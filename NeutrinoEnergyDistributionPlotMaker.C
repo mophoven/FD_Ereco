@@ -17,7 +17,7 @@ using namespace std;
 
 
 //Read in myntuples file
-TFile *f = new TFile("/pnfs/dune/persistent/users/mfucci/1_28mergemyntuple.root"); //Insert path to root file produced from MyEnergyAnalysis_module.cc
+TFile *f = new TFile("/exp/dune/app/users/mophoven/EReco/srcs/myntuples/myntuples/MyEnergyAnalysis/test5files.root"); //Insert path to root file produced from MyEnergyAnalysis_module.cc
 TTree *t1 = (TTree*)f->Get("MyEnergyAnalysis/MyTree");
 
 //Defining variables
