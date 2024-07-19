@@ -244,14 +244,14 @@ void Raw(){
     plot_2D_Lep_raw->Draw("COLZ");
     plot_2D_Lep_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Lep_raw->GetYaxis()->SetTitle("Lepton Total E/Primary #nu Energy "); //Set title of y-axis
-    c1->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/PercentEnergyLepton2D.jpg"); //Set file name
+    c1->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/PercentLeptonEnergy2D.jpg"); //Set file name
     
     TCanvas *c2 = new TCanvas("c2", "c2", 1800, 1350);
     c2->cd();
     plot_2D_N_raw->Draw("COLZ");
     plot_2D_N_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_N_raw->GetYaxis()->SetTitle("Neutron KE/Primary #nu Energy "); //Set title of y-axis
-    c2->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/PercentEnergyNeutron2D.jpg"); //Set file name
+    c2->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/PercentEnergyNeutron2D.jpg"); //Set file name
     
     
     TCanvas *c3 = new TCanvas("c3", "c3", 1800, 1350);
@@ -259,35 +259,35 @@ void Raw(){
     plot_2D_P_raw->Draw("COLZ");
     plot_2D_P_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_P_raw->GetYaxis()->SetTitle("Proton KE/Primary #nu Energy "); //Set title of y-axis
-    c3->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/PercentEnergyProton2D.jpg"); //Set file name
+    c3->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/PercentEnergyProton2D.jpg"); //Set file name
     
     TCanvas *c4 = new TCanvas("c4", "c4", 1800, 1350);
     c4->cd();  
     plot_2D_Pip_raw->Draw("COLZ");
     plot_2D_Pip_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pip_raw->GetYaxis()->SetTitle("Pion+ total E/Primary #nu Energy "); //Set title of y-axis
-    c4->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/PercentEnergyPion+2D.jpg"); //Set file name  
+    c4->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/PercentEnergyPion+2D.jpg"); //Set file name  
     
     TCanvas *c5 = new TCanvas("c5", "c5", 1800, 1350);
     c5->cd();  
     plot_2D_Pim_raw->Draw("COLZ");
     plot_2D_Pim_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pim_raw->GetYaxis()->SetTitle("Pion- total E/Primary #nu Energy "); //Set title of y-axis
-    c5->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/PercentEnergyPion-2D.jpg"); //Set file name  
+    c5->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/PercentEnergyPion-2D.jpg"); //Set file name  
     
     TCanvas *c6 = new TCanvas("c6", "c6", 1800, 1350);
     c6->cd();  
     plot_2D_Pi0_raw->Draw("COLZ");
     plot_2D_Pi0_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_raw->GetYaxis()->SetTitle("Pion0 total E/Primary #nu Energy "); //Set title of y-axis
-    c6->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/PercentEnergyPion02D.jpg"); //Set file name  
+    c6->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/PercentEnergyPion02D.jpg"); //Set file name  
     
     TCanvas *c7 = new TCanvas("c7", "c7", 1800, 1350);
     c7->cd();  
     plot_2D_Other_raw->Draw("COLZ");
     plot_2D_Other_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Other_raw->GetYaxis()->SetTitle("Other Energy/Primary #nu Energy "); //Set title of y-axis
-    c7->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/PercentEnergyOther2D.jpg"); //Set file name
+    c7->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/PercentEnergyOther2D.jpg"); //Set file name
 
     //Ratio Deposited Energy to Kinetic Energy against Primary Neutrino Energy
 
@@ -296,49 +296,49 @@ void Raw(){
     plot_2D_mu_Edep_raw->Draw("COLZ");
     plot_2D_mu_Edep_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_mu_Edep_raw->GetYaxis()->SetTitle("Lepton Edep/Lepton Total E "); //Set title of y-axis
-    c8->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergymuon2D.jpg"); //Set file name
+    c8->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergymuon2D.jpg"); //Set file name
 
     TCanvas *c9 = new TCanvas("c9", "c9", 1800, 1350);
     c9->cd();
     plot_2D_N_Edep_raw->Draw("COLZ");
     plot_2D_N_Edep_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_N_Edep_raw->GetYaxis()->SetTitle("Neutron Edep/Neutron KE "); //Set title of y-axis
-    c9->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyNeutron2D.jpg"); //Set file name
+    c9->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyNeutron2D.jpg"); //Set file name
     
     TCanvas *c10 = new TCanvas("c10", "c10", 1800, 1350);
     c10->cd();  
     plot_2D_P_Edep_raw->Draw("COLZ");
     plot_2D_P_Edep_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_P_Edep_raw->GetYaxis()->SetTitle("Proton Edep/Proton KE "); //Set title of y-axis
-    c10->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyProton2D.jpg"); //Set file name
+    c10->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyProton2D.jpg"); //Set file name
     
     TCanvas *c11 = new TCanvas("c11", "c11", 1800, 1350);
     c11->cd();  
     plot_2D_Pip_Edep_raw->Draw("COLZ");
     plot_2D_Pip_Edep_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pip_Edep_raw->GetYaxis()->SetTitle("Pion+ Edep/Pi+ KE "); //Set title of y-axis
-    c11->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyPion+2D.jpg"); //Set file name  
+    c11->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyPion+2D.jpg"); //Set file name  
     
     TCanvas *c12 = new TCanvas("c12", "c12", 1800, 1350);
     c12->cd();  
     plot_2D_Pim_Edep_raw->Draw("COLZ");
     plot_2D_Pim_Edep_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pim_Edep_raw->GetYaxis()->SetTitle("Pion- Edep/Pi- KE "); //Set title of y-axis
-    c12->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyPion-2D.jpg"); //Set file name  
+    c12->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyPion-2D.jpg"); //Set file name  
     
     TCanvas *c13 = new TCanvas("c13", "c13", 1800, 1350);
     c13->cd();  
     plot_2D_Pi0_Edep_raw->Draw("COLZ");
     plot_2D_Pi0_Edep_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_Edep_raw->GetYaxis()->SetTitle("Pion0 Edep/Pi0 KE "); //Set title of y-axis
-    c13->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyPion02D.jpg"); //Set file name  
+    c13->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyPion02D.jpg"); //Set file name  
     
     TCanvas *c14 = new TCanvas("c14", "c14", 1800, 1350);
     c14->cd();  
     plot_2D_Other_Edep_raw->Draw("COLZ");
     plot_2D_Other_Edep_raw->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Other_Edep_raw->GetYaxis()->SetTitle("Other Edep/Other KE "); //Set title of y-axis
-    c14->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyOther2D.jpg"); //Set file name
+    c14->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyOther2D.jpg"); //Set file name
 
     //Ratio Deposited Energy to Kinetic Energy against Kinetic Energy
 
@@ -347,49 +347,49 @@ void Raw(){
     plot_2D_mu_EdepKE_raw->Draw("COLZ");
     plot_2D_mu_EdepKE_raw->GetXaxis()->SetTitle("Lepton Total E (GeV)"); //Set title of x-axis
     plot_2D_mu_EdepKE_raw->GetYaxis()->SetTitle("Lepton Edep/Lepton Total E "); //Set title of y-axis
-    c15->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyKEmuon2D.jpg"); //Set file name
+    c15->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyKEmuon2D.jpg"); //Set file name
 
     TCanvas *c16 = new TCanvas("c16", "c16", 1800, 1350);
     c16->cd();
     plot_2D_N_EdepKE_raw->Draw("COLZ");
     plot_2D_N_EdepKE_raw->GetXaxis()->SetTitle("Neutron KE (GeV)"); //Set title of x-axis
     plot_2D_N_EdepKE_raw->GetYaxis()->SetTitle("Neutron Edep/Neutron KE "); //Set title of y-axis
-    c16->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyKENeutron2D.jpg"); //Set file name
+    c16->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyKENeutron2D.jpg"); //Set file name
     
     TCanvas *c17 = new TCanvas("c17", "c17", 1800, 1350);
     c17->cd();  
     plot_2D_P_EdepKE_raw->Draw("COLZ");
     plot_2D_P_EdepKE_raw->GetXaxis()->SetTitle("Proton KE (GeV)"); //Set title of x-axis
     plot_2D_P_EdepKE_raw->GetYaxis()->SetTitle("Proton Edep/Proton KE "); //Set title of y-axis
-    c17->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyKEProton2D.jpg"); //Set file name
+    c17->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyKEProton2D.jpg"); //Set file name
     
     TCanvas *c18 = new TCanvas("c18", "c18", 1800, 1350);
     c18->cd();  
     plot_2D_Pip_EdepKE_raw->Draw("COLZ");
     plot_2D_Pip_EdepKE_raw->GetXaxis()->SetTitle("Pi+ KE (GeV)"); //Set title of x-axis
     plot_2D_Pip_EdepKE_raw->GetYaxis()->SetTitle("Pi+ Edep/Pi+ KE "); //Set title of y-axis
-    c18->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyKEPion+2D.jpg"); //Set file name  
+    c18->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyKEPion+2D.jpg"); //Set file name  
     
     TCanvas *c19 = new TCanvas("c19", "c19", 1800, 1350);
     c19->cd();  
     plot_2D_Pim_EdepKE_raw->Draw("COLZ");
     plot_2D_Pim_EdepKE_raw->GetXaxis()->SetTitle("Pi- KE (GeV)"); //Set title of x-axis
     plot_2D_Pim_EdepKE_raw->GetYaxis()->SetTitle("Pi- Edep/Pi- KE "); //Set title of y-axis
-    c19->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyKEPion-2D.jpg"); //Set file name  
+    c19->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyKEPion-2D.jpg"); //Set file name  
     
     TCanvas *c20 = new TCanvas("c20", "c20", 1800, 1350);
     c20->cd();  
     plot_2D_Pi0_EdepKE_raw->Draw("COLZ");
     plot_2D_Pi0_EdepKE_raw->GetXaxis()->SetTitle("Pi0 total energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_EdepKE_raw->GetYaxis()->SetTitle("Pi0 Edep/Pi+ total energy "); //Set title of y-axis
-    c20->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyKEPion02D.jpg"); //Set file name  
+    c20->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyKEPion02D.jpg"); //Set file name  
     
     TCanvas *c21 = new TCanvas("c21", "c21", 1800, 1350);
     c21->cd();  
     plot_2D_Other_EdepKE_raw->Draw("COLZ");
     plot_2D_Other_EdepKE_raw->GetXaxis()->SetTitle("Other KE (GeV)"); //Set title of x-axis
     plot_2D_Other_EdepKE_raw->GetYaxis()->SetTitle("Other Edep/Other KE "); //Set title of y-axis
-    c21->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/raw/DepositedEnergyKEOther2D.jpg"); //Set file name
+    c21->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/raw/DepositedEnergyKEOther2D.jpg"); //Set file name
     
 
 outFile.Close();
@@ -780,7 +780,7 @@ void Column_Normalized(){
     plot_2D_Lep_cn->Draw("COLZ");
     plot_2D_Lep_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Lep_cn->GetYaxis()->SetTitle("Lepton Total E/Primary #nu Energy "); //Set title of y-axis
-    c1->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/PercentEnergyLepton2D.jpg"); //Set file name
+    c1->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/PercentEnergyLepton2D.jpg"); //Set file name
     
     TCanvas *c2 = new TCanvas("c2", "c2", 1800, 1350);
     c2->cd();
@@ -788,7 +788,7 @@ void Column_Normalized(){
     plot_2D_N_cn->Draw("COLZ");
     plot_2D_N_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_N_cn->GetYaxis()->SetTitle("Neutron KE/Primary #nu Energy "); //Set title of y-axis
-    c2->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/fnal_data/columnnormalized/PercentEnergyNeutron2D.jpg"); //Set file name
+    c2->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/PercentEnergyNeutron2D.jpg"); //Set file name
     
     
     TCanvas *c3 = new TCanvas("c3", "c3", 1800, 1350);
@@ -797,7 +797,7 @@ void Column_Normalized(){
     plot_2D_P_cn->Draw("COLZ");
     plot_2D_P_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_P_cn->GetYaxis()->SetTitle("Proton KE/Primary #nu Energy "); //Set title of y-axis
-    c3->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/PercentEnergyProton2D.jpg"); //Set file name
+    c3->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/PercentEnergyProton2D.jpg"); //Set file name
     
     TCanvas *c4 = new TCanvas("c4", "c4", 1800, 1350);
     c4->cd();  
@@ -805,7 +805,7 @@ void Column_Normalized(){
     plot_2D_Pip_cn->Draw("COLZ");
     plot_2D_Pip_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pip_cn->GetYaxis()->SetTitle("Pion+ total E/Primary #nu Energy "); //Set title of y-axis
-    c4->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/PercentEnergyPion+2D.jpg"); //Set file name  
+    c4->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/PercentEnergyPion+2D.jpg"); //Set file name  
     
     TCanvas *c5 = new TCanvas("c5", "c5", 1800, 1350);
     c5->cd(); 
@@ -813,7 +813,7 @@ void Column_Normalized(){
     plot_2D_Pim_cn->Draw("COLZ");
     plot_2D_Pim_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pim_cn->GetYaxis()->SetTitle("Pion- total E/Primary #nu Energy "); //Set title of y-axis
-    c5->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/PercentEnergyPion-2D.jpg"); //Set file name  
+    c5->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/PercentEnergyPion-2D.jpg"); //Set file name  
     
     TCanvas *c6 = new TCanvas("c6", "c6", 1800, 1350);
     c6->cd(); 
@@ -821,7 +821,7 @@ void Column_Normalized(){
     plot_2D_Pi0_cn->Draw("COLZ");
     plot_2D_Pi0_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_cn->GetYaxis()->SetTitle("Pion0 total E/Primary #nu Energy "); //Set title of y-axis
-    c6->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/PercentEnergyPion02D.jpg"); //Set file name  
+    c6->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/PercentEnergyPion02D.jpg"); //Set file name  
     
     TCanvas *c7 = new TCanvas("c7", "c7", 1800, 1350);
     c7->cd();  
@@ -829,7 +829,7 @@ void Column_Normalized(){
     plot_2D_Other_cn->Draw("COLZ");
     plot_2D_Other_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Other_cn->GetYaxis()->SetTitle("Other Energy/Primary #nu Energy "); //Set title of y-axis
-    c7->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/PercentEnergyOther2D.jpg"); //Set file name
+    c7->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/PercentEnergyOther2D.jpg"); //Set file name
 
     //Ratio Deposited Energy to Kinetic Energy against Primary Neutrino Energy
 
@@ -839,7 +839,7 @@ void Column_Normalized(){
     plot_2D_mu_Edep_cn->Draw("COLZ");
     plot_2D_mu_Edep_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_mu_Edep_cn->GetYaxis()->SetTitle("Lepton Edep/Lepton Total E "); //Set title of y-axis
-    c8->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergymuon2D.jpg"); //Set file name
+    c8->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergymuon2D.jpg"); //Set file name
 
     TCanvas *c9 = new TCanvas("c9", "c9", 1800, 1350);
     c9->cd();
@@ -847,7 +847,7 @@ void Column_Normalized(){
     plot_2D_N_Edep_cn->Draw("COLZ");
     plot_2D_N_Edep_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_N_Edep_cn->GetYaxis()->SetTitle("Neutron Edep/Neutron KE "); //Set title of y-axis
-    c9->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyNeutron2D.jpg"); //Set file name
+    c9->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyNeutron2D.jpg"); //Set file name
     
     TCanvas *c10 = new TCanvas("c10", "c10", 1800, 1350);
     c10->cd();  
@@ -855,7 +855,7 @@ void Column_Normalized(){
     plot_2D_P_Edep_cn->Draw("COLZ");
     plot_2D_P_Edep_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_P_Edep_cn->GetYaxis()->SetTitle("Proton Edep/Proton KE "); //Set title of y-axis
-    c10->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyProton2D.jpg"); //Set file name
+    c10->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyProton2D.jpg"); //Set file name
     
     TCanvas *c11 = new TCanvas("c11", "c11", 1800, 1350);
     c11->cd();  
@@ -863,7 +863,7 @@ void Column_Normalized(){
     plot_2D_Pip_Edep_cn->Draw("COLZ");
     plot_2D_Pip_Edep_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pip_Edep_cn->GetYaxis()->SetTitle("Pion+ Edep/Pi+ KE "); //Set title of y-axis
-    c11->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyPion+2D.jpg"); //Set file name  
+    c11->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyPion+2D.jpg"); //Set file name  
     
     TCanvas *c12 = new TCanvas("c12", "c12", 1800, 1350);
     c12->cd();  
@@ -871,7 +871,7 @@ void Column_Normalized(){
     plot_2D_Pim_Edep_cn->Draw("COLZ");
     plot_2D_Pim_Edep_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pim_Edep_cn->GetYaxis()->SetTitle("Pion- Edep/Pi- KE "); //Set title of y-axis
-    c12->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyPion-2D.jpg"); //Set file name  
+    c12->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyPion-2D.jpg"); //Set file name  
     
     TCanvas *c13 = new TCanvas("c13", "c13", 1800, 1350);
     c13->cd();  
@@ -879,7 +879,7 @@ void Column_Normalized(){
     plot_2D_Pi0_Edep_cn->Draw("COLZ");
     plot_2D_Pi0_Edep_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_Edep_cn->GetYaxis()->SetTitle("Pion0 Edep/Pi0 KE "); //Set title of y-axis
-    c13->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyPion02D.jpg"); //Set file name  
+    c13->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyPion02D.jpg"); //Set file name  
     
     TCanvas *c14 = new TCanvas("c14", "c14", 1800, 1350);
     c14->cd();  
@@ -887,7 +887,7 @@ void Column_Normalized(){
     plot_2D_Other_Edep_cn->Draw("COLZ");
     plot_2D_Other_Edep_cn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Other_Edep_cn->GetYaxis()->SetTitle("Other Edep/Other KE "); //Set title of y-axis
-    c14->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyOther2D.jpg"); //Set file name
+    c14->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyOther2D.jpg"); //Set file name
 
     //Ratio Deposited Energy to Kinetic Energy against Kinetic Energy
 
@@ -897,7 +897,7 @@ void Column_Normalized(){
     plot_2D_mu_EdepKE_cn->Draw("COLZ");
     plot_2D_mu_EdepKE_cn->GetXaxis()->SetTitle("Lepton Total E (GeV)"); //Set title of x-axis
     plot_2D_mu_EdepKE_cn->GetYaxis()->SetTitle("Lepton Edep/Lepton Total E "); //Set title of y-axis
-    c15->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyKEmuon2D.jpg"); //Set file name
+    c15->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyKEmuon2D.jpg"); //Set file name
 
     TCanvas *c16 = new TCanvas("c16", "c16", 1800, 1350);
     c16->cd();
@@ -905,7 +905,7 @@ void Column_Normalized(){
     plot_2D_N_EdepKE_cn->Draw("COLZ");
     plot_2D_N_EdepKE_cn->GetXaxis()->SetTitle("Neutron KE (GeV)"); //Set title of x-axis
     plot_2D_N_EdepKE_cn->GetYaxis()->SetTitle("Neutron Edep/Neutron KE "); //Set title of y-axis
-    c16->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyKENeutron2D.jpg"); //Set file name
+    c16->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyKENeutron2D.jpg"); //Set file name
     
     TCanvas *c17 = new TCanvas("c17", "c17", 1800, 1350);
     c17->cd();  
@@ -913,7 +913,7 @@ void Column_Normalized(){
     plot_2D_P_EdepKE_cn->Draw("COLZ");
     plot_2D_P_EdepKE_cn->GetXaxis()->SetTitle("Proton KE (GeV)"); //Set title of x-axis
     plot_2D_P_EdepKE_cn->GetYaxis()->SetTitle("Proton Edep/Proton KE "); //Set title of y-axis
-    c17->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyKEProton2D.jpg"); //Set file name
+    c17->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyKEProton2D.jpg"); //Set file name
     
     TCanvas *c18 = new TCanvas("c18", "c18", 1800, 1350);
     c18->cd();  
@@ -921,7 +921,7 @@ void Column_Normalized(){
     plot_2D_Pip_EdepKE_cn->Draw("COLZ");
     plot_2D_Pip_EdepKE_cn->GetXaxis()->SetTitle("Pi+ KE (GeV)"); //Set title of x-axis
     plot_2D_Pip_EdepKE_cn->GetYaxis()->SetTitle("Pi+ Edep/Pi+ KE "); //Set title of y-axis
-    c18->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyKEPion+2D.jpg"); //Set file name  
+    c18->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyKEPion+2D.jpg"); //Set file name  
     
     TCanvas *c19 = new TCanvas("c19", "c19", 1800, 1350);
     c19->cd();  
@@ -929,7 +929,7 @@ void Column_Normalized(){
     plot_2D_Pim_EdepKE_cn->Draw("COLZ");
     plot_2D_Pim_EdepKE_cn->GetXaxis()->SetTitle("Pi- KE (GeV)"); //Set title of x-axis
     plot_2D_Pim_EdepKE_cn->GetYaxis()->SetTitle("Pi- Edep/Pi- KE "); //Set title of y-axis
-    c19->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyKEPion-2D.jpg"); //Set file name  
+    c19->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyKEPion-2D.jpg"); //Set file name  
     
     TCanvas *c20 = new TCanvas("c20", "c20", 1800, 1350);
     c20->cd();  
@@ -937,7 +937,7 @@ void Column_Normalized(){
     plot_2D_Pi0_EdepKE_cn->Draw("COLZ");
     plot_2D_Pi0_EdepKE_cn->GetXaxis()->SetTitle("Pi0 total energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_EdepKE_cn->GetYaxis()->SetTitle("Pi0 Edep/Pi+ total energy "); //Set title of y-axis
-    c20->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyKEPion02D.jpg"); //Set file name  
+    c20->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyKEPion02D.jpg"); //Set file name  
     
     TCanvas *c21 = new TCanvas("c21", "c21", 1800, 1350);
     c21->cd();  
@@ -945,7 +945,7 @@ void Column_Normalized(){
     plot_2D_Other_EdepKE_cn->Draw("COLZ");
     plot_2D_Other_EdepKE_cn->GetXaxis()->SetTitle("Other KE (GeV)"); //Set title of x-axis
     plot_2D_Other_EdepKE_cn->GetYaxis()->SetTitle("Other Edep/Other KE "); //Set title of y-axis
-    c21->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/columnnormalized/DepositedEnergyKEOther2D.jpg"); //Set file name
+    c21->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/columnNormalized/DepositedEnergyKEOther2D.jpg"); //Set file name
     
 
 outFile.Close();
@@ -1128,14 +1128,14 @@ void Zero_Suppressed(){
     plot_2D_Lep_zs->Draw("COLZ");
     plot_2D_Lep_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Lep_zs->GetYaxis()->SetTitle("Lepton Total E/Primary #nu Energy "); //Set title of y-axis
-    c1->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/PercentEnergyLepton2D.jpg"); //Set file name
+    c1->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/PercentEnergyLepton2D.jpg"); //Set file name
     
     TCanvas *c2 = new TCanvas("c2", "c2", 1800, 1350);
     c2->cd();
     plot_2D_N_zs->Draw("COLZ");
     plot_2D_N_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_N_zs->GetYaxis()->SetTitle("Neutron KE/Primary #nu Energy y"); //Set title of y-axis
-    c2->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/PercentEnergyNeutron2D.jpg"); //Set file name
+    c2->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/PercentEnergyNeutron2D.jpg"); //Set file name
     
     
     TCanvas *c3 = new TCanvas("c3", "c3", 1800, 1350);
@@ -1143,35 +1143,35 @@ void Zero_Suppressed(){
     plot_2D_P_zs->Draw("COLZ");
     plot_2D_P_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_P_zs->GetYaxis()->SetTitle("Proton KE/Primary #nu Energy "); //Set title of y-axis
-    c3->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/PercentEnergyProton2D.jpg"); //Set file name
+    c3->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/PercentEnergyProton2D.jpg"); //Set file name
     
     TCanvas *c4 = new TCanvas("c4", "c4", 1800, 1350);
     c4->cd();  
     plot_2D_Pip_zs->Draw("COLZ");
     plot_2D_Pip_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pip_zs->GetYaxis()->SetTitle("Pion+ total E/Primary #nu Energy "); //Set title of y-axis
-    c4->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/PercentEnergyPion+2D.jpg"); //Set file name  
+    c4->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/PercentEnergyPion+2D.jpg"); //Set file name  
     
     TCanvas *c5 = new TCanvas("c5", "c5", 1800, 1350);
     c5->cd();  
     plot_2D_Pim_zs->Draw("COLZ");
     plot_2D_Pim_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pim_zs->GetYaxis()->SetTitle("Pion- total E/Primary #nu Energy "); //Set title of y-axis
-    c5->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/PercentEnergyPion-2D.jpg"); //Set file name  
+    c5->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/PercentEnergyPion-2D.jpg"); //Set file name  
     
     TCanvas *c6 = new TCanvas("c6", "c6", 1800, 1350);
     c6->cd();  
     plot_2D_Pi0_zs->Draw("COLZ");
     plot_2D_Pi0_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_zs->GetYaxis()->SetTitle("Pion0 total E/Primary #nu Energy "); //Set title of y-axis
-    c6->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/PercentEnergyPion02D.jpg"); //Set file name  
+    c6->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/PercentEnergyPion02D.jpg"); //Set file name  
     
     TCanvas *c7 = new TCanvas("c7", "c7", 1800, 1350);
     c7->cd();  
     plot_2D_Other_zs->Draw("COLZ");
     plot_2D_Other_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Other_zs->GetYaxis()->SetTitle("Other Energy/Primary #nu Energy "); //Set title of y-axis
-    c7->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/PercentEnergyOther2D.jpg"); //Set file name
+    c7->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/PercentEnergyOther2D.jpg"); //Set file name
 
     //Ratio Deposited Energy to Kinetic Energy against Primary Neutrino Energy
 
@@ -1180,49 +1180,49 @@ void Zero_Suppressed(){
     plot_2D_mu_Edep_zs->Draw("COLZ");
     plot_2D_mu_Edep_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_mu_Edep_zs->GetYaxis()->SetTitle("Lepton Edep/Lepton Total E "); //Set title of y-axis
-    c8->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergymuon2D.jpg"); //Set file name
+    c8->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergymuon2D.jpg"); //Set file name
 
     TCanvas *c9 = new TCanvas("c9", "c9", 1800, 1350);
     c9->cd();
     plot_2D_N_Edep_zs->Draw("COLZ");
     plot_2D_N_Edep_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_N_Edep_zs->GetYaxis()->SetTitle("Neutron Edep/Neutron KE "); //Set title of y-axis
-    c9->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyNeutron2D.jpg"); //Set file name
+    c9->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyNeutron2D.jpg"); //Set file name
     
     TCanvas *c10 = new TCanvas("c10", "c10", 1800, 1350);
     c10->cd();  
     plot_2D_P_Edep_zs->Draw("COLZ");
     plot_2D_P_Edep_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_P_Edep_zs->GetYaxis()->SetTitle("Proton Edep/Proton KE "); //Set title of y-axis
-    c10->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyProton2D.jpg"); //Set file name
+    c10->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyProton2D.jpg"); //Set file name
     
     TCanvas *c11 = new TCanvas("c11", "c11", 1800, 1350);
     c11->cd();  
     plot_2D_Pip_Edep_zs->Draw("COLZ");
     plot_2D_Pip_Edep_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pip_Edep_zs->GetYaxis()->SetTitle("Pion+ Edep/Pi+ KE "); //Set title of y-axis
-    c11->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyPion+2D.jpg"); //Set file name  
+    c11->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyPion+2D.jpg"); //Set file name  
     
     TCanvas *c12 = new TCanvas("c12", "c12", 1800, 1350);
     c12->cd();  
     plot_2D_Pim_Edep_zs->Draw("COLZ");
     plot_2D_Pim_Edep_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pim_Edep_zs->GetYaxis()->SetTitle("Pion- Edep/Pi- KE "); //Set title of y-axis
-    c12->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyPion-2D.jpg"); //Set file name  
+    c12->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyPion-2D.jpg"); //Set file name  
     
     TCanvas *c13 = new TCanvas("c13", "c13", 1800, 1350);
     c13->cd();  
     plot_2D_Pi0_Edep_zs->Draw("COLZ");
     plot_2D_Pi0_Edep_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_Edep_zs->GetYaxis()->SetTitle("Pion0 Edep/Pi0 KE "); //Set title of y-axis
-    c13->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyPion02D.jpg"); //Set file name  
+    c13->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyPion02D.jpg"); //Set file name  
     
     TCanvas *c14 = new TCanvas("c14", "c14", 1800, 1350);
     c14->cd();  
     plot_2D_Other_Edep_zs->Draw("COLZ");
     plot_2D_Other_Edep_zs->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Other_Edep_zs->GetYaxis()->SetTitle("Other Edep/Other KE "); //Set title of y-axis
-    c14->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyOther2D.jpg"); //Set file name
+    c14->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyOther2D.jpg"); //Set file name
 
     //Ratio Deposited Energy to Kinetic Energy against Kinetic Energy
 
@@ -1231,49 +1231,49 @@ void Zero_Suppressed(){
     plot_2D_mu_EdepKE_zs->Draw("COLZ");
     plot_2D_mu_EdepKE_zs->GetXaxis()->SetTitle("Lepton Total E (GeV)"); //Set title of x-axis
     plot_2D_mu_EdepKE_zs->GetYaxis()->SetTitle("Lepton Edep/Lepton Total E "); //Set title of y-axis
-    c15->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyKEmuon2D.jpg"); //Set file name
+    c15->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyKEmuon2D.jpg"); //Set file name
 
     TCanvas *c16 = new TCanvas("c16", "c16", 1800, 1350);
     c16->cd();
     plot_2D_N_EdepKE_zs->Draw("COLZ");
     plot_2D_N_EdepKE_zs->GetXaxis()->SetTitle("Neutron KE (GeV)"); //Set title of x-axis
     plot_2D_N_EdepKE_zs->GetYaxis()->SetTitle("Neutron Edep/Neutron KE "); //Set title of y-axis
-    c16->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyKENeutron2D.jpg"); //Set file name
+    c16->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyKENeutron2D.jpg"); //Set file name
     
     TCanvas *c17 = new TCanvas("c17", "c17", 1800, 1350);
     c17->cd();  
     plot_2D_P_EdepKE_zs->Draw("COLZ");
     plot_2D_P_EdepKE_zs->GetXaxis()->SetTitle("Proton KE (GeV)"); //Set title of x-axis
     plot_2D_P_EdepKE_zs->GetYaxis()->SetTitle("Proton Edep/Proton KE "); //Set title of y-axis
-    c17->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyKEProton2D.jpg"); //Set file name
+    c17->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyKEProton2D.jpg"); //Set file name
     
     TCanvas *c18 = new TCanvas("c18", "c18", 1800, 1350);
     c18->cd();  
     plot_2D_Pip_EdepKE_zs->Draw("COLZ");
     plot_2D_Pip_EdepKE_zs->GetXaxis()->SetTitle("Pi+ KE (GeV)"); //Set title of x-axis
     plot_2D_Pip_EdepKE_zs->GetYaxis()->SetTitle("Pi+ Edep/Pi+ KE "); //Set title of y-axis
-    c18->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyKEPion+2D.jpg"); //Set file name  
+    c18->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyKEPion+2D.jpg"); //Set file name  
     
     TCanvas *c19 = new TCanvas("c19", "c19", 1800, 1350);
     c19->cd();  
     plot_2D_Pim_EdepKE_zs->Draw("COLZ");
     plot_2D_Pim_EdepKE_zs->GetXaxis()->SetTitle("Pi- KE (GeV)"); //Set title of x-axis
     plot_2D_Pim_EdepKE_zs->GetYaxis()->SetTitle("Pi- Edep/Pi- KE "); //Set title of y-axis
-    c19->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyKEPion-2D.jpg"); //Set file name  
+    c19->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyKEPion-2D.jpg"); //Set file name  
     
     TCanvas *c20 = new TCanvas("c20", "c20", 1800, 1350);
     c20->cd();  
     plot_2D_Pi0_EdepKE_zs->Draw("COLZ");
     plot_2D_Pi0_EdepKE_zs->GetXaxis()->SetTitle("Pi0 total energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_EdepKE_zs->GetYaxis()->SetTitle("Pi0 Edep/Pi+ total energy "); //Set title of y-axis
-    c20->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyKEPion02D.jpg"); //Set file name  
+    c20->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyKEPion02D.jpg"); //Set file name  
     
     TCanvas *c21 = new TCanvas("c21", "c21", 1800, 1350);
     c21->cd();  
     plot_2D_Other_EdepKE_zs->Draw("COLZ");
     plot_2D_Other_EdepKE_zs->GetXaxis()->SetTitle("Other KE (GeV)"); //Set title of x-axis
     plot_2D_Other_EdepKE_zs->GetYaxis()->SetTitle("Other Edep/Other KE "); //Set title of y-axis
-    c21->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zerosuppressed/DepositedEnergyKEOther2D.jpg"); //Set file name
+    c21->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zeroSuppressed/DepositedEnergyKEOther2D.jpg"); //Set file name
     
 
 outFile.Close();
@@ -1709,7 +1709,7 @@ void ZSCN(){
     plot_2D_Lep_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Lep_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Lep_zscn->GetYaxis()->SetTitle("Muon Total E/Primary #nu Energy "); //Set title of y-axis
-    c1->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/PercentEnergyLepton.jpg"); //Set file name
+    c1->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/PercentEnergyLepton.jpg"); //Set file name
     
     TCanvas *c2 = new TCanvas("c2", "c2", 1800, 1350);
     c2->cd();
@@ -1720,7 +1720,7 @@ void ZSCN(){
     plot_2D_N_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_N_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_N_zscn->GetYaxis()->SetTitle("Neutrons KE/Primary #nu Energy "); //Set title of y-axis
-    c2->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/PercentEnergyNeutron2D_RP.jpg"); //Set file name
+    c2->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/PercentEnergyNeutron2D_RP.jpg"); //Set file name
     
     
     TCanvas *c3 = new TCanvas("c3", "c3", 1800, 1350);
@@ -1732,7 +1732,7 @@ void ZSCN(){
     plot_2D_P_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_P_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_P_zscn->GetYaxis()->SetTitle("Protons KE/Primary #nu Energy "); //Set title of y-axis
-    c3->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/PercentEnergyProton2D_RP.jpg"); //Set file name
+    c3->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/PercentEnergyProton2D_RP.jpg"); //Set file name
     
     TCanvas *c4 = new TCanvas("c4", "c4", 1800, 1350);
     c4->cd();  
@@ -1743,7 +1743,7 @@ void ZSCN(){
     plot_2D_Pip_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Pip_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pip_zscn->GetYaxis()->SetTitle("Pions+ Total E/Primary #nu Energy "); //Set title of y-axis
-    c4->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/PercentEnergyPion+2D_RP.jpg"); //Set file name  
+    c4->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/PercentEnergyPion+2D_RP.jpg"); //Set file name  
     
     TCanvas *c5 = new TCanvas("c5", "c5", 1800, 1350);
     c5->cd();  
@@ -1754,7 +1754,7 @@ void ZSCN(){
     plot_2D_Pim_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Pim_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pim_zscn->GetYaxis()->SetTitle("Pions- Total E/Primary #nu Energy "); //Set title of y-axis
-    c5->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/PercentEnergyPion-2D_RP.jpg"); //Set file name  
+    c5->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/PercentEnergyPion-2D_RP.jpg"); //Set file name  
     
     TCanvas *c6 = new TCanvas("c6", "c6", 1800, 1350);
     c6->cd();  
@@ -1765,7 +1765,7 @@ void ZSCN(){
     plot_2D_Pi0_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Pi0_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_zscn->GetYaxis()->SetTitle("Pions0 Total E/Primary #nu Energy "); //Set title of y-axis
-    c6->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/PercentEnergyPion02D_RP.jpg"); //Set file name  
+    c6->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/PercentEnergyPion02D_RP.jpg"); //Set file name  
     
     TCanvas *c7 = new TCanvas("c7", "c7", 1800, 1350);
     c7->cd();  
@@ -1776,7 +1776,7 @@ void ZSCN(){
     plot_2D_Other_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Other_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Other_zscn->GetYaxis()->SetTitle("Other Energy/Primary #nu Energy "); //Set title of y-axis
-    c7->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/PercentEnergyOther2D_RP.jpg"); //Set file name
+    c7->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/PercentEnergyOther2D_RP.jpg"); //Set file name
 
     //Ratio Deposited Energy to Kinetic Energy against Primary Neutrino Energy
 
@@ -1789,7 +1789,7 @@ void ZSCN(){
     plot_2D_mu_Edep_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_mu_Edep_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_mu_Edep_zscn->GetYaxis()->SetTitle("Muons Edep/Muons Total E "); //Set title of y-axis
-    c8->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergymuon2D_RP.jpg"); //Set file name
+    c8->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergymuon2D_RP.jpg"); //Set file name
 
     TCanvas *c9 = new TCanvas("c9", "c9", 1800, 1350);
     c9->cd();
@@ -1800,7 +1800,7 @@ void ZSCN(){
     plot_2D_N_Edep_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_N_Edep_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_N_Edep_zscn->GetYaxis()->SetTitle("Neutrons Edep/Neutrons KE "); //Set title of y-axis
-    c9->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyNeutron2D_RP.jpg"); //Set file name
+    c9->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyNeutron2D_RP.jpg"); //Set file name
     
     TCanvas *c10 = new TCanvas("c10", "c10", 1800, 1350);
     c10->cd();  
@@ -1811,7 +1811,7 @@ void ZSCN(){
     plot_2D_P_Edep_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_P_Edep_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_P_Edep_zscn->GetYaxis()->SetTitle("Protons Edep/Protons KE "); //Set title of y-axis
-    c10->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyProton2D_RP.jpg"); //Set file name
+    c10->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyProton2D_RP.jpg"); //Set file name
     
     TCanvas *c11 = new TCanvas("c11", "c11", 1800, 1350);
     c11->cd();  
@@ -1822,7 +1822,7 @@ void ZSCN(){
     plot_2D_Pip_Edep_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Pip_Edep_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pip_Edep_zscn->GetYaxis()->SetTitle("Pions+ Edep/Pions+ KE "); //Set title of y-axis
-    c11->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyPion+2D_RP.jpg"); //Set file name  
+    c11->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyPion+2D_RP.jpg"); //Set file name  
     
     TCanvas *c12 = new TCanvas("c12", "c12", 1800, 1350);
     c12->cd();  
@@ -1833,7 +1833,7 @@ void ZSCN(){
     plot_2D_Pim_Edep_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Pim_Edep_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pim_Edep_zscn->GetYaxis()->SetTitle("Pions- Edep/Pions- KE "); //Set title of y-axis
-    c12->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyPion-2D_RP.jpg"); //Set file name  
+    c12->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyPion-2D_RP.jpg"); //Set file name  
     
     TCanvas *c13 = new TCanvas("c13", "c13", 1800, 1350);
     c13->cd();  
@@ -1844,7 +1844,7 @@ void ZSCN(){
     plot_2D_Pi0_Edep_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Pi0_Edep_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_Edep_zscn->GetYaxis()->SetTitle("Pions0 Edep/Pions0 KE "); //Set title of y-axis
-    c13->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyPion02D_RP.jpg"); //Set file name  
+    c13->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyPion02D_RP.jpg"); //Set file name  
     
     TCanvas *c14 = new TCanvas("c14", "c14", 1800, 1350);
     c14->cd();  
@@ -1855,7 +1855,7 @@ void ZSCN(){
     plot_2D_Other_Edep_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Other_Edep_zscn->GetXaxis()->SetTitle("Primary Neutrino Energy (GeV)"); //Set title of x-axis
     plot_2D_Other_Edep_zscn->GetYaxis()->SetTitle("Other Edep/Other KE "); //Set title of y-axis
-    c14->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyOther2D_RP.jpg"); //Set file name
+    c14->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyOther2D_RP.jpg"); //Set file name
 
     //Ratio Deposited Energy to Kinetic Energy against Kinetic Energy
 
@@ -1868,7 +1868,7 @@ void ZSCN(){
     plot_2D_mu_EdepKE_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_mu_EdepKE_zscn->GetXaxis()->SetTitle("Muon Total E (GeV)"); //Set title of x-axis
     plot_2D_mu_EdepKE_zscn->GetYaxis()->SetTitle("Muon Edep/Muon Total E "); //Set title of y-axis
-    c15->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyKEmuon2D_RP.jpg"); //Set file name
+    c15->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyKEmuon2D_RP.jpg"); //Set file name
 
     TCanvas *c16 = new TCanvas("c16", "c16", 1800, 1350);
     c16->cd();
@@ -1879,7 +1879,7 @@ void ZSCN(){
     plot_2D_N_EdepKE_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_N_EdepKE_zscn->GetXaxis()->SetTitle("Neutrons KE (GeV)"); //Set title of x-axis
     plot_2D_N_EdepKE_zscn->GetYaxis()->SetTitle("Neutrons Edep/Neutron KE "); //Set title of y-axis
-    c16->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyKENeutron2D_RP.jpg"); //Set file name
+    c16->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyKENeutron2D_RP.jpg"); //Set file name
     
     TCanvas *c17 = new TCanvas("c17", "c17", 1800, 1350);
     c17->cd();  
@@ -1890,7 +1890,7 @@ void ZSCN(){
     plot_2D_P_EdepKE_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_P_EdepKE_zscn->GetXaxis()->SetTitle("Protons KE (GeV)"); //Set title of x-axis
     plot_2D_P_EdepKE_zscn->GetYaxis()->SetTitle("Protons Edep/Proton KE "); //Set title of y-axis
-    c17->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyKEProton2D_RP.jpg"); //Set file name
+    c17->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyKEProton2D_RP.jpg"); //Set file name
     
     TCanvas *c18 = new TCanvas("c18", "c18", 1800, 1350);
     c18->cd();  
@@ -1901,7 +1901,7 @@ void ZSCN(){
     plot_2D_Pip_EdepKE_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Pip_EdepKE_zscn->GetXaxis()->SetTitle("Pi+ KE (GeV)"); //Set title of x-axis
     plot_2D_Pip_EdepKE_zscn->GetYaxis()->SetTitle("Pions+ Edep/Pions+ KE "); //Set title of y-axis
-    c18->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyKEPion+2D_RP.jpg"); //Set file name  
+    c18->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyKEPion+2D_RP.jpg"); //Set file name  
     
     TCanvas *c19 = new TCanvas("c19", "c19", 1800, 1350);
     c19->cd();  
@@ -1912,7 +1912,7 @@ void ZSCN(){
     plot_2D_Pim_EdepKE_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Pim_EdepKE_zscn->GetXaxis()->SetTitle("Pi- KE (GeV)"); //Set title of x-axis
     plot_2D_Pim_EdepKE_zscn->GetYaxis()->SetTitle("Pions- Edep/Pions- KE "); //Set title of y-axis
-    c19->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyKEPion-2D_RP.jpg"); //Set file name  
+    c19->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyKEPion-2D_RP.jpg"); //Set file name  
     
     TCanvas *c20 = new TCanvas("c20", "c20", 1800, 1350);
     c20->cd();  
@@ -1923,7 +1923,7 @@ void ZSCN(){
     plot_2D_Pi0_EdepKE_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Pi0_EdepKE_zscn->GetXaxis()->SetTitle("Pi0 total energy (GeV)"); //Set title of x-axis
     plot_2D_Pi0_EdepKE_zscn->GetYaxis()->SetTitle("Pions0 Edep/Pions0 total energy "); //Set title of y-axis
-    c20->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyKEPion02D_RP.jpg"); //Set file name  
+    c20->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyKEPion02D_RP.jpg"); //Set file name  
     
     TCanvas *c21 = new TCanvas("c21", "c21", 1800, 1350);
     c21->cd();  
@@ -1934,7 +1934,7 @@ void ZSCN(){
     plot_2D_Other_EdepKE_zscn->GetYaxis()->SetTitleSize(0.05);
     plot_2D_Other_EdepKE_zscn->GetXaxis()->SetTitle("Other KE (GeV)"); //Set title of x-axis
     plot_2D_Other_EdepKE_zscn->GetYaxis()->SetTitle("Other Edep/Other KE "); //Set title of y-axis
-    c21->SaveAs("/exp/dune/app/users/mfucci/FDEff/srcs/myntuples/myntuples/MyEnergyAnalysis/NNBurrito/fnal_data/zscn/DepositedEnergyKEOther2D_RP.jpg"); //Set file name
+    c21->SaveAs("/exp/dune/app/users/mophoven/ERecoPlots/zscn/DepositedEnergyKEOther2D_RP.jpg"); //Set file name
     
 
 outFile.Close();
