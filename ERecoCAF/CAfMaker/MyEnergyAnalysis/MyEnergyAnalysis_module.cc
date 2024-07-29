@@ -866,6 +866,32 @@ fSim_pim_track_length       = -9999.;
         fSim_mu_end_4position[i]   = -9999.;
         fSim_mu_start_4mommenta[i] = -9999.;
         fSim_mu_end_4mommenta[i]   = -9999.;
+
+	fSim_P_start_4position[i] = -9999.;
+	fSim_P_end_4position[i] = -9999.;
+	fSim_P_start_4momenta[i] = -9999.;
+	fSim_P_end_4momenta[i] = -9999.;
+
+	fSim_N_start_4position[i] = -9999.;
+	fSim_N_end_4position[i] = -9999.;
+	fSim_N_start_4momenta[i] = -9999.;
+	fSim_N_end_4momenta[i] = -9999.;
+
+	fSim_Pi0_start_4position[i] = -9999.;
+	fSim_Pi0_end_4position[i] = -9999.;
+	fSim_Pi0_start_4momenta[i] = -9999.;
+	fSim_Pi0_end_4momenta[i] = -9999.;
+
+	fSim_pip_start_4position[i] = -9999.;
+	fSim_pip_end_4position[i] = -9999.;
+	fSim_pip_start_4momenta[i] = -9999.;
+	fSim_pip_end_4momenta[i] = -9999.;
+
+	fSim_pim_start_4position[i] = -9999.;
+	fSim_pim_end_4position[i] = -9999.;
+	fSim_pim_start_4momenta[i] = -9999.;
+	fSim_pim_end_4momenta[i] = -9999.;
+	
       }
 
       fSim_hadronic_hit_x_b.clear();
@@ -1222,42 +1248,146 @@ fSim_pim_track_length       = -9999.;
         const simb::MCParticle& leadingmu = *(SimMuons[0]);
 
         // A muon track consists of a set of 4-positions and 4-mommenta.
-        const size_t numberTrajectoryPoints = leadingmu.NumberTrajectoryPoints();
+        const size_t munumberTrajectoryPoints = leadingmu.NumberTrajectoryPoints();
 
         // For trajectories, as for vectors and arrays, the first point is #0, not #1.
-        const int last = numberTrajectoryPoints - 1;
-        const TLorentzVector& positionStart = leadingmu.Position(0);
-        const TLorentzVector& positionEnd = leadingmu.Position(last);
-        const TLorentzVector& momentumStart = leadingmu.Momentum(0);
-        const TLorentzVector& momentumEnd = leadingmu.Momentum(last);
+        const int mulast = munumberTrajectoryPoints - 1;
+        const TLorentzVector& mupositionStart = leadingmu.Position(0);
+        const TLorentzVector& mupositionEnd = leadingmu.Position(mulast);
+        const TLorentzVector& mumomentumStart = leadingmu.Momentum(0);
+        const TLorentzVector& mumomentumEnd = leadingmu.Momentum(mulast);
 
         // Fill position and momentum components
         fSim_mu_start_vx = leadingmu.Vx(0); // unit?
         fSim_mu_start_vy = leadingmu.Vy(0);
         fSim_mu_start_vz = leadingmu.Vz(0);
-        fSim_mu_end_vx   = leadingmu.Vx(last);
-        fSim_mu_end_vy   = leadingmu.Vy(last);
-        fSim_mu_end_vz   = leadingmu.Vz(last);
+        fSim_mu_end_vx   = leadingmu.Vx(mulast);
+        fSim_mu_end_vy   = leadingmu.Vy(mulast);
+        fSim_mu_end_vz   = leadingmu.Vz(mulast);
         fSim_mu_start_px = leadingmu.Px(0);
         fSim_mu_start_py = leadingmu.Py(0);
         fSim_mu_start_pz = leadingmu.Pz(0);
         fSim_mu_start_E  = leadingmu.E(0);
-        fSim_mu_end_px   = leadingmu.Px(last);
-        fSim_mu_end_py   = leadingmu.Py(last);
-        fSim_mu_end_pz   = leadingmu.Pz(last);
-        fSim_mu_end_E    = leadingmu.E(last);
+        fSim_mu_end_px   = leadingmu.Px(mulast);
+        fSim_mu_end_py   = leadingmu.Py(mulast);
+        fSim_mu_end_pz   = leadingmu.Pz(mulast);
+        fSim_mu_end_E    = leadingmu.E(mulast);
 
         // Fill arrays with the 4-values.
-        positionStart.GetXYZT(fSim_mu_start_4position);
-        positionEnd.GetXYZT(fSim_mu_end_4position);
-        momentumStart.GetXYZT(fSim_mu_start_4mommenta);
-        momentumEnd.GetXYZT(fSim_mu_end_4mommenta);
+        mupositionStart.GetXYZT(fSim_mu_start_4position);
+        mupositionEnd.GetXYZT(fSim_mu_end_4position);
+        mumomentumStart.GetXYZT(fSim_mu_start_4mommenta);
+        mumomentumEnd.GetXYZT(fSim_mu_end_4mommenta);
 
         // Calculate length using spherical cooridnate system: assume straight track? time negligible?
-        const double trackLength = (positionEnd - positionStart).Rho();
-        fSim_mu_track_length = trackLength;
+        const double mutrackLength = (mupositionEnd - mupositionStart).Rho();
+        fSim_mu_track_length = mutrackLength;
       } // End if muon exists
 
+	if ( fSim_nP > 0 ) {
+		const simb::MCParticle& leadingP = *(SimProtons[0]);
+
+		const size_t PnumberTrajectoryPoints = leadingP.NumberTrajectoryPoints();
+
+	const int Plast = PnumberTrajectoryPoints - 1;
+	const TLorentzVector& PpositionStart = leadingP.Position(0);
+	const TLorentzVector& PpositionEnd = leadingP.Position(Plast);
+	const TLorentzVector& PmomentumStart = leadingP.Momentum(0);
+	const TLorentzVector& PmomentumEnd = leadingP.Momentum(Plast);
+
+	fSim_P_start_vx = leadingP.Vx(0); // unit?
+        fSim_P_start_vy = leadingP.Vy(0);
+        fSim_P_start_vz = leadingP.Vz(0);
+        fSim_P_end_vx   = leadingP.Vx(Plast);
+        fSim_P_end_vy   = leadingP.Vy(Plast);
+        fSim_P_end_vz   = leadingP.Vz(Plast);
+        fSim_P_start_px = leadingP.Px(0);
+        fSim_P_start_py = leadingP.Py(0);
+        fSim_P_start_pz = leadingP.Pz(0);
+        fSim_P_start_E  = leadingP.E(0);
+        fSim_P_end_px   = leadingP.Px(Plast);
+        fSim_P_end_py   = leadingP.Py(Plast);
+        fSim_P_end_pz   = leadingP.Pz(Plast);
+        fSim_P_end_E    = leadingP.E(Plast);
+
+        PpositionStart.GetXYZT(fSim_P_start_4position);
+        PpositionEnd.GetXYZT(fSim_P_end_4position);
+        PmomentumStart.GetXYZT(fSim_P_start_4mommenta);
+        PmomentumEnd.GetXYZT(fSim_P_end_4mommenta);
+
+	const double PtrackLength = (PpositionEnd - PpositionStart).Rho();
+		fSim_P_track_length = PtrackLength;
+	}
+
+	if ( fSim_nN > 0 ) {
+		const simb::MCParticle& leadingN = *(SimNeutrons[0]);
+
+		const size_t NnumberTrajectoryPoints = leadingN.NumberTrajectoryPoints();
+
+	const int Nlast = NnumberTrajectoryPoints - 1;
+	const TLorentzVector& NpositionStart = leadingN.Position(0);
+	const TLorentzVector& NpositionEnd = leadingN.Position(last);
+	const TLorentzVector& NmomentumStart = leadingN.Momentum(0);
+	const TLorentzVector& NmomentumEnd = leadingN.Momentum(last);
+
+	fSim_N_start_vx = leadingN.Vx(0); // unit?
+        fSim_N_start_vy = leadingN.Vy(0);
+        fSim_N_start_vz = leadingN.Vz(0);
+        fSim_N_end_vx   = leadingN.Vx(Nlast);
+        fSim_N_end_vy   = leadingN.Vy(Nlast);
+        fSim_N_end_vz   = leadingN.Vz(Nlast);
+        fSim_N_start_px = leadingN.Px(0);
+        fSim_N_start_py = leadingN.Py(0);
+        fSim_N_start_pz = leadingN.Pz(0);
+        fSim_N_start_E  = leadingN.E(0);
+        fSim_N_end_px   = leadingN.Px(Nlast);
+        fSim_N_end_py   = leadingN.Py(Nlast);
+        fSim_N_end_pz   = leadingN.Pz(Nlast);
+        fSim_N_end_E    = leadingN.E(Nlast);
+
+        NpositionStart.GetXYZT(fSim_N_start_4position);
+        NpositionEnd.GetXYZT(fSim_N_end_4position);
+        NmomentumStart.GetXYZT(fSim_N_start_4mommenta);
+        NmomentumEnd.GetXYZT(fSim_N_end_4mommenta);
+
+	const double NtrackLength = (NpositionEnd - NpositionStart).Rho();
+		fSim_N_track_length = NtrackLength;
+	}
+
+	if ( fSim_nPionNeutral > 0 ) {
+		const simb::MCParticle& leadingPi0 = *(SimNeutralPions[0]);
+
+		const size_t Pi0numberTrajectoryPoints = leadingPi0.NumberTrajectoryPoints();
+
+	const int Pi0last = Pi0numberTrajectoryPoints - 1;
+	const TLorentzVector& Pi0positionStart = leadingPi0.Position(0);
+	const TLorentzVector& Pi0positionEnd = leadingPi0.Position(Pi0last);
+	const TLorentzVector& Pi0momentumStart = leadingPi0.Momentum(0);
+	const TLorentzVector& Pi0momentumEnd = leadingPi0.Momentum(Pi0last);
+
+	fSim_Pi0_start_vx = leadingPi0.Vx(0); // unit?
+        fSim_Pi0_start_vy = leadingPi0.Vy(0);
+        fSim_Pi0_start_vz = leadingPi0.Vz(0);
+        fSim_Pi0_end_vx   = leadingPi0.Vx(Pi0last);
+        fSim_Pi0_end_vy   = leadingPi0.Vy(Pi0last);
+        fSim_Pi0_end_vz   = leadingPi0.Vz(Pi0last);
+        fSim_Pi0_start_px = leadingPi0.Px(0);
+        fSim_Pi0_start_py = leadingPi0.Py(0);
+        fSim_Pi0_start_pz = leadingPi0.Pz(0);
+        fSim_Pi0_start_E  = leadingPi0.E(0);
+        fSim_Pi0_end_px   = leadingPi0.Px(Nlast);
+        fSim_Pi0_end_py   = leadingPi0.Py(Nlast);
+        fSim_Pi0_end_pz   = leadingPi0.Pz(Nlast);
+        fSim_Pi0_end_E    = leadingPi0.E(Nlast);
+
+        Pi0positionStart.GetXYZT(fSim_Pi0_start_4position);
+        Pi0positionEnd.GetXYZT(fSim_Pi0_end_4position);
+        Pi0momentumStart.GetXYZT(fSim_Pi0_start_4mommenta);
+        Pi0momentumEnd.GetXYZT(fSim_Pi0_end_4mommenta);
+
+	const double Pi0trackLength = (Pi0positionEnd - Pi0positionStart).Rho();
+		fSim_Pi0_track_length = Pi0trackLength;
+	}
       //
       // Calculate sim hadronic deposit energy
       //
