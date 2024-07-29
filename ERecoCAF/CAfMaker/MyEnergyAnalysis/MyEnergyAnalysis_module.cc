@@ -701,6 +701,7 @@ namespace lar {
       fNuvtxy_truth         		 = -9999.;
       fNuvtxz_truth  	        	 = -9999.;
       fSim_numu_E                = 0.;
+	    
       fSim_mu_start_vx           = -9999.;
       fSim_mu_start_vy           = -9999.;
       fSim_mu_start_vz           = -9999.;
@@ -716,6 +717,87 @@ namespace lar {
       fSim_mu_end_pz             = -9999.;
       fSim_mu_end_E              = -9999.;
       fSim_mu_track_length       = -9999.;
+
+      fSim_P_start_vx           = -9999.;
+      fSim_P_start_vy           = -9999.;
+      fSim_P_start_vz           = -9999.;
+      fSim_P_end_vx             = -9999.;
+      fSim_P_end_vy             = -9999.;
+      fSim_P_end_vz             = -9999.;
+      fSim_P_start_px           = -9999.;
+      fSim_P_start_py           = -9999.;
+      fSim_P_start_pz           = -9999.;
+      fSim_P_start_E            = -9999.;
+      fSim_P_end_px             = -9999.;
+      fSim_P_end_py             = -9999.;
+      fSim_P_end_pz             = -9999.;
+      fSim_P_end_E              = -9999.;
+      fSim_P_track_length       = -9999.;
+	    
+	fSim_N_start_vx           = -9999.;
+	fSim_N_start_vy           = -9999.;
+	fSim_N_start_vz           = -9999.;
+	fSim_N_end_vx             = -9999.;
+	fSim_N_end_vy             = -9999.;
+	fSim_N_end_vz             = -9999.;
+	fSim_N_start_px           = -9999.;
+	fSim_N_start_py           = -9999.;
+	fSim_N_start_pz           = -9999.;
+	fSim_N_start_E            = -9999.;
+	fSim_N_end_px             = -9999.;
+	fSim_N_end_py             = -9999.;
+	fSim_N_end_pz             = -9999.;
+	fSim_N_end_E              = -9999.;
+	fSim_N_track_length       = -9999.;
+
+fSim_Pi0_start_vx           = -9999.;
+fSim_Pi0_start_vy           = -9999.;
+fSim_Pi0_start_vz           = -9999.;
+fSim_Pi0_end_vx             = -9999.;
+fSim_Pi0_end_vy             = -9999.;
+fSim_Pi0_end_vz             = -9999.;
+fSim_Pi0_start_px           = -9999.;
+fSim_Pi0_start_py           = -9999.;
+fSim_Pi0_start_pz           = -9999.;
+fSim_Pi0_start_E            = -9999.;
+fSim_Pi0_end_px             = -9999.;
+fSim_Pi0_end_py             = -9999.;
+fSim_Pi0_end_pz             = -9999.;
+fSim_Pi0_end_E              = -9999.;
+fSim_Pi0_track_length       = -9999.;
+
+fSim_pip_start_vx           = -9999.;
+fSim_pip_start_vy           = -9999.;
+fSim_pip_start_vz           = -9999.;
+fSim_pip_end_vx             = -9999.;
+fSim_pip_end_vy             = -9999.;
+fSim_pip_end_vz             = -9999.;
+fSim_pip_start_px           = -9999.;
+fSim_pip_start_py           = -9999.;
+fSim_pip_start_pz           = -9999.;
+fSim_pip_start_E            = -9999.;
+fSim_pip_end_px             = -9999.;
+fSim_pip_end_py             = -9999.;
+fSim_pip_end_pz             = -9999.;
+fSim_pip_end_E              = -9999.;
+fSim_pip_track_length       = -9999.;
+
+fSim_pim_start_vx           = -9999.;
+fSim_pim_start_vy           = -9999.;
+fSim_pim_start_vz           = -9999.;
+fSim_pim_end_vx             = -9999.;
+fSim_pim_end_vy             = -9999.;
+fSim_pim_end_vz             = -9999.;
+fSim_pim_start_px           = -9999.;
+fSim_pim_start_py           = -9999.;
+fSim_pim_start_pz           = -9999.;
+fSim_pim_start_E            = -9999.;
+fSim_pim_end_px             = -9999.;
+fSim_pim_end_py             = -9999.;
+fSim_pim_end_pz             = -9999.;
+fSim_pim_end_E              = -9999.;
+fSim_pim_track_length       = -9999.;
+	    
       fSim_LepE                  = 0.;
       fSim_HadE                  = 0.;
 
