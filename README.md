@@ -6,9 +6,9 @@ Setup your dune environment inside an SL7 container
 
 Then cd into your app directory and make a new directory for the build
 
-```cd /exp/dune/app/users/<your_username>
+```cd /exp/dune/app/users/<your_username>```
 mkDir EReco
-cd EReco```
+cd EReco
 
 Then setup mrb
 
