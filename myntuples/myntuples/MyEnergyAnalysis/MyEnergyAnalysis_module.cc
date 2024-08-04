@@ -231,21 +231,21 @@ namespace lar {
       double fSim_mu_start_vx;           // x position of the muon trajectory start
       double fSim_mu_start_vy;           // y .....................................
       double fSim_mu_start_vz;           // z .....................................
-      std::vector<TLorentzVector> fSim_mu_start_4position; // (x,y,z,t) of the muon trajectory start
+      std::vector<double> fSim_mu_start_4position; // (x,y,z,t) of the muon trajectory start
       double fSim_mu_end_vx;             // x position of the muon trajectory end
       double fSim_mu_end_vy;             // y ...................................
       double fSim_mu_end_vz;             // z ...................................
-      std::vector<TLorentzVector> fSim_mu_end_4position;   // ................................ end
+      std::vector<double> fSim_mu_end_4position;   // ................................ end
       double fSim_mu_start_px;           // x momentum of the muon trajectory start
       double fSim_mu_start_py;           // y .....................................
       double fSim_mu_start_pz;           // z .....................................
       double fSim_mu_start_E;            // Energy of leading mu
-      std::vector<TLorentzVector> fSim_mu_start_4mommenta; // (Px,Py,Pz,E) of the muon trajectory start
+      std::vector<double> fSim_mu_start_4mommenta; // (Px,Py,Pz,E) of the muon trajectory start
       double fSim_mu_end_px;             // x momentum of the muon trajectory end
       double fSim_mu_end_py;             // y ...................................
       double fSim_mu_end_pz;             // z ...................................
       double fSim_mu_end_E;              // Energy of leading mu
-      std::vector<TLorentzVector> fSim_mu_end_4mommenta;   // ................................... end
+      std::vector<double> fSim_mu_end_4mommenta;   // ................................... end
       double fSim_mu_track_length;       // leading mu track length
 
 // For now these just store the first Particle created's Energy, since each particle would be far more complex
@@ -253,101 +253,101 @@ namespace lar {
       double fSim_P_start_vx;           
       double fSim_P_start_vy;           
       double fSim_P_start_vz;           
-      std::vector<TLorentzVector fSim_P_start_4position;
+      std::vector<double> fSim_P_start_4position;
       double fSim_P_end_vx;             
       double fSim_P_end_vy;             
       double fSim_P_end_vz;          
-      std::vector<TLorentzVector> fSim_P_end_4position;   
+      std::vector<double> fSim_P_end_4position;   
       double fSim_P_start_px;           
       double fSim_P_start_py;         
       double fSim_P_start_pz;          
       double fSim_P_start_E;           
-      std::vector<TLorentzVector> fSim_P_start_4mommenta; 
+      std::vector<double> fSim_P_start_4mommenta; 
       double fSim_P_end_px;             
       double fSim_P_end_py;            
       double fSim_P_end_pz;          
       double fSim_P_end_E;             
-      std::vector<TLorentzVector> fSim_P_end_4mommenta;  
+      std::vector<double> fSim_P_end_4mommenta;  
       double fSim_P_track_length;    
 
       double fSim_N_start_vx;           
       double fSim_N_start_vy;           
       double fSim_N_start_vz;           
-      std::vector<TLorentzVector> fSim_N_start_4position;
+      std::vector<double> fSim_N_start_4position;
       double fSim_N_end_vx;             
       double fSim_N_end_vy;             
       double fSim_N_end_vz;          
-      std::vector<TLorentzVector> fSim_N_end_4position;   
+      std::vector<double> fSim_N_end_4position;   
       double fSim_N_start_px;           
       double fSim_N_start_py;         
       double fSim_N_start_pz;          
       double fSim_N_start_E;           
-      std::vector<TLorentzVector> fSim_N_start_4mommenta; 
+      std::vector<double> fSim_N_start_4mommenta; 
       double fSim_N_end_px;             
       double fSim_N_end_py;            
       double fSim_N_end_pz;          
       double fSim_N_end_E;             
-      std::vector<TLorentzVector> fSim_N_end_4mommenta;  
+      std::vector<double> fSim_N_end_4mommenta;  
       double fSim_N_track_length;      
 
       double fSim_Pi0_start_vx;           
       double fSim_Pi0_start_vy;           
       double fSim_Pi0_start_vz;           
-      std::vector<TLorentzVector> fSim_Pi0_start_4position;
+      std::vector<double> fSim_Pi0_start_4position;
       double fSim_Pi0_end_vx;             
       double fSim_Pi0_end_vy;             
       double fSim_Pi0_end_vz;          
-      std::vector<TLorentzVector> fSim_Pi0_end_4position;   
+      std::vector<double> fSim_Pi0_end_4position;   
       double fSim_Pi0_start_px;           
       double fSim_Pi0_start_py;         
       double fSim_Pi0_start_pz;          
       double fSim_Pi0_start_E;           
-      std::vector<TLorentzVector> fSim_Pi0_start_4mommenta; 
+      std::vector<double> fSim_Pi0_start_4mommenta; 
       double fSim_Pi0_end_px;             
       double fSim_Pi0_end_py;            
       double fSim_Pi0_end_pz;          
       double fSim_Pi0_end_E;             
-      std::vector<TLorentzVector> fSim_Pi0_end_4mommenta;  
+      std::vector<double> fSim_Pi0_end_4mommenta;  
       double fSim_Pi0_track_length;      
 
       double fSim_pip_start_vx;           
       double fSim_pip_start_vy;           
       double fSim_pip_start_vz;           
-      std::vector<TLorentzVector> fSim_pip_start_4position;
+      std::vector<double> fSim_pip_start_4position;
       double fSim_pip_end_vx;             
       double fSim_pip_end_vy;             
       double fSim_pip_end_vz;          
-      std::vector<TLorentzVector> fSim_pip_end_4position;   
+      std::vector<double> fSim_pip_end_4position;   
       double fSim_pip_start_px;           
       double fSim_pip_start_py;         
       double fSim_pip_start_pz;          
       double fSim_pip_start_E;           
-      std::vector<TLorentzVector> fSim_pip_start_4mommenta; 
+      std::vector<double> fSim_pip_start_4mommenta; 
       double fSim_pip_end_px;             
       double fSim_pip_end_py;            
       double fSim_pip_end_pz;          
       double fSim_pip_end_E;             
-      std::vector<TLorentzVector> fSim_pip_end_4mommenta;  
+      std::vector<double> fSim_pip_end_4mommenta;  
       double fSim_pip_track_length;      
 
       double fSim_pim_start_vx;           
       double fSim_pim_start_vy;           
       double fSim_pim_start_vz;           
-      std::vector<TLorentzVector> fSim_pim_start_4position;
+      std::vector<double> fSim_pim_start_4position;
       double fSim_pim_end_vx;             
       double fSim_pim_end_vy;             
       double fSim_pim_end_vz;          
-      std::vector<TLorentzVector> fSim_pim_end_4position;   
+      std::vector<double> fSim_pim_end_4position;   
       double fSim_pim_start_px;           
       double fSim_pim_start_py;         
       double fSim_pim_start_pz;          
       double fSim_pim_start_E;           
-      std::vector<TLorentzVector> fSim_pim_start_4mommenta; 
+      std::vector<double> fSim_pim_start_4mommenta; 
       double fSim_pim_end_px;             
       double fSim_pim_end_py;            
       double fSim_pim_end_pz;          
       double fSim_pim_end_E;             
-      std::vector<TLorentzVector> fSim_pim_end_4mommenta;  
+      std::vector<double> fSim_pim_end_4mommenta;  
       double fSim_pim_track_length;      
 
       double fSim_mu_Edep_b2;                // [MeV]
@@ -736,21 +736,21 @@ namespace lar {
       fSim_P_end_E              = -9999.;
       fSim_P_track_length       = -9999.;
 	    
-	    fSim_N_start_vx           = -9999.;
-	    fSim_N_start_vy           = -9999.;
-	    fSim_N_start_vz           = -9999.;
-	    fSim_N_end_vx             = -9999.;
-	    fSim_N_end_vy             = -9999.;
-	    fSim_N_end_vz             = -9999.;
-	    fSim_N_start_px           = -9999.;
-	    fSim_N_start_py           = -9999.;
-	    fSim_N_start_pz           = -9999.;
-	    fSim_N_start_E            = -9999.;
-	    fSim_N_end_px             = -9999.;
-	    fSim_N_end_py             = -9999.;
-	    fSim_N_end_pz             = -9999.;
-	    fSim_N_end_E              = -9999.;
-	    fSim_N_track_length       = -9999.;
+      fSim_N_start_vx           = -9999.;
+      fSim_N_start_vy           = -9999.;
+      fSim_N_start_vz           = -9999.;
+      fSim_N_end_vx             = -9999.;
+      fSim_N_end_vy             = -9999.;
+      fSim_N_end_vz             = -9999.;
+      fSim_N_start_px           = -9999.;
+      fSim_N_start_py           = -9999.;
+      fSim_N_start_pz           = -9999.;
+      fSim_N_start_E            = -9999.;
+      fSim_N_end_px             = -9999.;
+      fSim_N_end_py             = -9999.;  
+      fSim_N_end_pz             = -9999.;
+      fSim_N_end_E              = -9999.;
+      fSim_N_track_length       = -9999.;
 
       fSim_Pi0_start_vx           = -9999.;
       fSim_Pi0_start_vy           = -9999.;
@@ -900,30 +900,30 @@ namespace lar {
         fSim_mu_start_4mommenta[i] = -9999.;
         fSim_mu_end_4mommenta[i]   = -9999.;
 
-	      fSim_P_start_4position[i] = -9999.;
-	      fSim_P_end_4position[i] = -9999.;
-	      fSim_P_start_4mommenta[i] = -9999.;
-	      fSim_P_end_4mommenta[i] = -9999.;
+	fSim_P_start_4position[i] = -9999.;
+	fSim_P_end_4position[i] = -9999.;
+	fSim_P_start_4mommenta[i] = -9999.;
+        fSim_P_end_4mommenta[i] = -9999.;
 
-	      fSim_N_start_4position[i] = -9999.;
-	      fSim_N_end_4position[i] = -9999.;
-	      fSim_N_start_4mommenta[i] = -9999.;
-	      fSim_N_end_4mommenta[i] = -9999.;
+	fSim_N_start_4position[i] = -9999.;
+	fSim_N_end_4position[i] = -9999.;
+	fSim_N_start_4mommenta[i] = -9999.;
+	fSim_N_end_4mommenta[i] = -9999.;
 
-	      fSim_Pi0_start_4position[i] = -9999.;
-	      fSim_Pi0_end_4position[i] = -9999.;
-	      fSim_Pi0_start_4mommenta[i] = -9999.;
-	      fSim_Pi0_end_4mommenta[i] = -9999.;
+	fSim_Pi0_start_4position[i] = -9999.;
+	fSim_Pi0_end_4position[i] = -9999.;
+	fSim_Pi0_start_4mommenta[i] = -9999.;
+	fSim_Pi0_end_4mommenta[i] = -9999.;
 
-	      fSim_pip_start_4position[i] = -9999.;
-	      fSim_pip_end_4position[i] = -9999.;
-	      fSim_pip_start_4mommenta[i] = -9999.;
-	      fSim_pip_end_4mommenta[i] = -9999.;
+	fSim_pip_start_4position[i] = -9999.;
+	fSim_pip_end_4position[i] = -9999.;
+	fSim_pip_start_4mommenta[i] = -9999.;
+	fSim_pip_end_4mommenta[i] = -9999.;
 
-	      fSim_pim_start_4position[i] = -9999.;
-	      fSim_pim_end_4position[i] = -9999.;
-	      fSim_pim_start_4mommenta[i] = -9999.;
-	      fSim_pim_end_4momenta[i] = -9999.;
+	fSim_pim_start_4position[i] = -9999.;
+	fSim_pim_end_4position[i] = -9999.;
+	fSim_pim_start_4mommenta[i] = -9999.;
+	fSim_pim_end_4momenta[i] = -9999.;
 	
       }
 */
@@ -955,10 +955,10 @@ namespace lar {
       	fMode_truth   = mclist[0]->GetNeutrino().Mode(); // Interaction mode (QE/1-pi/DIS...)
         fInteractionType = mclist[0]->GetNeutrino().InteractionType(); // Interaction type
         fNuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx(); //Genie true neutrino interaction vertex x
-	      fNuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
+	fNuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
       	fNuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
       	fNuPDG    = mclist[0]->GetNeutrino().Nu().PdgCode(); // Generator level neutrino PDG code
-	      fLepPDG     = mclist[0]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
+	fLepPDG     = mclist[0]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
         fLepMomX    = mclist[0]->GetNeutrino().Lepton().Momentum().X(); // Generator level lepton momentum x
         fLepMomY    = mclist[0]->GetNeutrino().Lepton().Momentum().Y();  // Generator level lepton momentum y
         fLepMomZ    = mclist[0]->GetNeutrino().Lepton().Momentum().Z();  // Generator level lepton momentum z
