@@ -508,7 +508,7 @@ namespace lar {
       fNtuple->Branch("Sim_nPhoton",              &fSim_nPhoton,            "Sim_nPhoton/I");
       fNtuple->Branch("Sim_nPionNeutral",         &fSim_nPionNeutral,       "Sim_nPionNeutral/I");
       fNtuple->Branch("Sim_nPip",                 &fSim_nPip,               "Sim_nPip/I");
-      fNtuple->Branch("Sim_nPim",                 &fSim_nPim                "Sim_nPim/I");
+      fNtuple->Branch("Sim_nPim",                 &fSim_nPim,                "Sim_nPim/I");
       fNtuple->Branch("Sim_nNeutron",             &fSim_nNeutron,           "Sim_nNeutron/I");
       fNtuple->Branch("Sim_nProton",              &fSim_nProton,            "Sim_nProton/I");
       fNtuple->Branch("Sim_LepE",                 &fSim_LepE,               "Sim_LepE/D");
@@ -1280,7 +1280,7 @@ namespace lar {
 
       // Store info for leading momentum sim muon
       if ( fSim_nMu > 0 ) {
-        for (size_t i = 0; i < fSim_nMu; i++){
+        for (int i = 0; i < fSim_nMu; i++){
 
         const simb::MCParticle& leadingmu = *(SimMuons[i]);
 
@@ -1325,8 +1325,8 @@ namespace lar {
       
       }// End if muon exists
 
-	if ( fSim_nP > 0 ) {
-    for (size_t i = 0; i < fSim_nP; i++){
+	if ( fSim_nProton > 0 ) {
+    for (int i = 0; i < fSim_nP; i++){
 		  const simb::MCParticle& leadingP = *(SimProtons[i]);
 
 	    const size_t PnumberTrajectoryPoints = leadingP.NumberTrajectoryPoints();
@@ -1363,8 +1363,8 @@ namespace lar {
     */
 	}
 
-	if ( fSim_nN > 0 ) {
-    for (size_t i = 0; i < fSim_nN; i++){
+	if ( fSim_nNeutron > 0 ) {
+    for (int i = 0; i < fSim_nN; i++){
 		const simb::MCParticle& leadingN = *(SimNeutrons[i]);
 
 		const size_t NnumberTrajectoryPoints = leadingN.NumberTrajectoryPoints();
@@ -1407,7 +1407,7 @@ namespace lar {
 
 	if ( fSim_nPionNeutral > 0 ) {
 
-    for (size_t i = 0; i < fSim_nPionNeutral; i++){
+    for (int i = 0; i < fSim_nPionNeutral; i++){
 		  const simb::MCParticle& leadingPi0 = *(SimNeutralPions[i]);
 
 	    const size_t Pi0numberTrajectoryPoints = leadingPi0.NumberTrajectoryPoints();
@@ -1450,7 +1450,7 @@ namespace lar {
 	}
 
   if (fSim_nPim > 0){
-    for (size_t i = 0; i < fSim_nPim; i++){
+    for (int i = 0; i < fSim_nPim; i++){
      const simb::MCParticle& Pimvecs = *(SimPim[i])
         
       const size_t pimnumberTrajectoryPoints = Pimvecs.NumberTrajectoryPoints();
@@ -1461,7 +1461,7 @@ namespace lar {
 	    const TLorentzVector& pimmomentumStart = Pimvecs.Momentum(0);
 	    const TLorentzVector& pimmomentumEnd = Pimvecs.Momentum(pimlast);
 
-      fSim_pim_start_4position.push_back(pimpositionStart);
+      fSim_pim_start_4position.push_back(pimpositionStart.X());
       fSim_pim_end_4position.push_back(pimpositionEnd);
       fSim_pim_start_4mommenta.push_back(pimmomentumStart);
       fSim_pim_end_4mommenta.push_back(pimmomentumEnd);
@@ -1488,7 +1488,7 @@ namespace lar {
   }
 
   if (fSim_nPip > 0){
-    for (size_t i = 0; i < fSim_nPip; i++){
+    for (int i = 0; i < fSim_nPip; i++){
       const simb::MCParticle& Pipvecs = *(SimPip[i])
         
       const size_t pipnumberTrajectoryPoints = Pipvecs.NumberTrajectoryPoints();
