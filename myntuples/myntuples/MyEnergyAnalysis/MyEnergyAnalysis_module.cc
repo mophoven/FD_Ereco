@@ -1338,7 +1338,7 @@ namespace lar {
       }// End if muon exists
 
 	if ( fSim_nProton > 0 ) {
-    for (int i = 0; i < fSim_nP; i++){
+    for (int i = 0; i < fSim_nProton; i++){
 		  const simb::MCParticle& leadingP = *(SimProtons[i]);
 
 	    const size_t PnumberTrajectoryPoints = leadingP.NumberTrajectoryPoints();
@@ -1388,16 +1388,16 @@ namespace lar {
 	}
 
 	if ( fSim_nNeutron > 0 ) {
-    for (int i = 0; i < fSim_nN; i++){
+    for (int i = 0; i < fSim_nNeutron; i++){
 		const simb::MCParticle& leadingN = *(SimNeutrons[i]);
 
 		const size_t NnumberTrajectoryPoints = leadingN.NumberTrajectoryPoints();
 
 	  const int Nlast = NnumberTrajectoryPoints - 1;
 	  const TLorentzVector& NpositionStart = leadingN.Position(0);
-	  const TLorentzVector& NpositionEnd = leadingN.Position(last);
+	  const TLorentzVector& NpositionEnd = leadingN.Position(Nlast);
 	  const TLorentzVector& NmomentumStart = leadingN.Momentum(0);
-	  const TLorentzVector& NmomentumEnd = leadingN.Momentum(last);
+	  const TLorentzVector& NmomentumEnd = leadingN.Momentum(Nlast);
 
         fSim_N_start_4position.push_back(NpositionStart.X());
 		fSim_N_start_4position.push_back(NpositionStart.Y());
