@@ -1294,10 +1294,22 @@ namespace lar {
         const TLorentzVector& mumomentumStart = leadingmu.Momentum(0);
         const TLorentzVector& mumomentumEnd = leadingmu.Momentum(mulast);
 
-        fSim_mu_start_4position.push_back(mupositionStart);
-        fSim_mu_end_4position.push_back(mupositionEnd);
-        fSim_mu_start_4mommenta.push_back(mumomentumStart);
-        fSim_mu_end_4mommenta.push_back(mumomentumEnd);
+        fSim_mu_start_4position.push_back(mupositionStart.X());
+		fSim_mu_start_4position.push_back(mupositionStart.Y());
+		fSim_mu_start_4position.push_back(mupositionStart.Z());
+		fSim_mu_start_4position.push_back(mupositionStart.T());
+        fSim_mu_end_4position.push_back(mupositionEnd.X());
+		fSim_mu_end_4position.push_back(mupositionEnd.Y());
+		fSim_mu_end_4position.push_back(mupositionEnd.Z());
+		fSim_mu_end_4position.push_back(mupositionEnd.T());
+        fSim_mu_start_4mommenta.push_back(mumomentumStart.X());
+		fSim_mu_start_4mommenta.push_back(mumomentumStart.Y());
+		fSim_mu_start_4mommenta.push_back(mumomentumStart.Z());
+		fSim_mu_start_4mommenta.push_back(mumomentumStart.T());
+        fSim_mu_end_4mommenta.push_back(mumomentumEnd.X());
+		fSim_mu_end_4mommenta.push_back(mumomentumEnd.Y());
+		fSim_mu_end_4mommenta.push_back(mumomentumEnd.Z());
+		fSim_mu_end_4mommenta.push_back(mumomentumEnd.T());
 
         }
         /*Fill position and momentum components
@@ -1337,10 +1349,22 @@ namespace lar {
 	    const TLorentzVector& PmomentumStart = leadingP.Momentum(0);
 	    const TLorentzVector& PmomentumEnd = leadingP.Momentum(Plast);
 
-      fSim_P_start_4position.push_back(PpositionStart);
-      fSim_P_end_4position.push_back(PpositionEnd);
-      fSim_P_start_4mommenta.push_back(PmomentumStart);
-      fSim_P_end_4mommenta.push_back(PmomentumEnd);
+        fSim_P_start_4position.push_back(PpositionStart.X());
+		fSim_P_start_4position.push_back(PpositionStart.Y());
+		fSim_P_start_4position.push_back(PpositionStart.Z());
+		fSim_P_start_4position.push_back(PpositionStart.T());
+        fSim_P_end_4position.push_back(PpositionEnd.X());
+		fSim_P_end_4position.push_back(PpositionEnd.Y());
+		fSim_P_end_4position.push_back(PpositionEnd.Z());
+		fSim_P_end_4position.push_back(PpositionEnd.T());
+        fSim_P_start_4mommenta.push_back(PmomentumStart.X());
+		fSim_P_start_4mommenta.push_back(PmomentumStart.Y());
+		fSim_P_start_4mommenta.push_back(PmomentumStart.Z());
+		fSim_P_start_4mommenta.push_back(PmomentumStart.T());
+        fSim_P_end_4mommenta.push_back(PmomentumEnd.X());
+		fSim_P_end_4mommenta.push_back(PmomentumEnd.Y());
+		fSim_P_end_4mommenta.push_back(PmomentumEnd.Z());
+		fSim_P_end_4mommenta.push_back(PmomentumEnd.T());
     }
 	      /*fSim_P_start_vx = leadingP.Vx(0); // unit?
         fSim_P_start_vy = leadingP.Vy(0);
@@ -1375,10 +1399,22 @@ namespace lar {
 	  const TLorentzVector& NmomentumStart = leadingN.Momentum(0);
 	  const TLorentzVector& NmomentumEnd = leadingN.Momentum(last);
 
-    fSim_N_start_4position.push_back(NpositionStart);
-    fSim_N_end_4position.push_back(NpositionEnd);
-    fSim_N_start_4mommenta.push_back(NmomentumStart);
-    fSim_N_end_4mommenta.push_back(NmomentumEnd);
+        fSim_N_start_4position.push_back(NpositionStart.X());
+		fSim_N_start_4position.push_back(NpositionStart.Y());
+		fSim_N_start_4position.push_back(NpositionStart.Z());
+		fSim_N_start_4position.push_back(NpositionStart.T());
+        fSim_mu_end_4position.push_back(NpositionEnd.X());
+		fSim_N_end_4position.push_back(NpositionEnd.Y());
+		fSim_N_end_4position.push_back(NpositionEnd.Z());
+		fSim_N_end_4position.push_back(NpositionEnd.T());
+        fSim_N_start_4mommenta.push_back(NmomentumStart.X());
+		fSim_N_start_4mommenta.push_back(NmomentumStart.Y());
+		fSim_N_start_4mommenta.push_back(NmomentumStart.Z());
+		fSim_N_start_4mommenta.push_back(NmomentumStart.T());
+        fSim_N_end_4mommenta.push_back(NmomentumEnd.X());
+		fSim_N_end_4mommenta.push_back(NmomentumEnd.Y());
+		fSim_N_end_4mommenta.push_back(NmomentumEnd.Z());
+		fSim_N_end_4mommenta.push_back(NmomentumEnd.T());
     }
 	      /*fSim_N_start_vx = leadingN.Vx(0); // unit?
         fSim_N_start_vy = leadingN.Vy(0);
@@ -1419,10 +1455,22 @@ namespace lar {
 	    const TLorentzVector& Pi0momentumEnd = leadingPi0.Momentum(Pi0last);
 
 
-      fSim_Pi0_start_4position.push_back(Pi0positionStart);
-      fSim_Pi0_end_4position.push_back(Pi0positionEnd);
-      fSim_Pi0_start_4mommenta.push_back(Pi0momentumStart);
-      fSim_Pi0_end_4mommenta.push_back(Pi0momentumEnd);
+        fSim_Pi0_start_4position.push_back(Pi0positionStart.X());
+		fSim_Pi0_start_4position.push_back(Pi0positionStart.Y());
+		fSim_Pi0_start_4position.push_back(Pi0positionStart.Z());
+		fSim_Pi0_start_4position.push_back(Pi0positionStart.T());
+        fSim_Pi0_end_4position.push_back(Pi0positionEnd.X());
+		fSim_Pi0_end_4position.push_back(Pi0positionEnd.Y());
+		fSim_Pi0_end_4position.push_back(Pi0positionEnd.Z());
+		fSim_Pi0_end_4position.push_back(Pi0positionEnd.T());
+        fSim_Pi0_start_4mommenta.push_back(Pi0momentumStart.X());
+		fSim_Pi0_start_4mommenta.push_back(Pi0momentumStart.Y());
+		fSim_Pi0_start_4mommenta.push_back(Pi0momentumStart.Z());
+		fSim_Pi0_start_4mommenta.push_back(Pi0momentumStart.T());
+        fSim_Pi0_end_4mommenta.push_back(Pi0momentumEnd.X());
+		fSim_Pi0_end_4mommenta.push_back(Pi0momentumEnd.Y());
+		fSim_Pi0_end_4mommenta.push_back(Pi0momentumEnd.Z());
+		fSim_Pi0_end_4mommenta.push_back(Pi0momentumEnd.T());
     }
 	/*fSim_Pi0_start_vx = leadingPi0.Vx(0); // unit?
         fSim_Pi0_start_vy = leadingPi0.Vy(0);
@@ -1461,10 +1509,22 @@ namespace lar {
 	    const TLorentzVector& pimmomentumStart = Pimvecs.Momentum(0);
 	    const TLorentzVector& pimmomentumEnd = Pimvecs.Momentum(pimlast);
 
-      fSim_pim_start_4position.push_back(pimpositionStart.X());
-      fSim_pim_end_4position.push_back(pimpositionEnd);
-      fSim_pim_start_4mommenta.push_back(pimmomentumStart);
-      fSim_pim_end_4mommenta.push_back(pimmomentumEnd);
+        fSim_pim_start_4position.push_back(pimpositionStart.X());
+		fSim_pim_start_4position.push_back(pimpositionStart.Y());
+		fSim_pim_start_4position.push_back(pimpositionStart.Z());
+		fSim_pim_start_4position.push_back(pimpositionStart.T());
+        fSim_pim_end_4position.push_back(pimpositionEnd.X());
+		fSim_pim_end_4position.push_back(pimpositionEnd.Y());
+		fSim_pim_end_4position.push_back(pimpositionEnd.Z());
+		fSim_pim_end_4position.push_back(pimpositionEnd.T());
+        fSim_pim_start_4mommenta.push_back(pimmomentumStart.X());
+		fSim_pim_start_4mommenta.push_back(pimmomentumStart.Y());
+		fSim_pim_start_4mommenta.push_back(pimmomentumStart.Z());
+		fSim_pim_start_4mommenta.push_back(pimmomentumStart.T());
+        fSim_pim_end_4mommenta.push_back(pimmomentumEnd.X());
+		fSim_pim_end_4mommenta.push_back(pimmomentumEnd.Y());
+		fSim_pim_end_4mommenta.push_back(pimmomentumEnd.Z());
+		fSim_pim_end_4mommenta.push_back(pimmomentumEnd.T());
     }
 
        /* fSim_pim_start_vx = Pimvecs.Vx(0); // unit?
@@ -1499,11 +1559,22 @@ namespace lar {
 	    const TLorentzVector& pipmomentumStart = Pipvecs.Momentum(0);
 	    const TLorentzVector& pipmomentumEnd = Pipvecs.Momentum(piplast);
 
-      fSim_pip_start_4position.push_back(pippositionStart);
-      fSim_pip_end_4position.push_back(pippositionEnd);
-      fSim_pip_start_4mommenta.push_back(pipmomentumStart);
-      fSim_pip_end_4mommenta.push_back(pipmomentumEnd);
-
+        fSim_pip_start_4position.push_back(pippositionStart.X());
+		fSim_pip_start_4position.push_back(pippositionStart.Y());
+		fSim_pip_start_4position.push_back(pippositionStart.Z());
+		fSim_pip_start_4position.push_back(pippositionStart.T());
+        fSim_pip_end_4position.push_back(pippositionEnd.X());
+		fSim_pip_end_4position.push_back(pippositionEnd.Y());
+		fSim_pip_end_4position.push_back(pippositionEnd.Z());
+		fSim_pip_end_4position.push_back(pippositionEnd.T());
+        fSim_pip_start_4mommenta.push_back(pipmomentumStart.X());
+		fSim_pip_start_4mommenta.push_back(pipmomentumStart.Y());
+		fSim_pip_start_4mommenta.push_back(pipmomentumStart.Z());
+		fSim_pip_start_4mommenta.push_back(pipmomentumStart.T());
+        fSim_pip_end_4mommenta.push_back(pipmomentumEnd.X());
+		fSim_pip_end_4mommenta.push_back(pipmomentumEnd.Y());
+		fSim_pip_end_4mommenta.push_back(pipmomentumEnd.Z());
+		fSim_pip_end_4mommenta.push_back(pipmomentumEnd.T());
     }
 
       /*  fSim_pip_start_vx = Pipvecs.Vx(0); // unit?
