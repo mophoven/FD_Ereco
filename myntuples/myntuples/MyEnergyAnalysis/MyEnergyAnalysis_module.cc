@@ -1499,7 +1499,7 @@ namespace lar {
 
   if (fSim_nPim > 0){
     for (int i = 0; i < fSim_nPim; i++){
-     const simb::MCParticle& Pimvecs = *(SimPim[i])
+     const simb::MCParticle& Pimvecs = *(SimPim[i]);
         
       const size_t pimnumberTrajectoryPoints = Pimvecs.NumberTrajectoryPoints();
 
@@ -1549,7 +1549,7 @@ namespace lar {
 
   if (fSim_nPip > 0){
     for (int i = 0; i < fSim_nPip; i++){
-      const simb::MCParticle& Pipvecs = *(SimPip[i])
+      const simb::MCParticle& Pipvecs = *(SimPip[i]);
         
       const size_t pipnumberTrajectoryPoints = Pipvecs.NumberTrajectoryPoints();
 
