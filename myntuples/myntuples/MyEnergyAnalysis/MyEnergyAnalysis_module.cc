@@ -372,6 +372,8 @@ namespace lar {
       //std::vector<float> fSim_hadronic_hit_Edep_b1;
       std::vector<float> fSim_hadronic_hit_Edep_b2;
 
+      std::vector<int> fP_int_class;
+
       //
       // Other variables that will be shared between different methods.
       //
@@ -674,6 +676,8 @@ namespace lar {
       fNtuple->Branch("True_LepE",                &fTrue_LepE,            "True_LepE/D");
       fNtuple->Branch("Vis_HadE",                 &fVis_HadE,             "Vis_HadE/D");
 
+      fNtuple->Branch("P_int_class",		  &fP_int_class);
+
     }
 
     //-----------------------------------------------------------------------
@@ -892,6 +896,8 @@ namespace lar {
       fSim_pip_end_4position.clear();
       fSim_pip_start_4mommenta.clear();
       fSim_pip_end_4mommenta.clear();
+
+      fP_int_class.clear();
 
       /*
         for (int i = 0; i < 4; i++) {
@@ -1597,6 +1603,22 @@ namespace lar {
 		fSim_pip_track_length = piptrackLength;
     */
   }
+	    for(int k = 0; k < fSimP_Mom_vec.size(); ++k){
+		if(fSimP_Mom_vec[k] != fSimP_Mom_vec[k-1]){
+			if(fSimPDG[k] == 13) string primary_part = "1";
+			else if(fSimPDG[k] == 211) string primary_part = "2";
+			else if(fSimPDG[k] == -211) string primary_part = "3";
+			else if(fSimPDG[k] == 2212) string primary_part = "4";
+			else if(fSimPDG[k] == 2112) string primary_part = "5";
+		}
+		if(fSimP_Mom_vec[k] == fSimP_Mom_vec[k-1]){
+			if(fSimPDG[k] == 13) string daughter_part = "1";
+			else if(fSimPDG[k] == 211) string daughter_part = "2";
+			else if(fSimPDG[k] == -211) string daughter_part = "3";
+			else if(fSimPDG[k] == 2212) string daugter_part = "4";
+			else if(fSimPDG[k] == 2112) string daughter_part = "5";
+		}
+	    }
       //
       // Calculate sim hadronic deposit energy
       //
