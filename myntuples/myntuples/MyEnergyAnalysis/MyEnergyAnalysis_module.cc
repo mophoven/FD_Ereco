@@ -1603,21 +1603,31 @@ namespace lar {
 		fSim_pip_track_length = piptrackLength;
     */
   }
+	    std::string combined_string;
 	    for(int k = 0; k < fSimP_Mom_vec.size(); ++k){
 		if(fSimP_Mom_vec[k] != fSimP_Mom_vec[k-1]){
-			if(fSimPDG[k] == 13) string primary_part = "1";
-			else if(fSimPDG[k] == 211) string primary_part = "2";
-			else if(fSimPDG[k] == -211) string primary_part = "3";
-			else if(fSimPDG[k] == 2212) string primary_part = "4";
-			else if(fSimPDG[k] == 2112) string primary_part = "5";
+			int interaction_code = std::stoi(combined_string);
+			fP_int_class.push_back(interaction_code);
+			combined_string = "";
+			if(fSimPDG[k] == 13) std::string primary_part = "1";
+			else if(fSimPDG[k] == 211) std::string primary_part = "2";
+			else if(fSimPDG[k] == -211) std::string primary_part = "3";
+			else if(fSimPDG[k] == 2212) std::string primary_part = "4";
+			else if(fSimPDG[k] == 2112) std::string primary_part = "5";
+			else break;
+
+			combined_string = primary_part;
 		}
 		if(fSimP_Mom_vec[k] == fSimP_Mom_vec[k-1]){
-			if(fSimPDG[k] == 13) string daughter_part = "1";
-			else if(fSimPDG[k] == 211) string daughter_part = "2";
-			else if(fSimPDG[k] == -211) string daughter_part = "3";
-			else if(fSimPDG[k] == 2212) string daugter_part = "4";
-			else if(fSimPDG[k] == 2112) string daughter_part = "5";
+			if(fSimPDG[k] == 13) std::string daughter_part = "1";
+			else if(fSimPDG[k] == 211) std::string daughter_part = "2";
+			else if(fSimPDG[k] == -211) std::string daughter_part = "3";
+			else if(fSimPDG[k] == 2212) std::string daugter_part = "4";
+			else if(fSimPDG[k] == 2112) std::string daughter_part = "5";
+			else break;
+			combined_string += daughter_part;
 		}
+		    
 	    }
       //
       // Calculate sim hadronic deposit energy
