@@ -1603,31 +1603,52 @@ namespace lar {
 		fSim_pip_track_length = piptrackLength;
     */
   }
-	    std::string combined_string;
-	    for(int k = 0; k < fSimP_Mom_vec.size(); ++k){
-		if(fSimP_Mom_vec[k] != fSimP_Mom_vec[k-1]){
-			int interaction_code = std::stoi(combined_string);
-			fP_int_class.push_back(interaction_code);
-			combined_string = "";
-			if(fSimPDG[k] == 13) std::string primary_part = "1";
-			else if(fSimPDG[k] == 211) std::string primary_part = "2";
-			else if(fSimPDG[k] == -211) std::string primary_part = "3";
-			else if(fSimPDG[k] == 2212) std::string primary_part = "4";
-			else if(fSimPDG[k] == 2112) std::string primary_part = "5";
-			else break;
-
-			combined_string = primary_part;
+	    std::string combined_string = "";
+	    std::string primary_particle = "";
+	    std::string daughter_particles = "";
+	    int combined_int = 0;
+	    for(size_t k = 0; k < fSimP_TrackID_vec.size(); k++){
+		    	switch(fSimP_PDG_vec[k]){
+				case 13: primary_particle = "1"
+					break;
+				case 211: primary_particle = "2"
+					break;
+				case -211: primary_particle = "3"
+					break;
+				case 2212: primary_particle = "4"
+					break;
+				case 2112: primary_particle = "5"
+					break;
+				default: primary_particle = "0"
+					break;
+						}
+		    	combined_string += primary_particle;
+		for(size_t j = 0; j < fSimP_Mom_vec.size(); j++){
+			if(fSimP_Mom_vec[j] == fSimP_TrackID_vec[k]){
+				switch(fSimP_PDG_vec[j]){
+					case 13: daughter_particles = "1"
+						break;
+					case 211: daughter_particles = "2"
+						break;
+					case -211: daughter_particles = "3"
+						break;
+					case 2212: daughter_particles = "4"
+						break;
+					case 2112: daughter_particles = "5"
+						break;
+					default: daughter_particles = "0"
+						break;
+				}
+				
+				combined_string += daughter_particles;
+				daughter_particle = "";
 		}
-		if(fSimP_Mom_vec[k] == fSimP_Mom_vec[k-1]){
-			if(fSimPDG[k] == 13) std::string daughter_part = "1";
-			else if(fSimPDG[k] == 211) std::string daughter_part = "2";
-			else if(fSimPDG[k] == -211) std::string daughter_part = "3";
-			else if(fSimPDG[k] == 2212) std::string daugter_part = "4";
-			else if(fSimPDG[k] == 2112) std::string daughter_part = "5";
-			else break;
-			combined_string += daughter_part;
-		}
-		    
+	    }
+		    combined_int = stoi(combined_string);
+		    fP_int_class.push_back(combined_int);
+		    combined_int = 0;
+		    primary_particle = "";
+		    combined_string = "";
 	    }
       //
       // Calculate sim hadronic deposit energy
