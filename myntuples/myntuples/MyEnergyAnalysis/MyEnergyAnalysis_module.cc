@@ -1609,45 +1609,45 @@ namespace lar {
 	    int combined_int = 0;
 	    for(size_t k = 0; k < fSimP_TrackID_vec.size(); k++){
 		    	switch(fSimP_PDG_vec[k]){
-				case 13: primary_particle = "1"
+				case 13: primary_particle = "1";
 					break;
-				case 211: primary_particle = "2"
+				case 211: primary_particle = "2";
 					break;
-				case -211: primary_particle = "3"
+				case -211: primary_particle = "3";
 					break;
-				case 2212: primary_particle = "4"
+				case 2212: primary_particle = "4";
 					break;
-				case 2112: primary_particle = "5"
+				case 2112: primary_particle = "5";
 					break;
-				default: primary_particle = "0"
+				default: primary_particle = "0";
 					break;
 						}
 		    	combined_string += primary_particle;
 		for(size_t j = 0; j < fSimP_Mom_vec.size(); j++){
 			if(fSimP_Mom_vec[j] == fSimP_TrackID_vec[k]){
 				switch(fSimP_PDG_vec[j]){
-					case 13: daughter_particles = "1"
+					case 13: daughter_particles = "1";
 						break;
-					case 211: daughter_particles = "2"
+					case 211: daughter_particles = "2";
 						break;
-					case -211: daughter_particles = "3"
+					case -211: daughter_particles = "3";
 						break;
-					case 2212: daughter_particles = "4"
+					case 2212: daughter_particles = "4";
 						break;
-					case 2112: daughter_particles = "5"
+					case 2112: daughter_particles = "5";
 						break;
-					default: daughter_particles = "0"
+					default: daughter_particles = "0";
 						break;
 				}
 				
 				combined_string += daughter_particles;
-				daughter_particle = "";
+				daughter_particles = "";
 		}
 	    }
 		    combined_int = stoi(combined_string);
 		    fP_int_class.push_back(combined_int);
 		    combined_int = 0;
-		    primary_particle = "";
+		    primary_particles = "";
 		    combined_string = "";
 	    }
       //
