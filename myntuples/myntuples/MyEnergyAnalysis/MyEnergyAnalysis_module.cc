@@ -1647,7 +1647,7 @@ namespace lar {
 		    combined_int = stoi(combined_string);
 		    fP_int_class.push_back(combined_int);
 		    combined_int = 0;
-		    primary_particles = "";
+		    primary_particle = "";
 		    combined_string = "";
 	    }
       //
