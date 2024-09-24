@@ -1601,7 +1601,7 @@ namespace lar {
 
 	const double piptrackLength = (pippositionEnd - pippositionStart).Rho();
 		fSim_pip_track_length = piptrackLength;
-    */
+    
   }
 	    std::string combined_string = "";
 	    std::string primary_particle = "";
@@ -1650,6 +1650,7 @@ namespace lar {
 		    primary_particle = "";
 		    combined_string = "";
 	    }
+	    */
       //
       // Calculate sim hadronic deposit energy
       //
