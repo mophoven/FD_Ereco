@@ -46,6 +46,9 @@
 // C++ includes
 #include <cmath>
 #include <map>
+#include <string>
+#include <iostream>
+#include <cstdlib>
 
 namespace {
 
@@ -204,7 +207,8 @@ namespace lar {
       int fSim_nNutau;                   // No. of Sim tau neutrinos (nutau and nutaubar)
       int fSim_nPhoton;                  // No. of Sim photons
       int fSim_nPionNeutral;             // No. of Sim pi+/pi-
-      int fSim_nPionCharged;             // No. of Sim pi0
+      int fSim_nPip;
+      int fSim_nPim;                     // No. of Sim pi0
       int fSim_nNeutron;                 // No. of Sim neutrons
       int fSim_nProton;                  // No. of Sim protons
       double fSim_LepE, fSim_HadE;       // Energy of Sim lep and had
@@ -230,21 +234,21 @@ namespace lar {
       double fSim_mu_start_vx;           // x position of the muon trajectory start
       double fSim_mu_start_vy;           // y .....................................
       double fSim_mu_start_vz;           // z .....................................
-      double fSim_mu_start_4position[4]; // (x,y,z,t) of the muon trajectory start
+      std::vector<double> fSim_mu_start_4position; // (x,y,z,t) of the muon trajectory start
       double fSim_mu_end_vx;             // x position of the muon trajectory end
       double fSim_mu_end_vy;             // y ...................................
       double fSim_mu_end_vz;             // z ...................................
-      double fSim_mu_end_4position[4];   // ................................ end
+      std::vector<double> fSim_mu_end_4position;   // ................................ end
       double fSim_mu_start_px;           // x momentum of the muon trajectory start
       double fSim_mu_start_py;           // y .....................................
       double fSim_mu_start_pz;           // z .....................................
       double fSim_mu_start_E;            // Energy of leading mu
-      double fSim_mu_start_4mommenta[4]; // (Px,Py,Pz,E) of the muon trajectory start
+      std::vector<double> fSim_mu_start_4mommenta; // (Px,Py,Pz,E) of the muon trajectory start
       double fSim_mu_end_px;             // x momentum of the muon trajectory end
       double fSim_mu_end_py;             // y ...................................
       double fSim_mu_end_pz;             // z ...................................
       double fSim_mu_end_E;              // Energy of leading mu
-      double fSim_mu_end_4mommenta[4];   // ................................... end
+      std::vector<double> fSim_mu_end_4mommenta;   // ................................... end
       double fSim_mu_track_length;       // leading mu track length
 
 // For now these just store the first Particle created's Energy, since each particle would be far more complex
@@ -252,102 +256,105 @@ namespace lar {
       double fSim_P_start_vx;           
       double fSim_P_start_vy;           
       double fSim_P_start_vz;           
-      double fSim_P_start_4position[4];
+      std::vector<double> fSim_P_start_4position;
       double fSim_P_end_vx;             
       double fSim_P_end_vy;             
       double fSim_P_end_vz;          
-      double fSim_P_end_4position[4];   
+      std::vector<double> fSim_P_end_4position;   
       double fSim_P_start_px;           
       double fSim_P_start_py;         
       double fSim_P_start_pz;          
       double fSim_P_start_E;           
-      double fSim_P_start_4mommenta[4]; 
+      std::vector<double> fSim_P_start_4mommenta; 
       double fSim_P_end_px;             
       double fSim_P_end_py;            
       double fSim_P_end_pz;          
       double fSim_P_end_E;             
-      double fSim_P_end_4mommenta[4];  
+      std::vector<double> fSim_P_end_4mommenta;  
       double fSim_P_track_length;    
 
       double fSim_N_start_vx;           
       double fSim_N_start_vy;           
       double fSim_N_start_vz;           
-      double fSim_N_start_4position[4];
+      std::vector<double> fSim_N_start_4position;
       double fSim_N_end_vx;             
       double fSim_N_end_vy;             
       double fSim_N_end_vz;          
-      double fSim_N_end_4position[4];   
+      std::vector<double> fSim_N_end_4position;   
       double fSim_N_start_px;           
       double fSim_N_start_py;         
       double fSim_N_start_pz;          
       double fSim_N_start_E;           
-      double fSim_N_start_4mommenta[4]; 
+      std::vector<double> fSim_N_start_4mommenta; 
       double fSim_N_end_px;             
       double fSim_N_end_py;            
       double fSim_N_end_pz;          
       double fSim_N_end_E;             
-      double fSim_N_end_4mommenta[4];  
+      std::vector<double> fSim_N_end_4mommenta;  
       double fSim_N_track_length;      
 
       double fSim_Pi0_start_vx;           
       double fSim_Pi0_start_vy;           
       double fSim_Pi0_start_vz;           
-      double fSim_Pi0_start_4position[4];
+      std::vector<double> fSim_Pi0_start_4position;
       double fSim_Pi0_end_vx;             
       double fSim_Pi0_end_vy;             
       double fSim_Pi0_end_vz;          
-      double fSim_Pi0_end_4position[4];   
+      std::vector<double> fSim_Pi0_end_4position;   
       double fSim_Pi0_start_px;           
       double fSim_Pi0_start_py;         
       double fSim_Pi0_start_pz;          
       double fSim_Pi0_start_E;           
-      double fSim_Pi0_start_4mommenta[4]; 
+      std::vector<double> fSim_Pi0_start_4mommenta; 
       double fSim_Pi0_end_px;             
       double fSim_Pi0_end_py;            
       double fSim_Pi0_end_pz;          
       double fSim_Pi0_end_E;             
-      double fSim_Pi0_end_4mommenta[4];  
+      std::vector<double> fSim_Pi0_end_4mommenta;  
       double fSim_Pi0_track_length;      
 
       double fSim_pip_start_vx;           
       double fSim_pip_start_vy;           
       double fSim_pip_start_vz;           
-      double fSim_pip_start_4position[4];
+      std::vector<double> fSim_pip_start_4position;
       double fSim_pip_end_vx;             
       double fSim_pip_end_vy;             
       double fSim_pip_end_vz;          
-      double fSim_pip_end_4position[4];   
+      std::vector<double> fSim_pip_end_4position;   
       double fSim_pip_start_px;           
       double fSim_pip_start_py;         
       double fSim_pip_start_pz;          
       double fSim_pip_start_E;           
-      double fSim_pip_start_4mommenta[4]; 
+      std::vector<double> fSim_pip_start_4mommenta; 
       double fSim_pip_end_px;             
       double fSim_pip_end_py;            
       double fSim_pip_end_pz;          
       double fSim_pip_end_E;             
-      double fSim_pip_end_4mommenta[4];  
+      std::vector<double> fSim_pip_end_4mommenta;  
       double fSim_pip_track_length;      
 
       double fSim_pim_start_vx;           
       double fSim_pim_start_vy;           
       double fSim_pim_start_vz;           
-      double fSim_pim_start_4position[4];
+      std::vector<double> fSim_pim_start_4position;
       double fSim_pim_end_vx;             
       double fSim_pim_end_vy;             
       double fSim_pim_end_vz;          
-      double fSim_pim_end_4position[4];   
+      std::vector<double> fSim_pim_end_4position;   
       double fSim_pim_start_px;           
       double fSim_pim_start_py;         
       double fSim_pim_start_pz;          
       double fSim_pim_start_E;           
-      double fSim_pim_start_4mommenta[4]; 
+      std::vector<double> fSim_pim_start_4mommenta; 
       double fSim_pim_end_px;             
       double fSim_pim_end_py;            
       double fSim_pim_end_pz;          
       double fSim_pim_end_E;             
-      double fSim_pim_end_4mommenta[4];  
+      std::vector<double> fSim_pim_end_4mommenta;  
       double fSim_pim_track_length;      
+
+      std::vector<double> fSim_primary_end_energy;
+      std::vector<double> fSim_daughter_begin_energy;
 
       double fSim_mu_Edep_b2;                // [MeV]
       double fSim_n_Edep_b2;                // [MeV] Energy Deposit of neutron
@@ -370,6 +377,9 @@ namespace lar {
       std::vector<float> fSim_hadronic_hit_z_b;
       //std::vector<float> fSim_hadronic_hit_Edep_b1;
       std::vector<float> fSim_hadronic_hit_Edep_b2;
+
+      std::vector<std::string> fP_int_class_string;
+      std::vector<unsigned long long> fP_int_class;
 
       //
       // Other variables that will be shared between different methods.
@@ -506,7 +516,8 @@ namespace lar {
       fNtuple->Branch("Sim_nNutau",               &fSim_nNutau,             "Sim_nNutau/I");
       fNtuple->Branch("Sim_nPhoton",              &fSim_nPhoton,            "Sim_nPhoton/I");
       fNtuple->Branch("Sim_nPionNeutral",         &fSim_nPionNeutral,       "Sim_nPionNeutral/I");
-      fNtuple->Branch("Sim_nPionCharged",         &fSim_nPionCharged,       "Sim_nPionCharged/I");
+      fNtuple->Branch("Sim_nPip",                 &fSim_nPip,               "Sim_nPip/I");
+      fNtuple->Branch("Sim_nPim",                 &fSim_nPim,                "Sim_nPim/I");
       fNtuple->Branch("Sim_nNeutron",             &fSim_nNeutron,           "Sim_nNeutron/I");
       fNtuple->Branch("Sim_nProton",              &fSim_nProton,            "Sim_nProton/I");
       fNtuple->Branch("Sim_LepE",                 &fSim_LepE,               "Sim_LepE/D");
@@ -529,10 +540,10 @@ namespace lar {
       fNtuple->Branch("Sim_mu_end_py",            &fSim_mu_end_py,          "Sim_mu_end_py/D");
       fNtuple->Branch("Sim_mu_end_pz",            &fSim_mu_end_pz,          "Sim_mu_end_pz/D");
       fNtuple->Branch("Sim_mu_end_E",             &fSim_mu_end_E,           "Sim_mu_end_E/D");
-      fNtuple->Branch("Sim_mu_start_4position",    fSim_mu_start_4position, "Sim_mu_start_4position[4]/D");
-      fNtuple->Branch("Sim_mu_end_4position",      fSim_mu_end_4position,   "Sim_mu_end_4position[4]/D");
-      fNtuple->Branch("Sim_mu_start_4mommenta",    fSim_mu_start_4mommenta, "Sim_mu_start_4mommenta[4]/D");
-      fNtuple->Branch("Sim_mu_end_4mommenta",      fSim_mu_end_4mommenta,   "Sim_mu_end_4mommenta[4]/D");
+      fNtuple->Branch("Sim_mu_start_4position",   &fSim_mu_start_4position);
+      fNtuple->Branch("Sim_mu_end_4position",     &fSim_mu_end_4position);
+      fNtuple->Branch("Sim_mu_start_4mommenta",   &fSim_mu_start_4mommenta);
+      fNtuple->Branch("Sim_mu_end_4mommenta",     &fSim_mu_end_4mommenta);
       fNtuple->Branch("Sim_mu_track_length",      &fSim_mu_track_length,    "Sim_mu_track_length/D");
 
       fNtuple->Branch("Sim_P_start_vx",          &fSim_P_start_vx,        "Sim_P_start_vx/D");
@@ -549,10 +560,10 @@ namespace lar {
       fNtuple->Branch("Sim_P_end_py",            &fSim_P_end_py,          "Sim_P_end_py/D");
       fNtuple->Branch("Sim_P_end_pz",            &fSim_P_end_pz,          "Sim_P_end_pz/D");
       fNtuple->Branch("Sim_P_end_E",             &fSim_P_end_E,           "Sim_P_end_E/D");
-      fNtuple->Branch("Sim_P_start_4position",    fSim_P_start_4position, "Sim_P_start_4position[4]/D");
-      fNtuple->Branch("Sim_P_end_4position",      fSim_P_end_4position,   "Sim_P_end_4position[4]/D");
-      fNtuple->Branch("Sim_P_start_4mommenta",    fSim_P_start_4mommenta, "Sim_P_start_4mommenta[4]/D");
-      fNtuple->Branch("Sim_P_end_4mommenta",      fSim_P_end_4mommenta,   "Sim_P_end_4mommenta[4]/D");
+      fNtuple->Branch("Sim_P_start_4position",   &fSim_P_start_4position);
+      fNtuple->Branch("Sim_P_end_4position",     &fSim_P_end_4position);
+      fNtuple->Branch("Sim_P_start_4mommenta",   &fSim_P_start_4mommenta);
+      fNtuple->Branch("Sim_P_end_4mommenta",     &fSim_P_end_4mommenta);
       fNtuple->Branch("Sim_P_track_length",      &fSim_P_track_length,    "Sim_P_track_length/D");
 
       fNtuple->Branch("Sim_N_start_vx",          &fSim_N_start_vx,        "Sim_N_start_vx/D");
@@ -569,10 +580,10 @@ namespace lar {
       fNtuple->Branch("Sim_N_end_py",            &fSim_N_end_py,          "Sim_N_end_py/D");
       fNtuple->Branch("Sim_N_end_pz",            &fSim_N_end_pz,          "Sim_N_end_pz/D");
       fNtuple->Branch("Sim_N_end_E",             &fSim_N_end_E,           "Sim_N_end_E/D");
-      fNtuple->Branch("Sim_N_start_4position",    fSim_N_start_4position, "Sim_N_start_4position[4]/D");
-      fNtuple->Branch("Sim_N_end_4position",      fSim_N_end_4position,   "Sim_N_end_4position[4]/D");
-      fNtuple->Branch("Sim_N_start_4mommenta",    fSim_N_start_4mommenta, "Sim_N_start_4mommenta[4]/D");
-      fNtuple->Branch("Sim_N_end_4mommenta",      fSim_N_end_4mommenta,   "Sim_N_end_4mommenta[4]/D");
+      fNtuple->Branch("Sim_N_start_4position",   &fSim_N_start_4position);
+      fNtuple->Branch("Sim_N_end_4position",     &fSim_N_end_4position);
+      fNtuple->Branch("Sim_N_start_4mommenta",   &fSim_N_start_4mommenta);
+      fNtuple->Branch("Sim_N_end_4mommenta",     &fSim_N_end_4mommenta);
       fNtuple->Branch("Sim_N_track_length",      &fSim_N_track_length,    "Sim_N_track_length/D");
 
       fNtuple->Branch("Sim_Pi0_start_vx",          &fSim_Pi0_start_vx,        "Sim_Pi0_start_vx/D");
@@ -589,10 +600,10 @@ namespace lar {
       fNtuple->Branch("Sim_Pi0_end_py",            &fSim_Pi0_end_py,          "Sim_Pi0_end_py/D");
       fNtuple->Branch("Sim_Pi0_end_pz",            &fSim_Pi0_end_pz,          "Sim_Pi0_end_pz/D");
       fNtuple->Branch("Sim_Pi0_end_E",             &fSim_Pi0_end_E,           "Sim_Pi0_end_E/D");
-      fNtuple->Branch("Sim_Pi0_start_4position",    fSim_Pi0_start_4position, "Sim_Pi0_start_4position[4]/D");
-      fNtuple->Branch("Sim_Pi0_end_4position",      fSim_Pi0_end_4position,   "Sim_Pi0_end_4position[4]/D");
-      fNtuple->Branch("Sim_Pi0_start_4mommenta",    fSim_Pi0_start_4mommenta, "Sim_Pi0_start_4mommenta[4]/D");
-      fNtuple->Branch("Sim_Pi0_end_4mommenta",      fSim_Pi0_end_4mommenta,   "Sim_Pi0_end_4mommenta[4]/D");
+      fNtuple->Branch("Sim_Pi0_start_4position",   &fSim_Pi0_start_4position);
+      fNtuple->Branch("Sim_Pi0_end_4position",     &fSim_Pi0_end_4position);
+      fNtuple->Branch("Sim_Pi0_start_4mommenta",   &fSim_Pi0_start_4mommenta);
+      fNtuple->Branch("Sim_Pi0_end_4mommenta",     &fSim_Pi0_end_4mommenta);
       fNtuple->Branch("Sim_Pi0_track_length",      &fSim_Pi0_track_length,    "Sim_Pi0_track_length/D");
 
       fNtuple->Branch("Sim_pip_start_vx",          &fSim_pip_start_vx,        "Sim_pip_start_vx/D");
@@ -609,10 +620,10 @@ namespace lar {
       fNtuple->Branch("Sim_pip_end_py",            &fSim_pip_end_py,          "Sim_pip_end_py/D");
       fNtuple->Branch("Sim_pip_end_pz",            &fSim_pip_end_pz,          "Sim_pip_end_pz/D");
       fNtuple->Branch("Sim_pip_end_E",             &fSim_pip_end_E,           "Sim_pip_end_E/D");
-      fNtuple->Branch("Sim_pip_start_4position",    fSim_pip_start_4position, "Sim_pip_start_4position[4]/D");
-      fNtuple->Branch("Sim_pip_end_4position",      fSim_pip_end_4position,   "Sim_pip_end_4position[4]/D");
-      fNtuple->Branch("Sim_pip_start_4mommenta",    fSim_pip_start_4mommenta, "Sim_pip_start_4mommenta[4]/D");
-      fNtuple->Branch("Sim_pip_end_4mommenta",      fSim_pip_end_4mommenta,   "Sim_pip_end_4mommenta[4]/D");
+      fNtuple->Branch("Sim_pip_start_4position",   &fSim_pip_start_4position);
+      fNtuple->Branch("Sim_pip_end_4position",     &fSim_pip_end_4position);
+      fNtuple->Branch("Sim_pip_start_4mommenta",   &fSim_pip_start_4mommenta);
+      fNtuple->Branch("Sim_pip_end_4mommenta",     &fSim_pip_end_4mommenta);
       fNtuple->Branch("Sim_pip_track_length",      &fSim_pip_track_length,    "Sim_pip_track_length/D");
 
       fNtuple->Branch("Sim_pim_start_vx",          &fSim_pim_start_vx,        "Sim_pim_start_vx/D");
@@ -629,11 +640,14 @@ namespace lar {
       fNtuple->Branch("Sim_pim_end_py",            &fSim_pim_end_py,          "Sim_pim_end_py/D");
       fNtuple->Branch("Sim_pim_end_pz",            &fSim_pim_end_pz,          "Sim_pim_end_pz/D");
       fNtuple->Branch("Sim_pim_end_E",             &fSim_pim_end_E,           "Sim_pim_end_E/D");
-      fNtuple->Branch("Sim_pim_start_4position",    fSim_pim_start_4position, "Sim_pim_start_4position[4]/D");
-      fNtuple->Branch("Sim_pim_end_4position",      fSim_pim_end_4position,   "Sim_pim_end_4position[4]/D");
-      fNtuple->Branch("Sim_pim_start_4mommenta",    fSim_pim_start_4mommenta, "Sim_pim_start_4mommenta[4]/D");
-      fNtuple->Branch("Sim_pim_end_4mommenta",      fSim_pim_end_4mommenta,   "Sim_pim_end_4mommenta[4]/D");
+      fNtuple->Branch("Sim_pim_start_4position",   &fSim_pim_start_4position);
+      fNtuple->Branch("Sim_pim_end_4position",     &fSim_pim_end_4position);
+      fNtuple->Branch("Sim_pim_start_4mommenta",   &fSim_pim_start_4mommenta);
+      fNtuple->Branch("Sim_pim_end_4mommenta",     &fSim_pim_end_4mommenta);
       fNtuple->Branch("Sim_pim_track_length",      &fSim_pim_track_length,    "Sim_pim_track_length/D");
+
+      fNtuple->Branch("Sim_primary_end_energy",    &fSim_primary_end_energy);
+      fNtuple->Branch("Sim_daughter_begin_energy", &fSim_daughter_begin_energy);
 
       fNtuple->Branch("Sim_mu_Edep_b2",           &fSim_mu_Edep_b2,         "Sim_mu_Edep_b2/D");
       fNtuple->Branch("Sim_n_Edep_b2",            &fSim_n_Edep_b2,          "Sim_n_Edep_b2/D");
@@ -671,6 +685,9 @@ namespace lar {
       fNtuple->Branch("True_HadE",                &fTrue_HadE,            "True_HadE/D");
       fNtuple->Branch("True_LepE",                &fTrue_LepE,            "True_LepE/D");
       fNtuple->Branch("Vis_HadE",                 &fVis_HadE,             "Vis_HadE/D");
+      
+      fNtuple->Branch("P_int_class_string",       &fP_int_class_string);
+      fNtuple->Branch("P_int_class",		  &fP_int_class);
 
     }
 
@@ -734,69 +751,69 @@ namespace lar {
       fSim_P_end_E              = -9999.;
       fSim_P_track_length       = -9999.;
 	    
-	fSim_N_start_vx           = -9999.;
-	fSim_N_start_vy           = -9999.;
-	fSim_N_start_vz           = -9999.;
-	fSim_N_end_vx             = -9999.;
-	fSim_N_end_vy             = -9999.;
-	fSim_N_end_vz             = -9999.;
-	fSim_N_start_px           = -9999.;
-	fSim_N_start_py           = -9999.;
-	fSim_N_start_pz           = -9999.;
-	fSim_N_start_E            = -9999.;
-	fSim_N_end_px             = -9999.;
-	fSim_N_end_py             = -9999.;
-	fSim_N_end_pz             = -9999.;
-	fSim_N_end_E              = -9999.;
-	fSim_N_track_length       = -9999.;
+      fSim_N_start_vx           = -9999.;
+      fSim_N_start_vy           = -9999.;
+      fSim_N_start_vz           = -9999.;
+      fSim_N_end_vx             = -9999.;
+      fSim_N_end_vy             = -9999.;
+      fSim_N_end_vz             = -9999.;
+      fSim_N_start_px           = -9999.;
+      fSim_N_start_py           = -9999.;
+      fSim_N_start_pz           = -9999.;
+      fSim_N_start_E            = -9999.;
+      fSim_N_end_px             = -9999.;
+      fSim_N_end_py             = -9999.;  
+      fSim_N_end_pz             = -9999.;
+      fSim_N_end_E              = -9999.;
+      fSim_N_track_length       = -9999.;
 
-fSim_Pi0_start_vx           = -9999.;
-fSim_Pi0_start_vy           = -9999.;
-fSim_Pi0_start_vz           = -9999.;
-fSim_Pi0_end_vx             = -9999.;
-fSim_Pi0_end_vy             = -9999.;
-fSim_Pi0_end_vz             = -9999.;
-fSim_Pi0_start_px           = -9999.;
-fSim_Pi0_start_py           = -9999.;
-fSim_Pi0_start_pz           = -9999.;
-fSim_Pi0_start_E            = -9999.;
-fSim_Pi0_end_px             = -9999.;
-fSim_Pi0_end_py             = -9999.;
-fSim_Pi0_end_pz             = -9999.;
-fSim_Pi0_end_E              = -9999.;
-fSim_Pi0_track_length       = -9999.;
+      fSim_Pi0_start_vx           = -9999.;
+      fSim_Pi0_start_vy           = -9999.;
+      fSim_Pi0_start_vz           = -9999.;
+      fSim_Pi0_end_vx             = -9999.;
+      fSim_Pi0_end_vy             = -9999.;
+      fSim_Pi0_end_vz             = -9999.;
+      fSim_Pi0_start_px           = -9999.;
+      fSim_Pi0_start_py           = -9999.;
+      fSim_Pi0_start_pz           = -9999.;
+      fSim_Pi0_start_E            = -9999.;
+      fSim_Pi0_end_px             = -9999.;
+      fSim_Pi0_end_py             = -9999.;
+      fSim_Pi0_end_pz             = -9999.;
+      fSim_Pi0_end_E              = -9999.;
+      fSim_Pi0_track_length       = -9999.;
 
-fSim_pip_start_vx           = -9999.;
-fSim_pip_start_vy           = -9999.;
-fSim_pip_start_vz           = -9999.;
-fSim_pip_end_vx             = -9999.;
-fSim_pip_end_vy             = -9999.;
-fSim_pip_end_vz             = -9999.;
-fSim_pip_start_px           = -9999.;
-fSim_pip_start_py           = -9999.;
-fSim_pip_start_pz           = -9999.;
-fSim_pip_start_E            = -9999.;
-fSim_pip_end_px             = -9999.;
-fSim_pip_end_py             = -9999.;
-fSim_pip_end_pz             = -9999.;
-fSim_pip_end_E              = -9999.;
-fSim_pip_track_length       = -9999.;
+      fSim_pip_start_vx           = -9999.;
+      fSim_pip_start_vy           = -9999.;
+      fSim_pip_start_vz           = -9999.;
+      fSim_pip_end_vx             = -9999.;
+      fSim_pip_end_vy             = -9999.;
+      fSim_pip_end_vz             = -9999.;
+      fSim_pip_start_px           = -9999.;
+      fSim_pip_start_py           = -9999.;
+      fSim_pip_start_pz           = -9999.;
+      fSim_pip_start_E            = -9999.;
+      fSim_pip_end_px             = -9999.;
+      fSim_pip_end_py             = -9999.;
+      fSim_pip_end_pz             = -9999.;
+      fSim_pip_end_E              = -9999.;
+      fSim_pip_track_length       = -9999.;
 
-fSim_pim_start_vx           = -9999.;
-fSim_pim_start_vy           = -9999.;
-fSim_pim_start_vz           = -9999.;
-fSim_pim_end_vx             = -9999.;
-fSim_pim_end_vy             = -9999.;
-fSim_pim_end_vz             = -9999.;
-fSim_pim_start_px           = -9999.;
-fSim_pim_start_py           = -9999.;
-fSim_pim_start_pz           = -9999.;
-fSim_pim_start_E            = -9999.;
-fSim_pim_end_px             = -9999.;
-fSim_pim_end_py             = -9999.;
-fSim_pim_end_pz             = -9999.;
-fSim_pim_end_E              = -9999.;
-fSim_pim_track_length       = -9999.;
+      fSim_pim_start_vx           = -9999.;
+      fSim_pim_start_vy           = -9999.;
+      fSim_pim_start_vz           = -9999.;
+      fSim_pim_end_vx             = -9999.;
+      fSim_pim_end_vy             = -9999.;
+      fSim_pim_end_vz             = -9999.;
+      fSim_pim_start_px           = -9999.;
+      fSim_pim_start_py           = -9999.;
+      fSim_pim_start_pz           = -9999.;
+      fSim_pim_start_E            = -9999.;
+      fSim_pim_end_px             = -9999.;
+      fSim_pim_end_py             = -9999.;
+      fSim_pim_end_pz             = -9999.;
+      fSim_pim_end_E              = -9999.;
+      fSim_pim_track_length       = -9999.;
 	    
       fSim_LepE                  = 0.;
       fSim_HadE                  = 0.;
@@ -861,7 +878,44 @@ fSim_pim_track_length       = -9999.;
       fSim_Other_Edep_b2     = 0.;
       fSim_hadronic_Edep_b2  = 0.;
 
-      for (int i = 0; i < 4; i++) {
+      fSim_mu_start_4position.clear();
+      fSim_mu_end_4position.clear();
+      fSim_mu_start_4mommenta.clear();
+      fSim_mu_end_4mommenta.clear();
+
+      fSim_P_start_4position.clear();
+      fSim_P_end_4position.clear();
+      fSim_P_start_4mommenta.clear();
+      fSim_P_end_4mommenta.clear();
+
+      fSim_N_start_4position.clear();
+      fSim_N_end_4position.clear();
+      fSim_N_start_4mommenta.clear();
+      fSim_N_end_4mommenta.clear();
+
+      fSim_Pi0_start_4position.clear();
+      fSim_Pi0_end_4position.clear();
+      fSim_Pi0_start_4mommenta.clear();
+      fSim_Pi0_end_4mommenta.clear();
+
+      fSim_pim_start_4position.clear();
+      fSim_pim_end_4position.clear();
+      fSim_pim_start_4mommenta.clear();
+      fSim_pim_end_4position.clear();
+
+      fSim_pip_start_4position.clear();
+      fSim_pip_end_4position.clear();
+      fSim_pip_start_4mommenta.clear();
+      fSim_pip_end_4mommenta.clear();
+
+      fSim_primary_end_energy.clear();
+      fSim_daughter_begin_energy.clear();
+
+      fP_int_class_string.clear();
+      fP_int_class.clear();
+
+      /*
+        for (int i = 0; i < 4; i++) {
         fSim_mu_start_4position[i] = -9999.;
         fSim_mu_end_4position[i]   = -9999.;
         fSim_mu_start_4mommenta[i] = -9999.;
@@ -869,31 +923,31 @@ fSim_pim_track_length       = -9999.;
 
 	fSim_P_start_4position[i] = -9999.;
 	fSim_P_end_4position[i] = -9999.;
-	fSim_P_start_4momenta[i] = -9999.;
-	fSim_P_end_4momenta[i] = -9999.;
+	fSim_P_start_4mommenta[i] = -9999.;
+        fSim_P_end_4mommenta[i] = -9999.;
 
 	fSim_N_start_4position[i] = -9999.;
 	fSim_N_end_4position[i] = -9999.;
-	fSim_N_start_4momenta[i] = -9999.;
-	fSim_N_end_4momenta[i] = -9999.;
+	fSim_N_start_4mommenta[i] = -9999.;
+	fSim_N_end_4mommenta[i] = -9999.;
 
 	fSim_Pi0_start_4position[i] = -9999.;
 	fSim_Pi0_end_4position[i] = -9999.;
-	fSim_Pi0_start_4momenta[i] = -9999.;
-	fSim_Pi0_end_4momenta[i] = -9999.;
+	fSim_Pi0_start_4mommenta[i] = -9999.;
+	fSim_Pi0_end_4mommenta[i] = -9999.;
 
 	fSim_pip_start_4position[i] = -9999.;
 	fSim_pip_end_4position[i] = -9999.;
-	fSim_pip_start_4momenta[i] = -9999.;
-	fSim_pip_end_4momenta[i] = -9999.;
+	fSim_pip_start_4mommenta[i] = -9999.;
+	fSim_pip_end_4mommenta[i] = -9999.;
 
 	fSim_pim_start_4position[i] = -9999.;
 	fSim_pim_end_4position[i] = -9999.;
-	fSim_pim_start_4momenta[i] = -9999.;
+	fSim_pim_start_4mommenta[i] = -9999.;
 	fSim_pim_end_4momenta[i] = -9999.;
 	
       }
-
+*/
       fSim_hadronic_hit_x_b.clear();
       fSim_hadronic_hit_y_b.clear();
       fSim_hadronic_hit_z_b.clear();
@@ -922,10 +976,10 @@ fSim_pim_track_length       = -9999.;
       	fMode_truth   = mclist[0]->GetNeutrino().Mode(); // Interaction mode (QE/1-pi/DIS...)
         fInteractionType = mclist[0]->GetNeutrino().InteractionType(); // Interaction type
         fNuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx(); //Genie true neutrino interaction vertex x
-	      fNuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
+	fNuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy(); //Genie true neutrino interaction vertex y
       	fNuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz(); //Genie true neutrino interaction vertex z
       	fNuPDG    = mclist[0]->GetNeutrino().Nu().PdgCode(); // Generator level neutrino PDG code
-	      fLepPDG     = mclist[0]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
+	fLepPDG     = mclist[0]->GetNeutrino().Lepton().PdgCode(); // Generator level lepton PDG code
         fLepMomX    = mclist[0]->GetNeutrino().Lepton().Momentum().X(); // Generator level lepton momentum x
         fLepMomY    = mclist[0]->GetNeutrino().Lepton().Momentum().Y();  // Generator level lepton momentum y
         fLepMomZ    = mclist[0]->GetNeutrino().Lepton().Momentum().Z();  // Generator level lepton momentum z
@@ -1092,6 +1146,7 @@ fSim_pim_track_length       = -9999.;
       }
 
       // Store specific particles
+      std::vector<const simb::MCParticle*> SimParticles;
       std::vector<const simb::MCParticle*> SimElectrons;
       std::vector<const simb::MCParticle*> SimNues;
       std::vector<const simb::MCParticle*> SimMuons;
@@ -1100,7 +1155,8 @@ fSim_pim_track_length       = -9999.;
       std::vector<const simb::MCParticle*> SimNutaus;
       std::vector<const simb::MCParticle*> SimPhotons;
       std::vector<const simb::MCParticle*> SimNeutralPions;
-      std::vector<const simb::MCParticle*> SimChargedPions;
+      std::vector<const simb::MCParticle*> SimPip;
+      std::vector<const simb::MCParticle*> SimPim;
       std::vector<const simb::MCParticle*> SimNeutrons;
       std::vector<const simb::MCParticle*> SimProtons;
 
@@ -1203,7 +1259,7 @@ fSim_pim_track_length       = -9999.;
               fSim_HadE += particle.E();
             }
         }
-
+		SimParticles.push_back(&particle);
         //if ( particle.Process() == "primary" ) {
           if ( abs(fSimPDG) == 11 )   SimElectrons.push_back(&particle);
           if ( abs(fSimPDG) == 12 )   SimNues.push_back(&particle);
@@ -1213,7 +1269,8 @@ fSim_pim_track_length       = -9999.;
           if ( abs(fSimPDG) == 16 )   SimNutaus.push_back(&particle);
           if ( abs(fSimPDG) == 22 )   SimPhotons.push_back(&particle);
           if ( abs(fSimPDG) == 111 )  SimNeutralPions.push_back(&particle);
-          if ( abs(fSimPDG) == 211 )  SimChargedPions.push_back(&particle);
+          if ( fSimPDG == 211 )       SimPip.push_back(&particle);
+          if ( fSimPDG == -211 )      SimPim.push_back(&particle);
           if ( abs(fSimPDG) == 2112 ) SimNeutrons.push_back(&particle);
           if ( abs(fSimPDG) == 2212 ) SimProtons.push_back(&particle);
         //}
@@ -1228,7 +1285,8 @@ fSim_pim_track_length       = -9999.;
       fSim_nNutau       = SimNutaus.size();
       fSim_nPhoton      = SimPhotons.size();
       fSim_nPionNeutral = SimNeutralPions.size();
-      fSim_nPionCharged = SimChargedPions.size();
+      fSim_nPip         = SimPip.size();
+      fSim_nPim         = SimPim.size();
       fSim_nNeutron     = SimNeutrons.size();
       fSim_nProton      = SimProtons.size();
 
@@ -1244,8 +1302,9 @@ fSim_pim_track_length       = -9999.;
 
       // Store info for leading momentum sim muon
       if ( fSim_nMu > 0 ) {
+        for (int i = 0; i < fSim_nMu; i++){
 
-        const simb::MCParticle& leadingmu = *(SimMuons[0]);
+        const simb::MCParticle& leadingmu = *(SimMuons[i]);
 
         // A muon track consists of a set of 4-positions and 4-mommenta.
         const size_t munumberTrajectoryPoints = leadingmu.NumberTrajectoryPoints();
@@ -1257,7 +1316,25 @@ fSim_pim_track_length       = -9999.;
         const TLorentzVector& mumomentumStart = leadingmu.Momentum(0);
         const TLorentzVector& mumomentumEnd = leadingmu.Momentum(mulast);
 
-        // Fill position and momentum components
+        fSim_mu_start_4position.push_back(mupositionStart.X());
+		fSim_mu_start_4position.push_back(mupositionStart.Y());
+		fSim_mu_start_4position.push_back(mupositionStart.Z());
+		fSim_mu_start_4position.push_back(mupositionStart.T());
+        fSim_mu_end_4position.push_back(mupositionEnd.X());
+		fSim_mu_end_4position.push_back(mupositionEnd.Y());
+		fSim_mu_end_4position.push_back(mupositionEnd.Z());
+		fSim_mu_end_4position.push_back(mupositionEnd.T());
+        fSim_mu_start_4mommenta.push_back(mumomentumStart.Px());
+		fSim_mu_start_4mommenta.push_back(mumomentumStart.Py());
+		fSim_mu_start_4mommenta.push_back(mumomentumStart.Pz());
+		fSim_mu_start_4mommenta.push_back(mumomentumStart.E());
+        fSim_mu_end_4mommenta.push_back(mumomentumEnd.Px());
+		fSim_mu_end_4mommenta.push_back(mumomentumEnd.Py());
+		fSim_mu_end_4mommenta.push_back(mumomentumEnd.Pz());
+		fSim_mu_end_4mommenta.push_back(mumomentumEnd.E());
+
+        }
+        /*Fill position and momentum components
         fSim_mu_start_vx = leadingmu.Vx(0); // unit?
         fSim_mu_start_vy = leadingmu.Vy(0);
         fSim_mu_start_vz = leadingmu.Vz(0);
@@ -1272,30 +1349,46 @@ fSim_pim_track_length       = -9999.;
         fSim_mu_end_py   = leadingmu.Py(mulast);
         fSim_mu_end_pz   = leadingmu.Pz(mulast);
         fSim_mu_end_E    = leadingmu.E(mulast);
-
+        */
         // Fill arrays with the 4-values.
-        mupositionStart.GetXYZT(fSim_mu_start_4position);
-        mupositionEnd.GetXYZT(fSim_mu_end_4position);
-        mumomentumStart.GetXYZT(fSim_mu_start_4mommenta);
-        mumomentumEnd.GetXYZT(fSim_mu_end_4mommenta);
+
 
         // Calculate length using spherical cooridnate system: assume straight track? time negligible?
-        const double mutrackLength = (mupositionEnd - mupositionStart).Rho();
-        fSim_mu_track_length = mutrackLength;
-      } // End if muon exists
+        //const double mutrackLength = (mupositionEnd - mupositionStart).Rho();
+        //fSim_mu_track_length = mutrackLength;
+      
+      }// End if muon exists
 
-	if ( fSim_nP > 0 ) {
-		const simb::MCParticle& leadingP = *(SimProtons[0]);
+	if ( fSim_nProton > 0 ) {
+    for (int i = 0; i < fSim_nProton; i++){
+		  const simb::MCParticle& leadingP = *(SimProtons[i]);
 
-		const size_t PnumberTrajectoryPoints = leadingP.NumberTrajectoryPoints();
+	    const size_t PnumberTrajectoryPoints = leadingP.NumberTrajectoryPoints();
 
-	const int Plast = PnumberTrajectoryPoints - 1;
-	const TLorentzVector& PpositionStart = leadingP.Position(0);
-	const TLorentzVector& PpositionEnd = leadingP.Position(Plast);
-	const TLorentzVector& PmomentumStart = leadingP.Momentum(0);
-	const TLorentzVector& PmomentumEnd = leadingP.Momentum(Plast);
+	    const int Plast = PnumberTrajectoryPoints - 1;
+	    const TLorentzVector& PpositionStart = leadingP.Position(0);
+	    const TLorentzVector& PpositionEnd = leadingP.Position(Plast);
+	    const TLorentzVector& PmomentumStart = leadingP.Momentum(0);
+	    const TLorentzVector& PmomentumEnd = leadingP.Momentum(Plast);
 
-	fSim_P_start_vx = leadingP.Vx(0); // unit?
+        fSim_P_start_4position.push_back(PpositionStart.X());
+		fSim_P_start_4position.push_back(PpositionStart.Y());
+		fSim_P_start_4position.push_back(PpositionStart.Z());
+		fSim_P_start_4position.push_back(PpositionStart.T());
+        fSim_P_end_4position.push_back(PpositionEnd.X());
+		fSim_P_end_4position.push_back(PpositionEnd.Y());
+		fSim_P_end_4position.push_back(PpositionEnd.Z());
+		fSim_P_end_4position.push_back(PpositionEnd.T());
+        fSim_P_start_4mommenta.push_back(PmomentumStart.Px());
+		fSim_P_start_4mommenta.push_back(PmomentumStart.Py());
+		fSim_P_start_4mommenta.push_back(PmomentumStart.Pz());
+		fSim_P_start_4mommenta.push_back(PmomentumStart.E());
+        fSim_P_end_4mommenta.push_back(PmomentumEnd.Px());
+		fSim_P_end_4mommenta.push_back(PmomentumEnd.Py());
+		fSim_P_end_4mommenta.push_back(PmomentumEnd.Pz());
+		fSim_P_end_4mommenta.push_back(PmomentumEnd.E());
+    }
+	      /*fSim_P_start_vx = leadingP.Vx(0); // unit?
         fSim_P_start_vy = leadingP.Vy(0);
         fSim_P_start_vz = leadingP.Vz(0);
         fSim_P_end_vx   = leadingP.Vx(Plast);
@@ -1310,27 +1403,42 @@ fSim_pim_track_length       = -9999.;
         fSim_P_end_pz   = leadingP.Pz(Plast);
         fSim_P_end_E    = leadingP.E(Plast);
 
-        PpositionStart.GetXYZT(fSim_P_start_4position);
-        PpositionEnd.GetXYZT(fSim_P_end_4position);
-        PmomentumStart.GetXYZT(fSim_P_start_4mommenta);
-        PmomentumEnd.GetXYZT(fSim_P_end_4mommenta);
 
 	const double PtrackLength = (PpositionEnd - PpositionStart).Rho();
 		fSim_P_track_length = PtrackLength;
+    */
 	}
 
-	if ( fSim_nN > 0 ) {
-		const simb::MCParticle& leadingN = *(SimNeutrons[0]);
+	if ( fSim_nNeutron > 0 ) {
+    for (int i = 0; i < fSim_nNeutron; i++){
+		const simb::MCParticle& leadingN = *(SimNeutrons[i]);
 
 		const size_t NnumberTrajectoryPoints = leadingN.NumberTrajectoryPoints();
 
-	const int Nlast = NnumberTrajectoryPoints - 1;
-	const TLorentzVector& NpositionStart = leadingN.Position(0);
-	const TLorentzVector& NpositionEnd = leadingN.Position(last);
-	const TLorentzVector& NmomentumStart = leadingN.Momentum(0);
-	const TLorentzVector& NmomentumEnd = leadingN.Momentum(last);
+	  const int Nlast = NnumberTrajectoryPoints - 1;
+	  const TLorentzVector& NpositionStart = leadingN.Position(0);
+	  const TLorentzVector& NpositionEnd = leadingN.Position(Nlast);
+	  const TLorentzVector& NmomentumStart = leadingN.Momentum(0);
+	  const TLorentzVector& NmomentumEnd = leadingN.Momentum(Nlast);
 
-	fSim_N_start_vx = leadingN.Vx(0); // unit?
+        fSim_N_start_4position.push_back(NpositionStart.X());
+		fSim_N_start_4position.push_back(NpositionStart.Y());
+		fSim_N_start_4position.push_back(NpositionStart.Z());
+		fSim_N_start_4position.push_back(NpositionStart.T());
+        fSim_mu_end_4position.push_back(NpositionEnd.X());
+		fSim_N_end_4position.push_back(NpositionEnd.Y());
+		fSim_N_end_4position.push_back(NpositionEnd.Z());
+		fSim_N_end_4position.push_back(NpositionEnd.T());
+        fSim_N_start_4mommenta.push_back(NmomentumStart.Px());
+		fSim_N_start_4mommenta.push_back(NmomentumStart.Py());
+		fSim_N_start_4mommenta.push_back(NmomentumStart.Pz());
+		fSim_N_start_4mommenta.push_back(NmomentumStart.E());
+        fSim_N_end_4mommenta.push_back(NmomentumEnd.Px());
+		fSim_N_end_4mommenta.push_back(NmomentumEnd.Py());
+		fSim_N_end_4mommenta.push_back(NmomentumEnd.Pz());
+		fSim_N_end_4mommenta.push_back(NmomentumEnd.E());
+    }
+	      /*fSim_N_start_vx = leadingN.Vx(0); // unit?
         fSim_N_start_vy = leadingN.Vy(0);
         fSim_N_start_vz = leadingN.Vz(0);
         fSim_N_end_vx   = leadingN.Vx(Nlast);
@@ -1352,20 +1460,41 @@ fSim_pim_track_length       = -9999.;
 
 	const double NtrackLength = (NpositionEnd - NpositionStart).Rho();
 		fSim_N_track_length = NtrackLength;
+    */
 	}
 
 	if ( fSim_nPionNeutral > 0 ) {
-		const simb::MCParticle& leadingPi0 = *(SimNeutralPions[0]);
 
-		const size_t Pi0numberTrajectoryPoints = leadingPi0.NumberTrajectoryPoints();
+    for (int i = 0; i < fSim_nPionNeutral; i++){
+		  const simb::MCParticle& leadingPi0 = *(SimNeutralPions[i]);
 
-	const int Pi0last = Pi0numberTrajectoryPoints - 1;
-	const TLorentzVector& Pi0positionStart = leadingPi0.Position(0);
-	const TLorentzVector& Pi0positionEnd = leadingPi0.Position(Pi0last);
-	const TLorentzVector& Pi0momentumStart = leadingPi0.Momentum(0);
-	const TLorentzVector& Pi0momentumEnd = leadingPi0.Momentum(Pi0last);
+	    const size_t Pi0numberTrajectoryPoints = leadingPi0.NumberTrajectoryPoints();
 
-	fSim_Pi0_start_vx = leadingPi0.Vx(0); // unit?
+  	  const int Pi0last = Pi0numberTrajectoryPoints - 1;
+	    const TLorentzVector& Pi0positionStart = leadingPi0.Position(0);
+	    const TLorentzVector& Pi0positionEnd = leadingPi0.Position(Pi0last);
+	    const TLorentzVector& Pi0momentumStart = leadingPi0.Momentum(0);
+	    const TLorentzVector& Pi0momentumEnd = leadingPi0.Momentum(Pi0last);
+
+
+        fSim_Pi0_start_4position.push_back(Pi0positionStart.X());
+		fSim_Pi0_start_4position.push_back(Pi0positionStart.Y());
+		fSim_Pi0_start_4position.push_back(Pi0positionStart.Z());
+		fSim_Pi0_start_4position.push_back(Pi0positionStart.T());
+        fSim_Pi0_end_4position.push_back(Pi0positionEnd.X());
+		fSim_Pi0_end_4position.push_back(Pi0positionEnd.Y());
+		fSim_Pi0_end_4position.push_back(Pi0positionEnd.Z());
+		fSim_Pi0_end_4position.push_back(Pi0positionEnd.T());
+        fSim_Pi0_start_4mommenta.push_back(Pi0momentumStart.Px());
+		fSim_Pi0_start_4mommenta.push_back(Pi0momentumStart.Py());
+		fSim_Pi0_start_4mommenta.push_back(Pi0momentumStart.Pz());
+		fSim_Pi0_start_4mommenta.push_back(Pi0momentumStart.E());
+        fSim_Pi0_end_4mommenta.push_back(Pi0momentumEnd.Px());
+		fSim_Pi0_end_4mommenta.push_back(Pi0momentumEnd.Py());
+		fSim_Pi0_end_4mommenta.push_back(Pi0momentumEnd.Pz());
+		fSim_Pi0_end_4mommenta.push_back(Pi0momentumEnd.E());
+    }
+	/*fSim_Pi0_start_vx = leadingPi0.Vx(0); // unit?
         fSim_Pi0_start_vy = leadingPi0.Vy(0);
         fSim_Pi0_start_vz = leadingPi0.Vz(0);
         fSim_Pi0_end_vx   = leadingPi0.Vx(Pi0last);
@@ -1375,10 +1504,10 @@ fSim_pim_track_length       = -9999.;
         fSim_Pi0_start_py = leadingPi0.Py(0);
         fSim_Pi0_start_pz = leadingPi0.Pz(0);
         fSim_Pi0_start_E  = leadingPi0.E(0);
-        fSim_Pi0_end_px   = leadingPi0.Px(Nlast);
-        fSim_Pi0_end_py   = leadingPi0.Py(Nlast);
-        fSim_Pi0_end_pz   = leadingPi0.Pz(Nlast);
-        fSim_Pi0_end_E    = leadingPi0.E(Nlast);
+        fSim_Pi0_end_px   = leadingPi0.Px(Pi0last);
+        fSim_Pi0_end_py   = leadingPi0.Py(Pi0last);
+        fSim_Pi0_end_pz   = leadingPi0.Pz(Pi0last);
+        fSim_Pi0_end_E    = leadingPi0.E(Pi0last);
 
         Pi0positionStart.GetXYZT(fSim_Pi0_start_4position);
         Pi0positionEnd.GetXYZT(fSim_Pi0_end_4position);
@@ -1387,8 +1516,222 @@ fSim_pim_track_length       = -9999.;
 
 	const double Pi0trackLength = (Pi0positionEnd - Pi0positionStart).Rho();
 		fSim_Pi0_track_length = Pi0trackLength;
+    */
 	}
-      //
+
+  if (fSim_nPim > 0){
+    for (int i = 0; i < fSim_nPim; i++){
+     const simb::MCParticle& Pimvecs = *(SimPim[i]);
+        
+      const size_t pimnumberTrajectoryPoints = Pimvecs.NumberTrajectoryPoints();
+
+	    const int pimlast = pimnumberTrajectoryPoints - 1;
+	    const TLorentzVector& pimpositionStart = Pimvecs.Position(0);
+	    const TLorentzVector& pimpositionEnd = Pimvecs.Position(pimlast);
+	    const TLorentzVector& pimmomentumStart = Pimvecs.Momentum(0);
+	    const TLorentzVector& pimmomentumEnd = Pimvecs.Momentum(pimlast);
+
+        fSim_pim_start_4position.push_back(pimpositionStart.X());
+		fSim_pim_start_4position.push_back(pimpositionStart.Y());
+		fSim_pim_start_4position.push_back(pimpositionStart.Z());
+		fSim_pim_start_4position.push_back(pimpositionStart.T());
+        fSim_pim_end_4position.push_back(pimpositionEnd.X());
+		fSim_pim_end_4position.push_back(pimpositionEnd.Y());
+		fSim_pim_end_4position.push_back(pimpositionEnd.Z());
+		fSim_pim_end_4position.push_back(pimpositionEnd.Y());
+        fSim_pim_start_4mommenta.push_back(pimmomentumStart.Px());
+		fSim_pim_start_4mommenta.push_back(pimmomentumStart.Py());
+		fSim_pim_start_4mommenta.push_back(pimmomentumStart.Pz());
+		fSim_pim_start_4mommenta.push_back(pimmomentumStart.E());
+        fSim_pim_end_4mommenta.push_back(pimmomentumEnd.Px());
+		fSim_pim_end_4mommenta.push_back(pimmomentumEnd.Py());
+		fSim_pim_end_4mommenta.push_back(pimmomentumEnd.Pz());
+		fSim_pim_end_4mommenta.push_back(pimmomentumEnd.E());
+    }
+
+       /* fSim_pim_start_vx = Pimvecs.Vx(0); // unit?
+        fSim_pim_start_vy = Pimvecs.Vy(0);
+        fSim_pim_start_vz = Pimvecs.Vz(0);
+        fSim_pim_end_vx   = Pimvecs.Vx(pimlast);
+        fSim_pim_end_vy   = Pimvecs.Vy(pimlast);
+        fSim_pim_end_vz   = Pimvecs.Vz(pimlast);
+        fSim_pim_start_px = Pimvecs.Px(0);
+        fSim_pim_start_py = Pimvecs.Py(0);
+        fSim_pim_start_pz = Pimvecs.Pz(0);
+        fSim_pim_start_E  = Pimvecs.E(0);
+        fSim_pim_end_px   = Pimvecs.Px(pimlast);
+        fSim_pim_end_py   = Pimvecs.Py(pimlast);
+        fSim_pim_end_pz   = Pimvecs.Pz(pimlast);
+        fSim_pim_end_E    = Pimvecs.E(pimlast);
+
+	const double pimtrackLength = (pimpositionEnd - pimpositionStart).Rho();
+		fSim_pim_track_length = pimtrackLength;
+    */
+  }
+
+  if (fSim_nPip > 0){
+    for (int i = 0; i < fSim_nPip; i++){
+      const simb::MCParticle& Pipvecs = *(SimPip[i]);
+        
+      const size_t pipnumberTrajectoryPoints = Pipvecs.NumberTrajectoryPoints();
+
+	    const int piplast = pipnumberTrajectoryPoints - 1;
+	    const TLorentzVector& pippositionStart = Pipvecs.Position(0);
+	    const TLorentzVector& pippositionEnd = Pipvecs.Position(piplast);
+	    const TLorentzVector& pipmomentumStart = Pipvecs.Momentum(0);
+	    const TLorentzVector& pipmomentumEnd = Pipvecs.Momentum(piplast);
+
+        fSim_pip_start_4position.push_back(pippositionStart.X());
+		fSim_pip_start_4position.push_back(pippositionStart.Y());
+		fSim_pip_start_4position.push_back(pippositionStart.Z());
+		fSim_pip_start_4position.push_back(pippositionStart.T());
+        fSim_pip_end_4position.push_back(pippositionEnd.X());
+		fSim_pip_end_4position.push_back(pippositionEnd.Y());
+		fSim_pip_end_4position.push_back(pippositionEnd.Z());
+		fSim_pip_end_4position.push_back(pippositionEnd.T());
+        fSim_pip_start_4mommenta.push_back(pipmomentumStart.Px());
+		fSim_pip_start_4mommenta.push_back(pipmomentumStart.Py());
+		fSim_pip_start_4mommenta.push_back(pipmomentumStart.Pz());
+		fSim_pip_start_4mommenta.push_back(pipmomentumStart.E());
+        fSim_pip_end_4mommenta.push_back(pipmomentumEnd.Px());
+		fSim_pip_end_4mommenta.push_back(pipmomentumEnd.Py());
+		fSim_pip_end_4mommenta.push_back(pipmomentumEnd.Pz());
+		fSim_pip_end_4mommenta.push_back(pipmomentumEnd.E());
+    }
+
+      /*  fSim_pip_start_vx = Pipvecs.Vx(0); // unit?
+        fSim_pip_start_vy = Pipvecs.Vy(0);
+        fSim_pip_start_vz = Pipvecs.Vz(0);
+        fSim_pip_end_vx   = Pipvecs.Vx(piplast);
+        fSim_pip_end_vy   = Pipvecs.Vy(piplast);
+        fSim_pip_end_vz   = Pipvecs.Vz(piplast);
+        fSim_pip_start_px = Pipvecs.Px(0);
+        fSim_pip_start_py = Pipvecs.Py(0);
+        fSim_pip_start_pz = Pipvecs.Pz(0);
+        fSim_pip_start_E  = Pipvecs.E(0);
+        fSim_pip_end_px   = Pipvecs.Px(piplast);
+        fSim_pip_end_py   = Pipvecs.Py(piplast);
+        fSim_pip_end_pz   = Pipvecs.Pz(piplast);
+        fSim_pip_end_E    = Pipvecs.E(piplast);
+
+
+	const double piptrackLength = (pippositionEnd - pippositionStart).Rho();
+		fSim_pip_track_length = piptrackLength;
+    */
+  }
+	    std::string combined_string = "";
+	    std::string primary_particle = "";
+	    std::string daughter_particle = "";
+	    std::string daughter_particles = "";
+	    unsigned long long combined_int = 0;
+	    double daughter_begin_sum = 0;
+	    double primary_end_energy = 0;
+	    for(size_t k = 0; k < fSimP_TrackID_vec.size(); k++){
+		    	switch(fSimP_PDG_vec[k]){
+				        case 22: primary_particle = "0";
+                                                break;
+                                        case 11: primary_particle = "1";
+                                                break;
+                                        case -11: primary_particle = "2";
+                                                break;
+                                        case 13: primary_particle = "3";
+                                                break;
+                                        case -13: primary_particle = "4";
+                                                break;
+                                        case 211: primary_particle = "5";
+                                                break;
+                                        case -211: primary_particle = "6";
+                                                break;
+                                        case 2212: primary_particle = "7";
+                                                break;
+                                        case 2112: primary_particle = "8";
+                                                break;
+                                        case 1000180400: primary_particle = "9";
+                                                break;
+                                        default: break;
+						}
+			//combined_string += primary_particle;
+			const simb::MCParticle& primaryVec = *(SimParticles[k]);
+			const size_t NPrimaryPoints = primaryVec.NumberTrajectoryPoints();
+			//const int primary_end = NPrimaryPoints - 1;
+			//const TLorentzVector& primary_end_4vector = primaryVec.Momentum(primary_end);
+			//double primary_end_energy = primary_end_4vector.E();
+			//if(primary_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){
+			//	primary_end_energy = primary_end_energy - primaryVec.Mass();
+			//}
+			combined_string += primary_particle;
+		for(size_t j = 0; j < fSimP_Mom_vec.size(); j++){
+			if(fSimP_Mom_vec[j] == fSimP_TrackID_vec[k]){
+				switch(fSimP_PDG_vec[j]){
+					case 22: daughter_particle = "0";
+						break;
+					case 11: daughter_particle = "1";
+						break;
+					case -11: daughter_particle = "2";
+						break;
+					case 13: daughter_particle = "3";
+						break;
+					case -13: daughter_particle = "4";
+						break;
+					case 211: daughter_particle = "5";
+						break;
+					case -211: daughter_particle = "6";
+						break;
+                               		case 2212: daughter_particle = "7";
+                                        	break;
+                               		case 2112: daughter_particle = "8";
+                          		        break;
+					case 1000180400: daughter_particle = "9";
+						break;	
+					default: break;
+				}
+			const simb::MCParticle& daughterVec = *(SimParticles[j]);
+			for(size_t l = 0; l <= NPrimaryPoints; l++){
+				const TLorentzVector& primary_position = primaryVec.Position(l);
+				const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
+				const TLorentzVector& daughter_position_start = daughterVec.Position(0);
+				if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
+				primary_end_energy = primary_momentum.E();
+				if(primary_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){
+					primary_end_energy = primary_end_energy - primaryVec.Mass();
+					}
+				
+				daughter_particles += daughter_particle;
+				daughter_particle= "";
+			
+			const TLorentzVector& daughter_begin_4vector = daughterVec.Momentum(0);
+			double daughter_begin_energy = daughter_begin_4vector.E();
+			if(daughter_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){
+				daughter_begin_energy = daughter_begin_energy - daughterVec.Mass();
+			}
+			daughter_begin_sum += daughter_begin_energy;
+			daughter_begin_energy = 0;
+		}
+	    }
+	    }
+	    }
+                                std::sort(daughter_particles.begin(), daughter_particles.end(), [](char a, char b){
+                                return std::stoull(std::string(1,a)) < std::stoull(std::string(1, b));
+                        });
+			combined_string += daughter_particles;
+			
+		  if(combined_string.length() <= 19 && combined_string.length() > 1){
+		    fP_int_class_string.push_back(combined_string);
+		    combined_int = std::stoull(combined_string);
+		    fP_int_class.push_back(combined_int);
+			std::cout << combined_string << std::endl;
+		    fSim_primary_end_energy.push_back(primary_end_energy);
+		    fSim_daughter_begin_energy.push_back(daughter_begin_sum);
+			}
+		    combined_int = 0;
+		    daughter_particles = "";
+		    primary_particle = "";
+		    combined_string = "";
+		    daughter_begin_sum = 0;
+		    primary_end_energy = 0;
+	    
+	    }
+     
       // Calculate sim hadronic deposit energy
       //
 
