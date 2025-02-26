@@ -253,7 +253,9 @@ namespace lar {
 
 // For now these just store the first Particle created's Energy, since each particle would be far more complex
 
-      double fSim_P_start_vx;           
+// Each Particle Processed's vertexes, momenta, and four vectors
+
+      double fSim_P_start_vx;
       double fSim_P_start_vy;           
       double fSim_P_start_vz;           
       std::vector<double> fSim_P_start_4position;
@@ -353,8 +355,9 @@ namespace lar {
       std::vector<double> fSim_pim_end_4mommenta;  
       double fSim_pim_track_length;      
 
-      std::vector<double> fSim_primary_end_energy;
-      std::vector<double> fSim_daughter_begin_energy;
+
+      std::vector<double> fSim_primary_end_energy;	//Primary particle in interaction's final energy
+      std::vector<double> fSim_daughter_begin_energy;	//Sum of daughter particle's energy per interaction 
 
       double fSim_mu_Edep_b2;                // [MeV]
       double fSim_n_Edep_b2;                // [MeV] Energy Deposit of neutron
@@ -1359,6 +1362,8 @@ namespace lar {
       
       }// End if muon exists
 
+//Collecting four-vector information for each particle
+
 	if ( fSim_nProton > 0 ) {
     for (int i = 0; i < fSim_nProton; i++){
 		  const simb::MCParticle& leadingP = *(SimProtons[i]);
@@ -1619,49 +1624,54 @@ namespace lar {
 		fSim_pip_track_length = piptrackLength;
     */
   }
-	    std::string combined_string = "";
-	    std::string primary_particle = "";
-	    std::string daughter_particle = "";
-	    std::string daughter_particles = "";
+  //End four-vector collection
+  
+  //Begin interaction classification and energy calculation
+  
+	    std::string combined_string = ""; 		//Stores the interaction classification code
+	    std::string primary_particle = ""; 		//Primary particle of interaction
+	    std::string daughter_particle = "";		//Current daughter particle being processed
+	    std::string daughter_particles = "";	//String of daughter particles per primary particle
 	    unsigned long long combined_int = 0;
 	    double daughter_begin_sum = 0;
 	    double primary_end_energy = 0;
+//Loop through particle list and classify primary particle
 	    for(size_t k = 0; k < fSimP_TrackID_vec.size(); k++){
 		    	switch(fSimP_PDG_vec[k]){
-				        case 22: primary_particle = "0";
+				        case 22: primary_particle = "0";	//photon
                                                 break;
-                                        case 11: primary_particle = "1";
+                                        case 11: primary_particle = "1";	//electron
                                                 break;
-                                        case -11: primary_particle = "2";
+                                        case -11: primary_particle = "2";	//positron
                                                 break;
-                                        case 13: primary_particle = "3";
+                                        case 13: primary_particle = "3";	//muon 
                                                 break;
-                                        case -13: primary_particle = "4";
+                                        case -13: primary_particle = "4";	//mu+
                                                 break;
-                                        case 211: primary_particle = "5";
+                                        case 211: primary_particle = "5";	//pi+
+                                                break;4
+                                        case -211: primary_particle = "6";	//pi-
                                                 break;
-                                        case -211: primary_particle = "6";
+                                        case 2212: primary_particle = "7";	//proton
                                                 break;
-                                        case 2212: primary_particle = "7";
+                                        case 2112: primary_particle = "8";	//neutron
                                                 break;
-                                        case 2112: primary_particle = "8";
-                                                break;
-                                        case 1000180400: primary_particle = "9";
+                                        case 1000180400: primary_particle = "9"; //Argon nucleus
                                                 break;
                                         default: break;
 						}
-			//combined_string += primary_particle;
-			const simb::MCParticle& primaryVec = *(SimParticles[k]);
-			const size_t NPrimaryPoints = primaryVec.NumberTrajectoryPoints();
-			//const int primary_end = NPrimaryPoints - 1;
-			//const TLorentzVector& primary_end_4vector = primaryVec.Momentum(primary_end);
-			//double primary_end_energy = primary_end_4vector.E();
-			//if(primary_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){
-			//	primary_end_energy = primary_end_energy - primaryVec.Mass();
-			//}
+			const simb::MCParticle& primaryVec = *(SimParticles[k]);	//Store primary particle's MCParticle information
+			const size_t NPrimaryPoints = primaryVec.NumberTrajectoryPoints();	//Number of trajectory points for the primary particle
+			/*const int primary_end = NPrimaryPoints - 1;
+			const TLorentzVector& primary_end_4vector = primaryVec.Momentum(primary_end);
+			double primary_end_energy = primary_end_4vector.E();
+			if(primary_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){
+				primary_end_energy = primary_end_energy - primaryVec.Mass();
+			}*/
 			combined_string += primary_particle;
+	if(primary_particle != "8"){						//Exclude neutron interactions for now
 		for(size_t j = 0; j < fSimP_Mom_vec.size(); j++){
-			if(fSimP_Mom_vec[j] == fSimP_TrackID_vec[k]){
+			if(fSimP_Mom_vec[j] == fSimP_TrackID_vec[k]){		//Loop through particles again to see which particles are tagged with primary as mom
 				switch(fSimP_PDG_vec[j]){
 					case 22: daughter_particle = "0";
 						break;
@@ -1685,32 +1695,29 @@ namespace lar {
 						break;	
 					default: break;
 				}
-			const simb::MCParticle& daughterVec = *(SimParticles[j]);
+			const simb::MCParticle& daughterVec = *(SimParticles[j]);	//Daughter particle information
 			for(size_t l = 0; l <= NPrimaryPoints; l++){
-				const TLorentzVector& primary_position = primaryVec.Position(l);
+				const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
 				const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
-				const TLorentzVector& daughter_position_start = daughterVec.Position(0);
+				const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
 				if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
-				primary_end_energy = primary_momentum.E();
-				if(primary_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){
-					primary_end_energy = primary_end_energy - primaryVec.Mass();
-					}
+				primary_end_energy = primary_momentum.E();	//Store Primary energy
 				
-				daughter_particles += daughter_particle;
+				daughter_particles += daughter_particle;	//Store daughter
 				daughter_particle= "";
 			
 			const TLorentzVector& daughter_begin_4vector = daughterVec.Momentum(0);
 			double daughter_begin_energy = daughter_begin_4vector.E();
-			if(daughter_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){
+			if(daughter_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){		//Subtract rest mass if not pion
 				daughter_begin_energy = daughter_begin_energy - daughterVec.Mass();
 			}
-			daughter_begin_sum += daughter_begin_energy;
+			daughter_begin_sum += daughter_begin_energy;		//sum daughter particle's energy
 			daughter_begin_energy = 0;
 		}
 	    }
 	    }
 	    }
-                                std::sort(daughter_particles.begin(), daughter_particles.end(), [](char a, char b){
+                                std::sort(daughter_particles.begin(), daughter_particles.end(), [](char a, char b){	//Sort daughter code from low to high mass
                                 return std::stoull(std::string(1,a)) < std::stoull(std::string(1, b));
                         });
 			combined_string += daughter_particles;
@@ -1722,6 +1729,7 @@ namespace lar {
 			std::cout << combined_string << std::endl;
 		    fSim_primary_end_energy.push_back(primary_end_energy);
 		    fSim_daughter_begin_energy.push_back(daughter_begin_sum);
+			}
 			}
 		    combined_int = 0;
 		    daughter_particles = "";
