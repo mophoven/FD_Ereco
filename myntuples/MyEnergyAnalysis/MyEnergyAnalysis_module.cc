@@ -50,6 +50,11 @@
 
 // An outside package call this module like lar::example::MyEnergyAnalysis
 
+namespace {
+
+  double DetectorDiagonal(geo::GeometryCore cosnt& geome);
+
+}
 namespace lar {
   namespace example {
 
