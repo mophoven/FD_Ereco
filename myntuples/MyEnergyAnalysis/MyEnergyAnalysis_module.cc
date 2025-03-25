@@ -132,7 +132,8 @@ namespace lar {
       int fRun;    // number of the run being processed
       int fSubRun; // number of the sub-run being processed
 
-      
+      geo::GeometryCore const* = fGeometryService;
+      double fElectronsToGeV;
     }; // class MyEnergyAnalysis
 
     // END MyEnergyAnalysis group
@@ -222,6 +223,7 @@ namespace lar {
       }
 
      std::vector<const simb::MCParticle*> SimParticles;
+     art::Handle<std::vector<simb::MCParticle>> particleHandle;
       // Loop over the list of particles in the event
       // GENIE: primary process; GEANT4: primary+secondary
       for ( auto const& particle : (*particleHandle) ) {
@@ -232,12 +234,12 @@ namespace lar {
 
       
       std::vector<int> daughters;
-      for(size_t ip1 = 0, ip1 < SimParticles.size(), ip1++){
+      for(size_t ip1 = 0; ip1 < SimParticles.size(); ip1++){
         if(SimParticles(ip1).NumberDaughters() != 0){
-          for(size_t ip2 = 0, ip2 < SimParticles.size(), ip2++){
+          for(size_t ip2 = 0; ip2 < SimParticles.size(); ip2++){
             if(SimParticles(ip2).Mother() == SimParticles(ip1).TrackId() && (SimParticles(ip1).EndX() - SimParticles(ip2).Vx(0)) < 0.1){
               std::cout << SimParticles(ip2).TrackId() << std::endl;
-             daughters.push_back(SimParticles(ip2).TrackId());
+             daughters.push_back(ip2);
           }
           }
         }
