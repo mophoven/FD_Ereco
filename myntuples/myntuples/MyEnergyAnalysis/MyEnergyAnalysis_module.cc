@@ -1627,7 +1627,7 @@ namespace lar {
   //End four-vector collection
   
   //Begin interaction classification and energy calculation
-  
+  /*
 	    std::string combined_string = ""; 		//Stores the interaction classification code
 	    std::string primary_particle = ""; 		//Primary particle of interaction
 	    std::string daughter_particle = "";		//Current daughter particle being processed
@@ -1667,7 +1667,7 @@ namespace lar {
 			double primary_end_energy = primary_end_4vector.E();
 			if(primary_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){
 				primary_end_energy = primary_end_energy - primaryVec.Mass();
-			}*/
+			}
 			combined_string += primary_particle;
 	if(primary_particle != "8"){						//Exclude neutron interactions for now
 		for(size_t j = 0; j < fSimP_Mom_vec.size(); j++){
@@ -1739,7 +1739,7 @@ namespace lar {
 		    primary_end_energy = 0;
 	    
 	    }
-     
+     */
       // Calculate sim hadronic deposit energy
       //
 
