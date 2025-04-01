@@ -216,7 +216,8 @@ namespace lar {
       // There could be more than one MCTruth, e.g., you might have multiple neutrino interactions per spill,
       // in which case you’d run GENIE multiple times and have one MCTruth per interaction.
       // Or you might want one MCTruth information for the GENIE event and another that overlays cosmic simulation or data onto the same event
-      
+      art::Handle<std::vector<simb::MCParticle>> particleHandle;
+
       if ( !event.getByLabel(fSimulationProducerLabel, particleHandle) ) {
         // If no MCParticles in an event, throw an exception to force this module to stop.
         throw cet::exception("MyEnergyAnalysis") << " No simb::MCParticle objects in this event - " << " Line " << __LINE__ << " in file " << __FILE__ << std::endl;
