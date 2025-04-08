@@ -52,7 +52,7 @@
 
 namespace {
 
-  double DetectorDiagonal(geo::GeometryCore cosnt& geom);
+  double DetectorDiagonal(geo::GeometryCore const& geom);
 
 }
 namespace lar {
