@@ -36,7 +36,7 @@ Now we begin the build<br/>
 ```mrb uc```<br/>
 ```cd ${MRB_BUILDDIR}```<br/>
 ```mrb z```<br/>
-```mrb setenv```<br/>
+```mrbsetenv```<br/>
 ```mrb b```<br/>
 
 Build should be successful, then to test, run on the two files pre-loaded into the .fcl file<br/>
@@ -52,5 +52,11 @@ Setup environment inside SL7 container<br/>
 ```setup mrb v4_04_06```<br/>
 ```setup dunetpc v09_22_02 -q e19:debug```<br/>
 ```source /exp/dune/app/users/<your_username>/EReco/localProducts_larsoft_v09_22_02_debug_e19/setup```<br/>
+
+**If changes are made to MyEnergyAnalysis_module.cc**
+```cd ${MRB_BUILDDIR}```<br/>
+```mrb z```<br/>
+```mrb b```<br/>
+
 
 
