@@ -958,7 +958,6 @@ namespace lar {
 	    std::string daughter_particles = "";	//String of daughter particles per primary particle
 	    unsigned long long combined_int = 0;
 	    double daughter_begin_sum = 0;
-	    double primary_end_energy = 0;
 //Loop through particle list and classify primary particle
 	    for(size_t k = 0; k < fSimP_TrackID_vec.size(); k++){
 		    	switch(fSimP_PDG_vec[k]){
@@ -984,11 +983,12 @@ namespace lar {
                   break;
                 default: break;
 						}
+      double primary_end_energy = 0;
 			const simb::MCParticle& primaryVec = *(SimParticles[k]);	//Store primary particle's MCParticle information
 			const size_t NPrimaryPoints = primaryVec.NumberTrajectoryPoints();	//Number of trajectory points for the primary particle
 			const int primary_end = NPrimaryPoints - 1;
 			const TLorentzVector& primary_end_4vector = primaryVec.Momentum(primary_end);
-			double primary_end_energy = primary_end_4vector.E();
+			  primary_end_energy = primary_end_4vector.E();
 			if(primary_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){
 				primary_end_energy = primary_end_energy - primaryVec.Mass();
 			}
@@ -1038,8 +1038,9 @@ namespace lar {
 			daughter_begin_sum += daughter_begin_energy;		//sum daughter particle's energy
 			daughter_begin_energy = 0;
 		}
+  }
 	    }
-	    }
+	    
 	    }
           std::sort(daughter_particles.begin(), daughter_particles.end(), [](char a, char b){	//Sort daughter code from low to high mass
             return std::stoull(std::string(1,a)) < std::stoull(std::string(1, b));
@@ -1062,7 +1063,7 @@ namespace lar {
 		    daughter_begin_sum = 0;
 		    primary_end_energy = 0;
 	    
-	    }
+	    
      
       // Calculate sim hadronic deposit energy
       //
