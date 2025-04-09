@@ -60,7 +60,7 @@ namespace {
   double DetectorDiagonal(geo::GeometryCore const& geom);
 
   // Sort MC particles based on its start momentum P(0)
-  bool MomentumOrderMCParticle(const simb::MCParticle*, const simb::MCParticle*);
+  //bool MomentumOrderMCParticle(const simb::MCParticle*, const simb::MCParticle*);
 
   // Ancestor Mother is primary lepton
   bool IsAncestorMotherPrimaryLep(const simb::MCParticle&, int, std::map<int, const simb::MCParticle*>);
