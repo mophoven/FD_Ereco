@@ -958,6 +958,7 @@ namespace lar {
 	    std::string daughter_particles = "";	//String of daughter particles per primary particle
 	    unsigned long long combined_int = 0;
 	    double daughter_begin_sum = 0;
+      double primary_end_energy = 0;
 //Loop through particle list and classify primary particle
 	    for(size_t k = 0; k < fSimP_TrackID_vec.size(); k++){
 		    	switch(fSimP_PDG_vec[k]){
@@ -983,7 +984,6 @@ namespace lar {
                   break;
                 default: break;
 						}
-      double primary_end_energy = 0;
 			const simb::MCParticle& primaryVec = *(SimParticles[k]);	//Store primary particle's MCParticle information
 			const size_t NPrimaryPoints = primaryVec.NumberTrajectoryPoints();	//Number of trajectory points for the primary particle
 			const int primary_end = NPrimaryPoints - 1;
@@ -1021,7 +1021,7 @@ namespace lar {
 				}
 			const simb::MCParticle& daughterVec = *(SimParticles[j]);	//Daughter particle information
 			for(size_t l = 0; l <= NPrimaryPoints; l++){
-				const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
+				//const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
 				const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
 				//const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
 				//if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
@@ -1211,9 +1211,9 @@ namespace {
     return std::sqrt(cet::sum_of_squares(length, width, height));
   }
 
-  bool MomentumOrderMCParticle(const simb::MCParticle* p1, const simb::MCParticle* p2) {
-    return ( p1->P(0) > p2->P(0) );
-  }
+  //bool MomentumOrderMCParticle(const simb::MCParticle* p1, const simb::MCParticle* p2) {
+  //  return ( p1->P(0) > p2->P(0) );
+  //}
 
   // If this returns true, then the energy deposit is associated with primary lepton
   bool IsAncestorMotherPrimaryLep(const simb::MCParticle& p1, int primarylep_trkID, std::map<int, const simb::MCParticle*> particleMap) {
