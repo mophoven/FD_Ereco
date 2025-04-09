@@ -1025,7 +1025,7 @@ namespace lar {
 				//const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
 				//const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
 				//if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
-				primary_end_energy = primary_momentum.E();	//Store Primary energy
+				//primary_end_energy = primary_momentum.E();	//Store Primary energy
 				
 				daughter_particles += daughter_particle;	//Store daughter
 				daughter_particle= "";
