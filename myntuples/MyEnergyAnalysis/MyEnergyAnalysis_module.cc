@@ -234,6 +234,8 @@ namespace lar {
 // For now these just store the first Particle created's Energy, since each particle would be far more complex
 
 // Each Particle Processed's vertexes, momenta, and four vectors
+
+      int fSim_nParticles;
     
       std::vector<double> fSim_start_4position;
       std::vector<double> fSim_end_4position;                 
@@ -415,11 +417,12 @@ namespace lar {
       // GEANT level neutrino E
       fNtuple->Branch("Sim_numu_E",               &fSim_numu_E,             "Sim_numu_E/D");
 
-      fNtuple->Branch("Sim_start_4position",   &fSim_Pi0_start_4position);
-      fNtuple->Branch("Sim_end_4position",     &fSim_Pi0_end_4position);
-      fNtuple->Branch("Sim_start_4mommenta",   &fSim_Pi0_start_4mommenta);
-      fNtuple->Branch("Sim_end_4mommenta",     &fSim_Pi0_end_4mommenta);
-      fNtuple->Branch("Sim_track_length",      &fSim_Pi0_track_length,    "Sim_Pi0_track_length/D");
+      fNtuple->Branch("Sim_nParticles",        &fSim_nParticles);
+
+      fNtuple->Branch("Sim_start_4position",   &fSim_start_4position);
+      fNtuple->Branch("Sim_end_4position",     &fSim_end_4position);
+      fNtuple->Branch("Sim_start_4mommenta",   &fSim_start_4mommenta);
+      fNtuple->Branch("Sim_end_4mommenta",     &fSim_end_4mommenta);
 
       fNtuple->Branch("Sim_primary_end_energy",    &fSim_primary_end_energy);
       fNtuple->Branch("Sim_daughter_begin_energy", &fSim_daughter_begin_energy);
@@ -494,7 +497,6 @@ namespace lar {
       fNuvtxz_truth  	        	 = -9999.;
       fSim_numu_E                = 0.;
 	   
-      fSim_track_length       = -9999.;
 
       fSim_LepE                  = 0.;
       fSim_HadE                  = 0.;
@@ -558,6 +560,8 @@ namespace lar {
       fSim_pi0_Edep_b2       = 0.;
       fSim_Other_Edep_b2     = 0.;
       fSim_hadronic_Edep_b2  = 0.;
+
+      fSim_nParticles        = 0;
 
       fSim_start_4position.clear();
       fSim_end_4position.clear();
@@ -918,7 +922,7 @@ namespace lar {
     for (int i = 0; i < fSim_nParticles; i++){
 		  const simb::MCParticle& particleVec = *(SimParticles[i]);
 
-	    const size_t Ntrajpoints = ParticleVec.NumberTrajectoryPoints();
+	    const size_t Ntrajpoints = particleVec.NumberTrajectoryPoints();
 
   	  const int last = Ntrajpoints - 1;
 	    const TLorentzVector& positionStart = particleVec.Position(0);
@@ -1019,8 +1023,8 @@ namespace lar {
 			for(size_t l = 0; l <= NPrimaryPoints; l++){
 				const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
 				const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
-				const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
-				if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
+				//const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
+				//if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
 				primary_end_energy = primary_momentum.E();	//Store Primary energy
 				
 				daughter_particles += daughter_particle;	//Store daughter
@@ -1037,9 +1041,9 @@ namespace lar {
 	    }
 	    }
 	    }
-                                std::sort(daughter_particles.begin(), daughter_particles.end(), [](char a, char b){	//Sort daughter code from low to high mass
-                                return std::stoull(std::string(1,a)) < std::stoull(std::string(1, b));
-                        });
+          std::sort(daughter_particles.begin(), daughter_particles.end(), [](char a, char b){	//Sort daughter code from low to high mass
+            return std::stoull(std::string(1,a)) < std::stoull(std::string(1, b));
+            });
 			combined_string += daughter_particles;
 			
 		  if(combined_string.length() <= 19 && combined_string.length() > 1){
