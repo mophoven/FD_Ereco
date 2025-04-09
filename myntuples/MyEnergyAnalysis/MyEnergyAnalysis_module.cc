@@ -1020,9 +1020,9 @@ namespace lar {
 					default: break;
 				}
 			const simb::MCParticle& daughterVec = *(SimParticles[j]);	//Daughter particle information
-			for(size_t l = 0; l <= NPrimaryPoints; l++){
+			//for(size_t l = 0; l <= NPrimaryPoints; l++){
 				//const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
-				const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
+				//const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
 				//const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
 				//if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
 				primary_end_energy = primary_momentum.E();	//Store Primary energy
@@ -1034,14 +1034,14 @@ namespace lar {
 			double daughter_begin_energy = daughter_begin_4vector.E();
 			if(daughter_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9"){		//Subtract rest mass if not pion
 				daughter_begin_energy = daughter_begin_energy - daughterVec.Mass();
-			}
+      }
 			daughter_begin_sum += daughter_begin_energy;		//sum daughter particle's energy
 			daughter_begin_energy = 0;
 		}
   }
-	    }
+    }
 	    
-	    }
+	    
           std::sort(daughter_particles.begin(), daughter_particles.end(), [](char a, char b){	//Sort daughter code from low to high mass
             return std::stoull(std::string(1,a)) < std::stoull(std::string(1, b));
             });
@@ -1055,14 +1055,14 @@ namespace lar {
 		    fSim_primary_end_energy.push_back(primary_end_energy);
 		    fSim_daughter_begin_energy.push_back(daughter_begin_sum);
 			}
-			}
+    
 		    combined_int = 0;
 		    daughter_particles = "";
 		    primary_particle = "";
 		    combined_string = "";
 		    daughter_begin_sum = 0;
 		    primary_end_energy = 0;
-	    
+    }
 	    
      
       // Calculate sim hadronic deposit energy
