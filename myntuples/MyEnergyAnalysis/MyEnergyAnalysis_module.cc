@@ -959,8 +959,10 @@ namespace lar {
 	    unsigned long long combined_int = 0;
 	    double daughter_begin_sum = 0;
       double primary_end_energy = 0;
+      int trkIDsize = fSimP_TrackID_vec.size()
+      int trkIDlast = fSimP_TrackID_vec[trkIDsize]
 //Loop through particle list and classify primary particle
-	    for(size_t k = 0; k < fSimP_TrackID_vec.size(); k++){
+	    for(size_t k = 0; k < trkIDlast; k++){
 		    	switch(fSimP_PDG_vec[k]){
 				        case 22: primary_particle = "0";	//photon
                   break;
@@ -994,7 +996,7 @@ namespace lar {
 			}
 			combined_string += primary_particle;
 	if(primary_particle != "8"){						//Exclude neutron interactions for now
-		for(size_t j = 0; j < fSimP_Mom_vec.size(); j++){
+		for(size_t j = 0; j < trkIDlast; j++){
 			if(fSimP_Mom_vec[j] == fSimP_TrackID_vec[k]){		//Loop through particles again to see which particles are tagged with primary as mom
 				switch(fSimP_PDG_vec[j]){
 					case 22: daughter_particle = "0";
