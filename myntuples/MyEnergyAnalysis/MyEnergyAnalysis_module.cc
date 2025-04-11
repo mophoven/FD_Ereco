@@ -960,7 +960,7 @@ namespace lar {
 	    double daughter_begin_sum = 0;
       double primary_end_energy = 0;
       int trkIDsize = fSimP_TrackID_vec.size();
-      int trkIDlast = fSimP_TrackID_vec[trkIDsize];
+      size_t trkIDlast = fSimP_TrackID_vec[trkIDsize];
 //Loop through particle list and classify primary particle
 	    for(size_t k = 0; k < trkIDlast; k++){
 		    	switch(fSimP_PDG_vec[k]){
