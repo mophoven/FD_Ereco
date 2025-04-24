@@ -803,7 +803,7 @@ namespace lar {
         fSimPDG = particle.PdgCode();
         fSimP_PDG_vec.push_back(fSimPDG);
         fSimP_Mom_vec.push_back(particle.Mother());
-        fSimP_Daughter_vec.push_back(particle.Daughters());
+        fSimP_Daughter_vec.push_back(particle.Daughter());
         fSimP_SC_vec.push_back(particle.StatusCode());
         fSimP_vtx_x_vec.push_back(particle.Vx());
         fSimP_vtx_y_vec.push_back(particle.Vy());
@@ -1025,12 +1025,12 @@ namespace lar {
 					default: break;
 				}
 			const simb::MCParticle& daughterVec = *(SimParticles[j]);	//Daughter particle information
-			for(size_t l = 0; l <= NPrimaryPoints; l++){
-				const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
-				const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
-				const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
-				if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
-				primary_end_energy = primary_momentum.E();	//Store Primary energy
+			//for(size_t l = 0; l <= NPrimaryPoints; l++){
+			//	const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
+			//	const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
+			//	const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
+			//	if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
+			//	primary_end_energy = primary_momentum.E();	//Store Primary energy
 				
 				daughter_particles += daughter_particle;	//Store daughter
 				daughter_particle= "";
