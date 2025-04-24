@@ -1042,7 +1042,7 @@ namespace lar {
       }
 			daughter_begin_sum += daughter_begin_energy;		//sum daughter particle's energy
 			daughter_begin_energy = 0;
-		}
+		//}
   
   }
     }
@@ -1197,7 +1197,7 @@ namespace lar {
 
       fNtuple->Fill();
 
-    }
+    
    } // MyEnergyAnalysis::analyze()
 
     // This macro has to be defined for this module to be invoked from a
