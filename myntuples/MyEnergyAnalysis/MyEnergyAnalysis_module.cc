@@ -175,6 +175,7 @@ namespace lar {
       std::vector<int> EDep_TrackID_vec;
       std::vector<int> fSimP_PDG_vec;
       std::vector<int> fSimP_Mom_vec;
+      std::vector<int> fSimP_Daughter_vec;
       std::vector<int> fSimP_SC_vec;
       std::vector<float> fSimP_vtx_x_vec;
       std::vector<float> fSimP_vtx_y_vec;
@@ -387,6 +388,7 @@ namespace lar {
       fNtuple->Branch("SimP_TrackID_vec",              &fSimP_TrackID_vec);
       fNtuple->Branch("SimP_PDG_vec",                  &fSimP_PDG_vec);
       fNtuple->Branch("SimP_Mom_vec",                  &fSimP_Mom_vec);
+      fNtuple->Branch("SimP_Daughter_vec",             &fSimP_Daughter_vec);
       fNtuple->Branch("SimP_SC_vec",                   &fSimP_SC_vec);
       fNtuple->Branch("SimP_vtx_x_vec",                &fSimP_vtx_x_vec);
       fNtuple->Branch("SimP_vtx_y_vec",                &fSimP_vtx_y_vec);
@@ -540,6 +542,7 @@ namespace lar {
       EDep_TrackID_vec.clear();
       fSimP_PDG_vec.clear();
       fSimP_Mom_vec.clear();
+      fSimP_Daughter_vec.clear();
       fSimP_SC_vec.clear();
       fSimP_vtx_x_vec.clear();
       fSimP_vtx_y_vec.clear();
@@ -800,6 +803,7 @@ namespace lar {
         fSimPDG = particle.PdgCode();
         fSimP_PDG_vec.push_back(fSimPDG);
         fSimP_Mom_vec.push_back(particle.Mother());
+        fSimP_Daughter_vec.push_back(particle.Daughters());
         fSimP_SC_vec.push_back(particle.StatusCode());
         fSimP_vtx_x_vec.push_back(particle.Vx());
         fSimP_vtx_y_vec.push_back(particle.Vy());
@@ -959,7 +963,7 @@ namespace lar {
 	    unsigned long long combined_int = 0;
 	    double daughter_begin_sum = 0;
       double primary_end_energy = 0;
-      int trkIDsize = fSimP_TrackID_vec.size() - 1;
+      int trkIDsize = fSimP_TrackID_vec.size()-1;
 //Loop through particle list and classify primary particle
 	    for(int k = 0; k < trkIDsize; k++){
 		    	switch(fSimP_PDG_vec[k]){
@@ -1021,12 +1025,12 @@ namespace lar {
 					default: break;
 				}
 			const simb::MCParticle& daughterVec = *(SimParticles[j]);	//Daughter particle information
-			//for(size_t l = 0; l <= NPrimaryPoints; l++){
-				//const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
-				//const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
-				//const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
-				//if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
-				//primary_end_energy = primary_momentum.E();	//Store Primary energy
+			for(size_t l = 0; l <= NPrimaryPoints; l++){
+				const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
+				const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
+				const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
+				if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
+				primary_end_energy = primary_momentum.E();	//Store Primary energy
 				
 				daughter_particles += daughter_particle;	//Store daughter
 				daughter_particle= "";
@@ -1039,9 +1043,10 @@ namespace lar {
 			daughter_begin_sum += daughter_begin_energy;		//sum daughter particle's energy
 			daughter_begin_energy = 0;
 		}
+  
   }
     }
-	    
+  }
 	    
           std::sort(daughter_particles.begin(), daughter_particles.end(), [](char a, char b){	//Sort daughter code from low to high mass
             return std::stoull(std::string(1,a)) < std::stoull(std::string(1, b));
@@ -1063,7 +1068,8 @@ namespace lar {
 		    combined_string = "";
 		    daughter_begin_sum = 0;
 		    primary_end_energy = 0;
-    }
+    
+  }
 	    
      
       // Calculate sim hadronic deposit energy
@@ -1191,7 +1197,8 @@ namespace lar {
 
       fNtuple->Fill();
 
-    } // MyEnergyAnalysis::analyze()
+    }
+   } // MyEnergyAnalysis::analyze()
 
     // This macro has to be defined for this module to be invoked from a
     // .fcl file; see MyEnergyAnalysis.fcl for more information.
