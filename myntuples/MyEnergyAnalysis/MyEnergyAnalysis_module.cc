@@ -820,7 +820,7 @@ namespace lar {
         std::vector<int> CurrentDaughters;
         CurrentDaughters.clear();
         if (currentMom == 0){
-          for (size_t i = 0; i < NDaughters; i++){
+          for (int i = 0; i < NDaughters; i++){
             CurrentDaughters.push_back(particle.Daughter(i));
           }
         }
