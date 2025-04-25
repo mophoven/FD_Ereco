@@ -175,7 +175,7 @@ namespace lar {
       std::vector<int> EDep_TrackID_vec;
       std::vector<int> fSimP_PDG_vec;
       std::vector<int> fSimP_Mom_vec;
-      std::vector<int> fSimP_Daughter_vec;
+      std::vector<std::vector<int>> fSimP_Daughter_vec;
       std::vector<int> fSimP_SC_vec;
       std::vector<float> fSimP_vtx_x_vec;
       std::vector<float> fSimP_vtx_y_vec;
@@ -803,7 +803,6 @@ namespace lar {
         fSimPDG = particle.PdgCode();
         fSimP_PDG_vec.push_back(fSimPDG);
         fSimP_Mom_vec.push_back(particle.Mother());
-        fSimP_Daughter_vec.push_back(particle.Daughter());
         fSimP_SC_vec.push_back(particle.StatusCode());
         fSimP_vtx_x_vec.push_back(particle.Vx());
         fSimP_vtx_y_vec.push_back(particle.Vy());
@@ -815,6 +814,18 @@ namespace lar {
         fSimP_E_vec.push_back(particle.E());
         fSimP_M_vec.push_back(particle.Mass());
         fSimP_Ek_vec.push_back(particle.E()-particle.Mass());
+
+        int currentMom = particle.Mother();
+        int NDaughers = particle.NumberDaughers();
+        std::vector<int> CurrentDaughters;
+        CurrentDaughters.clear();
+        if (currentMom == 0){
+          for (size_t i = 0; i < NDaughters; i++){
+            CurrentDaughters.push_back(particle.Daughter(i))
+          }
+        }
+
+        fSimP_Daughter_vec.push_back(CurrentDaughters);
 
         // Take note of primary lepton track id, to be used later
         if ( particle.Process() == "primary" && abs(fSimPDG) == 13 ) {
