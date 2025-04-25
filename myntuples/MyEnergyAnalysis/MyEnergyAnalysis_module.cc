@@ -816,7 +816,7 @@ namespace lar {
         fSimP_Ek_vec.push_back(particle.E()-particle.Mass());
 
         int currentMom = particle.Mother();
-        int NDaughers = particle.NumberDaughers();
+        int NDaughers = particle.NumberDaughters();
         std::vector<int> CurrentDaughters;
         CurrentDaughters.clear();
         if (currentMom == 0){
