@@ -956,12 +956,12 @@ namespace lar {
   //End four-vector collection
 
   //Collecting all Daughters of Each primary
-for(int i; i < fSimP_TrackID_vec.size(); i++){
+for(size_t i; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
   std::vector<int> CurrentDaughters;
   CurrentDaughters.clear();
   if (currentMom == 0){
-    int primaryID = fSimP_TrackID_vec[i]
+    int primaryID = fSimP_TrackID_vec[i];
     getDescendents(primaryID, fSimP_Mom_vec, fSimP_TrackID_vec, CurrentDaughters);
     fSimP_Daughter_vec.push_back(CurrentDaughters);
   }
@@ -1357,7 +1357,7 @@ namespace {
     }
 
     void getDescendents(int motherID, const std::vector<int>& fSimP_Mom_vec, std::vector<int>& fSimP_TrackID_vec, std::vector<int>& primaryDaughters){
-      for (int i = 0; i < simMomVec.size(); i++){
+      for (size_t i = 0; i < simMomVec.size(); i++){
         if(simMomVec[i] == motherID){
           int daughterID = simTrackID[i];
           primaryDaughters.push_back(daughterID);
