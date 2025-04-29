@@ -960,7 +960,7 @@ namespace lar {
   // Collecting all Daughters of Each primary
  
 
-for(size_t i; i < fSimP_TrackID_vec.size(); i++){
+for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
   std::vector<int> CurrentDaughters;
   CurrentDaughters.clear();
