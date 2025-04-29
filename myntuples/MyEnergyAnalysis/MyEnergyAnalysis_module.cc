@@ -956,12 +956,12 @@ namespace lar {
   //End four-vector collection
 
   //Collecting all Daughters of Each primary
-for(int i; i < SimP_TrackID_vec.size(); i++){
-  int currentMom = fSimP_Mom_vec[i]
+for(int i; i < fSimP_TrackID_vec.size(); i++){
+  int currentMom = fSimP_Mom_vec[i];
   std::vector<int> CurrentDaughters;
   CurrentDaughters.clear();
   if (currentMom == 0){
-    int primaryID = fSimP_TrackID[i]
+    int primaryID = fSimP_TrackID_vec[i]
     getDescendents(primaryID, fSimP_Mom_vec, fSimP_TrackID_vec, CurrentDaughters);
     fSimP_Daughter_vec.push_back(CurrentDaughters);
   }
@@ -1356,7 +1356,7 @@ namespace {
       return IsAncestorMotherPi0(tmp_mother, pi0_trkID, particleMap);
     }
 
-    void getDescendents(motherID, const std::vector<int>& simMomVec, std::vector<int>& simTrackID, std::vector<int>& primaryDaughters){
+    void getDescendents(int motherID, const std::vector<int>& fSimP_Mom_vec, std::vector<int>& fSimP_TrackID_vec, std::vector<int>& primaryDaughters){
       for (int i = 0; i < simMomVec.size(); i++){
         if(simMomVec[i] == motherID){
           int daughterID = simTrackID[i];
@@ -1366,7 +1366,7 @@ namespace {
         }
       }
     }
-    
+
   } // end GetAncestorMotherPi0TrkID
 
 } // local namespace
