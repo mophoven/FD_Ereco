@@ -962,7 +962,7 @@ for(size_t i; i < fSimP_TrackID_vec.size(); i++){
   CurrentDaughters.clear();
   if (currentMom == 0){
     int primaryID = fSimP_TrackID_vec[i];
-    getDescendents(primaryID, fSimP_Mom_vec, fSimP_TrackID_vec, CurrentDaughters);
+    getDescendants(primaryID, fSimP_Mom_vec, fSimP_TrackID_vec, CurrentDaughters);
     fSimP_Daughter_vec.push_back(CurrentDaughters);
   }
 }
@@ -1356,17 +1356,18 @@ namespace {
       return IsAncestorMotherPi0(tmp_mother, pi0_trkID, particleMap);
     }
 
-    void getDescendents(int motherID, const std::vector<int>& fSimP_Mom_vec, std::vector<int>& fSimP_TrackID_vec, std::vector<int>& primaryDaughters){
-      for (size_t i = 0; i < simMomVec.size(); i++){
-        if(simMomVec[i] == motherID){
-          int daughterID = simTrackID[i];
-          primaryDaughters.push_back(daughterID);
+  } // end GetAncestorMotherPi0TrkID
 
-          getDescendents(daughterID, simMomVec, simTrackID, primaryDaughters);
-        }
+  void getDescendants(int motherID, const std::vector<int>& fSimP_Mom_vec, std::vector<int>& fSimP_TrackID_vec, std::vector<int>& primaryDaughters){
+    for (size_t i = 0; i < simMomVec.size(); i++){
+      if(simMomVec[i] == motherID){
+        int daughterID = simTrackID[i];
+        primaryDaughters.push_back(daughterID);
+
+        getDescendants(daughterID, simMomVec, simTrackID, primaryDaughters);
       }
     }
+  }
 
-  } // end GetAncestorMotherPi0TrkID
 
 } // local namespace
