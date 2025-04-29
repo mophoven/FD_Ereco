@@ -1368,7 +1368,7 @@ namespace {
         int daughterID = fSimP_TrackID_vec[i];
         primaryDaughters.push_back(daughterID);
 
-        getDescendants(daughterID, fSimP_Mom_vec, simTrackID, primaryDaughters);
+        getDescendants(daughterID, fSimP_Mom_vec, fSimP_TrackID_vec, primaryDaughters);
       }
     }
   }
