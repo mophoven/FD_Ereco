@@ -1119,12 +1119,14 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
               auto search = particleMap.find( abs(energyDeposit.trackID) );
 
                 std::cout << "Time Slice Number: " << timeSlice.first << "Energy Deposit TrackID: " << energyDeposit.trackID << "Energy Deposit Energy: "<< energyDeposit.energy << std::endl;
-                std::cout << "i" << std::endl;
 
 
               if ( search != particleMap.end() ) { // found match in map
 
                 const simb::MCParticle& particle = *((*search).second);
+
+                std::cout << particle.PdgCode() << std::endl;
+                
                 // if the energy deposit is from primary lepton,
                 // or its ancestor mother particle is the primary lepton (e.g., from muon decays)
                 if ( ( particle.Process() == "primary" && abs(particle.PdgCode()) == 13 ) || IsAncestorMotherPrimaryLep(particle, primarylep_trkID, particleMap) ) {
