@@ -1073,7 +1073,7 @@ for(size_t i; i < fSimP_TrackID_vec.size(); i++){
 		    fP_int_class_string.push_back(combined_string);
 		    combined_int = std::stoull(combined_string);
 		    fP_int_class.push_back(combined_int);
-			std::cout << combined_string << std::endl;
+			//std::cout << combined_string << std::endl;
 		    fSim_primary_end_energy.push_back(primary_end_energy);
 		    fSim_daughter_begin_energy.push_back(daughter_begin_sum);
 			}
@@ -1362,13 +1362,13 @@ namespace {
 
   } // end GetAncestorMotherPi0TrkID
 
-  void getDescendants(int motherID, const std::vector<int>& fSimP_Mom_vec, std::vector<int>& fSimP_TrackID_vec, std::vector<int>& primaryDaughters){
-    for (size_t j = 0; j < fSimP_Mom_vec.size(); j++){
-      if(fSimP_Mom_vec[j] == motherID){
-        int daughterID = fSimP_TrackID_vec[j];
+  void getDescendants(int motherID, const std::vector<int>& momVec, std::vector<int>& TrkIDvec, std::vector<int>& primaryDaughters){
+    for (size_t j = 0; j < momVec.size(); j++){
+      if(momVec[j] == motherID){
+        int daughterID = TrkIDvec[j];
+        std::cout << "Found Daughter: " << daughterID << "(mother: " << motherID << ")" << std::endl;
         primaryDaughters.push_back(daughterID);
-
-        getDescendants(daughterID, fSimP_Mom_vec, fSimP_TrackID_vec, primaryDaughters);
+        getDescendants(daughterID, momVec, TrkIDvec, primaryDaughters);
       }
     }
   }
