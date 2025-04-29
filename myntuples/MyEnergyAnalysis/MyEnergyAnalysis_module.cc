@@ -1119,6 +1119,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
               auto search = particleMap.find( abs(energyDeposit.trackID) );
 
                 std::cout << "Time Slice Number: " << timeSlice.first << "Energy Deposit TrackID: " << energyDeposit.trackID << "Energy Deposit Energy: "<< energyDeposit.energy << std::endl;
+                std::cout << "i" << std::endl;
 
 
               if ( search != particleMap.end() ) { // found match in map
