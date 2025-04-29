@@ -957,7 +957,7 @@ namespace lar {
     }
   //End four-vector collection
 
-  //Collecting all Daughters of Each primary
+  // Collecting all Daughters of Each primary
  
 
 for(size_t i; i < fSimP_TrackID_vec.size(); i++){
@@ -967,7 +967,7 @@ for(size_t i; i < fSimP_TrackID_vec.size(); i++){
   if (currentMom == 0){
     int primaryID = fSimP_TrackID_vec[i];
     getDescendants(primaryID, fSimP_Mom_vec, fSimP_TrackID_vec, CurrentDaughters);
-    fSimP_Daughter_vec.push_back(CurrentDaughters);
+    fSimP_Daughter_vec.push_back(primaryDaughters);
   }
 }
   //Begin interaction classification and energy calculation
