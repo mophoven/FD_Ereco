@@ -967,7 +967,7 @@ for(size_t i; i < fSimP_TrackID_vec.size(); i++){
   if (currentMom == 0){
     int primaryID = fSimP_TrackID_vec[i];
     getDescendants(primaryID, fSimP_Mom_vec, fSimP_TrackID_vec, CurrentDaughters);
-    fSimP_Daughter_vec.push_back(primaryDaughters);
+    fSimP_Daughter_vec.push_back(CurrentDaughters);
   }
 }
   //Begin interaction classification and energy calculation
