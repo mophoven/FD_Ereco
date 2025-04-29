@@ -1118,6 +1118,8 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
               // Also search for EM shower particles from primary lepton, these deposits has trkID that's negative of the primary lepton trkID
               auto search = particleMap.find( abs(energyDeposit.trackID) );
 
+                std::cout << "Time Slice Number: " << timeSlice.first << "Energy Deposit TrackID: " << energyDeposit.trackID << "Energy Deposit Energy: "<< energyDeposit.energy << std::endl;
+
 
               if ( search != particleMap.end() ) { // found match in map
 
@@ -1366,7 +1368,7 @@ namespace {
     for (size_t j = 0; j < momVec.size(); j++){
       if(momVec[j] == motherID){
         int daughterID = TrkIDvec[j];
-        std::cout << "Found Daughter: " << daughterID << "(mother: " << motherID << ")" << std::endl;
+        //std::cout << "Found Daughter: " << daughterID << "(mother: " << motherID << ")" << std::endl;
         primaryDaughters.push_back(daughterID);
         getDescendants(daughterID, momVec, TrkIDvec, primaryDaughters);
       }
