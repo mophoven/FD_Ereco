@@ -1363,12 +1363,12 @@ namespace {
   } // end GetAncestorMotherPi0TrkID
 
   void getDescendants(int motherID, const std::vector<int>& fSimP_Mom_vec, std::vector<int>& fSimP_TrackID_vec, std::vector<int>& primaryDaughters){
-    for (size_t i = 0; i < simMomVec.size(); i++){
-      if(simMomVec[i] == motherID){
+    for (size_t i = 0; i < fSimP_Mom_vec.size(); i++){
+      if(fSimP_Mom_vec[i] == motherID){
         int daughterID = simTrackID[i];
         primaryDaughters.push_back(daughterID);
 
-        getDescendants(daughterID, simMomVec, simTrackID, primaryDaughters);
+        getDescendants(daughterID, fSimP_Mom_vec, simTrackID, primaryDaughters);
       }
     }
   }
