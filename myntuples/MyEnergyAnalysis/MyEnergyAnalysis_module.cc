@@ -815,17 +815,7 @@ namespace lar {
         fSimP_M_vec.push_back(particle.Mass());
         fSimP_Ek_vec.push_back(particle.E()-particle.Mass());
 
-        int currentMom = particle.Mother();
-        int NDaughters = particle.NumberDaughters();
-        std::vector<int> CurrentDaughters;
-        CurrentDaughters.clear();
-        if (currentMom == 0){
-          for (int i = 0; i < NDaughters; i++){
-            CurrentDaughters.push_back(particle.Daughter(i));
-          }
-        }
 
-        fSimP_Daughter_vec.push_back(CurrentDaughters);
 
         // Take note of primary lepton track id, to be used later
         if ( particle.Process() == "primary" && abs(fSimPDG) == 13 ) {
@@ -964,7 +954,18 @@ namespace lar {
 		fSim_end_4mommenta.push_back(momentumEnd.E());
     }
   //End four-vector collection
-  
+
+  //Collecting all Daughters of Each primary
+for(int i; i < SimP_TrackID_vec.size(); i++){
+  int currentMom = fSimP_Mom_vec[i]
+  std::vector<int> CurrentDaughters;
+  CurrentDaughters.clear();
+  if (currentMom == 0){
+    int primaryID = fSimP_TrackID[i]
+    getDescendents(primaryID, fSimP_Mom_vec, fSimP_TrackID_vec, CurrentDaughters);
+    fSimP_Daughter_vec.push_back(CurrentDaughters);
+  }
+}
   //Begin interaction classification and energy calculation
   
 	    std::string combined_string = ""; 		//Stores the interaction classification code
@@ -1354,6 +1355,18 @@ namespace {
       const simb::MCParticle& tmp_mother = *((*tmp_search).second);
       return IsAncestorMotherPi0(tmp_mother, pi0_trkID, particleMap);
     }
+
+    void getDescendents(motherID, const std::vector<int>& simMomVec, std::vector<int>& simTrackID, std::vector<int>& primaryDaughters){
+      for (int i = 0; i < simMomVec.size(); i++){
+        if(simMomVec[i] == motherID){
+          int daughterID = simTrackID[i];
+          primaryDaughters.push_back(daughterID);
+
+          getDescendents(daughterID, simMomVec, simTrackID, primaryDaughters);
+        }
+      }
+    }
+    
   } // end GetAncestorMotherPi0TrkID
 
 } // local namespace
