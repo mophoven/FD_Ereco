@@ -80,7 +80,7 @@ namespace {
   //Ancestor Mother is pi0
   bool IsAncestorMotherPi0(const simb::MCParticle&, std::vector<int>, std::map<int, const simb::MCParticle*>);
 
-  void getDescendants(int, const std::vector<int>&, std::vector<int>&, std::vector<int>&);
+  void getDescendants(const simb::MCParticle&, const std::vector<const simb::MCParticle>&, const std::vector<const simb::MCPArticle>&);
 
 
 } // local namespace
@@ -959,17 +959,19 @@ namespace lar {
 
   // Collecting all Daughters of Each primary
  
+std::vector<std::vector<const simb::MCParticle> DaughterpartVec;
 
-for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
-  int currentMom = fSimP_Mom_vec[i];
-  std::vector<int> CurrentDaughters;
+for(size_t i = 0; i < SimParticles.size(); i++){
+  int currentMom = SimParticles[i].Mother();
+  std::vector<const simb::MCParticle> CurrentDaughters;
   CurrentDaughters.clear();
   if (currentMom == 0){
-    int primaryID = fSimP_TrackID_vec[i];
-    getDescendants(primaryID, fSimP_Mom_vec, fSimP_TrackID_vec, CurrentDaughters);
+    const simb::MCParticle& primary = SimParticles[i];
+    getDescendants(primary, SimParticles, CurrentDaughters);
     fSimP_Daughter_vec.push_back(CurrentDaughters);
+    }
   }
-}
+
   //Begin interaction classification and energy calculation
   
 	    std::string combined_string = ""; 		//Stores the interaction classification code
@@ -1126,7 +1128,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
                 const simb::MCParticle& particle = *((*search).second);
 
                 std::cout << particle.PdgCode() << std::endl;
-                
+
                 // if the energy deposit is from primary lepton,
                 // or its ancestor mother particle is the primary lepton (e.g., from muon decays)
                 if ( ( particle.Process() == "primary" && abs(particle.PdgCode()) == 13 ) || IsAncestorMotherPrimaryLep(particle, primarylep_trkID, particleMap) ) {
@@ -1367,13 +1369,12 @@ namespace {
 
   } // end GetAncestorMotherPi0TrkID
 
-  void getDescendants(int motherID, const std::vector<int>& momVec, std::vector<int>& TrkIDvec, std::vector<int>& primaryDaughters){
-    for (size_t j = 0; j < momVec.size(); j++){
-      if(momVec[j] == motherID){
-        int daughterID = TrkIDvec[j];
-        //std::cout << "Found Daughter: " << daughterID << "(mother: " << motherID << ")" << std::endl;
-        primaryDaughters.push_back(daughterID);
-        getDescendants(daughterID, momVec, TrkIDvec, primaryDaughters);
+  void getDescendants(const simb::MCParticle& primarypart, const std::vector<const simb::MCParticle>& allpart, const std::vector<const simb::MCParticle>& primaryDaughters){
+    for (size_t j = 0; j < allpart.size(); j++){
+      if(allpart[j].Mother() == primarypart.TrackID()){
+        const simb::MCParticle& daughterpart = allpart[j];
+        primaryDaughters.push_back(daughterpart);
+        getDescendants(daughterpart, allpart, primaryDaughters);
       }
     }
   }
