@@ -80,7 +80,7 @@ namespace {
   //Ancestor Mother is pi0
   bool IsAncestorMotherPi0(const simb::MCParticle&, std::vector<int>, std::map<int, const simb::MCParticle*>);
 
-  void getDescendants(int, const std::vector<int>&, const std::map<int, const simb::MCParticle>&, std::vector<const simb::MCParticle>&);
+  void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle>&, std::vector<const simb::MCParticle>&);
 
 
 } // local namespace
@@ -959,7 +959,7 @@ namespace lar {
 
   // Collecting all Daughters of Each primary
  
-std::vector<std::vector<const simb::MCparticle*> DaughterpartVec;
+std::vector<std::vector<const simb::MCParticle*> DaughterpartVec;
 
 for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec.size();
@@ -1375,7 +1375,7 @@ namespace {
   } // end GetAncestorMotherPi0TrkID
 
   void getDescendants(int motherID, const std::vector<int>& momVec, const std::vector<int>& TrkIDvec, const std::map<int, const simb::MCParticle>& particleMap, std::vector<const simb::MCParticle*>& primaryDaughters){
-    for (size_t j = 0; j < TRkIDvec.size(); j++){
+    for (size_t j = 0; j < TrkIDvec.size(); j++){
       if(momVec[j] == motherID){
         int daughterID = TrkIDvec[j];
 
