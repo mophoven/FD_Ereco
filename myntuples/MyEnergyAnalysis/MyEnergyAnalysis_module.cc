@@ -959,7 +959,7 @@ namespace lar {
 
   // Collecting all Daughters of Each primary
  
-std::vector<std::vector<const simb::MCParticle*> DaughterpartVec;
+std::vector<std::vector<const simb::MCParticle*>> DaughterpartVec;
 
 for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec.size();
