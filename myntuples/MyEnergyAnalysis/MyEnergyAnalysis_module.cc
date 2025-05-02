@@ -969,7 +969,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     int primary = fSimP_TrackID_vec[i];
     getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
     DaughterpartVec.push_back(CurrentDaughters);
-    std::cout << "Mother" <<  SimParticles[i]->PdgCode() << std::endl;
+    std::cout << "Mother: " <<  SimParticles[i]->PdgCode() << std::endl;
     for (const auto* part : CurrentDaughters) {
       std::cout << "Descendant PDG: " << part->PdgCode() << " E: " << part->E() << " status: " << part->StatusCode() << std::endl;
   }
@@ -1125,14 +1125,14 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
               // Also search for EM shower particles from primary lepton, these deposits has trkID that's negative of the primary lepton trkID
               auto search = particleMap.find( abs(energyDeposit.trackID) );
 
-                std::cout << "Time Slice Number: " << timeSlice.first << "Energy Deposit TrackID: " << energyDeposit.trackID << "Energy Deposit Energy: "<< energyDeposit.energy << std::endl;
+                //std::cout << "Time Slice Number: " << timeSlice.first << "Energy Deposit TrackID: " << energyDeposit.trackID << "Energy Deposit Energy: "<< energyDeposit.energy << std::endl;
 
 
               if ( search != particleMap.end() ) { // found match in map
 
                 const simb::MCParticle& particle = *((*search).second);
 
-                std::cout << particle.PdgCode() << std::endl;
+                //std::cout << particle.PdgCode() << std::endl;
 
                 // if the energy deposit is from primary lepton,
                 // or its ancestor mother particle is the primary lepton (e.g., from muon decays)
