@@ -962,7 +962,7 @@ namespace lar {
 std::vector<std::vector<const simb::MCParticle*>> DaughterpartVec;
 
 for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
-  int currentMom = fSimP_Mom_vec.size();
+  int currentMom = fSimP_Mom_vec[i];
   std::vector<const simb::MCParticle*> CurrentDaughters;
   CurrentDaughters.clear();
   if (currentMom == 0){
