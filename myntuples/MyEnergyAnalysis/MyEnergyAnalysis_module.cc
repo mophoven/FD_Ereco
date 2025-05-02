@@ -80,7 +80,7 @@ namespace {
   //Ancestor Mother is pi0
   bool IsAncestorMotherPi0(const simb::MCParticle&, std::vector<int>, std::map<int, const simb::MCParticle*>);
 
-  void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle>&);
+  void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
 
 
 } // local namespace
