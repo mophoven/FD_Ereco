@@ -1374,6 +1374,43 @@ namespace {
 
   } // end GetAncestorMotherPi0TrkID
 
+  void getHadronicInformation(const simb::MCParticle& primary, const std::vector<const simb::MCParticle*>& daughters, int NHad, double BindingE){
+    int pNTP = primary->NumberTrajectoryPoints();
+    int pLast = pNTP - 1;
+    for(size_t k = 0; k < daughters->size(); k++){
+      int dNTP = daughters[k]->NumberTrajectoryPoints();
+      int dLast = dNTP - 1;
+      const TLorentzVector& daughterstart = daughters[k]->Position(0);
+      const TLorentzVector& Edaughterstart = daughters[k]->Momentum(0);
+      std::vector<float> X;
+      std::vector<float> Y;
+      std::vector<float> Z;
+      std::vector<float> T;
+      for(int l = 0; l < pLast; l++){
+        const TLorentzVector& pripos = primary->Position(l);
+        float epsilon = 0.1;
+        double Eout = 0;
+        if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
+          if(daughters[k]->PdgCode() == 211 || -211){
+            Eout += Edaughterstart.E();
+          }
+          else{
+            Eout += Edaughterstart.E() - daughters[k]->Mass();
+          }
+          X.push_back(daughterstart.X());
+          Y.push_back(daughterstart.Y());
+          Z.push_back(daughterstart.Z());
+          T.push_back(daughterstart.T());
+          int Xsize = X.size();
+          for(size_t m = 0; m < X.size(); m++){
+            if X.last() = X[m]
+          }
+        }
+      }
+
+    }
+  }
+
   void getDescendants(int motherID, const std::vector<int>& momVec, const std::vector<int>& TrkIDvec, const std::map<int, const simb::MCParticle*>& particleMap, std::vector<const simb::MCParticle*>& primaryDaughters){
     for (size_t j = 0; j < TrkIDvec.size(); j++){
       if(momVec[j] == motherID){
