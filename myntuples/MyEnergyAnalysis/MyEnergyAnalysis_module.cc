@@ -979,7 +979,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     NHad = 0;
     BindingE = 0;
     getHadronicInformation(SimParticles[i], CurrentDaughters, NHad, BindingE);
-    //std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
+    std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
     }
   }
 
@@ -1403,6 +1403,7 @@ namespace {
         const TLorentzVector& pripos = primary->Position(l);
         float epsilon = 0.1;
         double Ein = 0;
+        std::cout << "PDG of primary: " << primary->PdgCode() << std::cout;
         if(abs(primary->PdgCode()) == 211){
           Ein = primary->E(l);
         }
@@ -1411,6 +1412,7 @@ namespace {
         }
         double Eout = 0;
         if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
+          std::cout << "PDG of daughter: " << daughters[k]->PdgCode() << std::endl;
           if(abs(daughters[k]->PdgCode()) == 211){
             std::cout << "inside PDG if" << std::endl;
            Eout = Edaughterstart.E();
