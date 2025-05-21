@@ -973,16 +973,18 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
     DaughterpartVec.push_back(CurrentDaughters);
     primary_vec.push_back(SimParticles[i]);
+    int NHad = 0;
+    double BindingE = 0;
     getHadronicInformation(SimParticles[i], CurrentDaughters, NHad, BindingE);
     std::cout << "Number Had interactions per primary: " << NHad << "BindingE: " << BindingE << std::endl;
     }
   }
 
-  for(size_t n = 0; n < DaughterpartVec.size(); n++){
-    int NHad = 0;
-    int HadE = 0;
-    getHadronicInformation(primary_vec[n], DaughterpartVec[n], NHad, HadE);
-  }
+  //for(size_t n = 0; n < DaughterpartVec.size(); n++){
+  //  int NHad = 0;
+  //  int HadE = 0;
+   // getHadronicInformation(primary_vec[n], DaughterpartVec[n], NHad, HadE);
+  //}
 
 
   //Begin interaction classification and energy calculation
