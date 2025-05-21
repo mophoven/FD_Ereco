@@ -1388,7 +1388,7 @@ namespace {
     int pNTP = primary->NumberTrajectoryPoints();
     int pLast = pNTP - 1;
     for(size_t k = 0; k < daughters.size(); k++){
-      int dNTP = daughters[k]->NumberTrajectoryPoints();
+      //int dNTP = daughters[k]->NumberTrajectoryPoints();
       //int dLast = dNTP - 1;
       const TLorentzVector& daughterstart = daughters[k]->Position(0);
       const TLorentzVector& Edaughterstart = daughters[k]->Momentum(0);
