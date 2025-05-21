@@ -171,6 +171,9 @@ namespace lar {
       int nLep, nP, nN, nPip, nPim, nPi0, nOther;                            // number of particles
       double E_vis_true;                 // True vis energy [GeV]
 
+      int NHad;
+      double BindingE;
+
       //
       // Variables related to geneator/simulation
       //
@@ -973,10 +976,10 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
     DaughterpartVec.push_back(CurrentDaughters);
     primary_vec.push_back(SimParticles[i]);
-    int NHad = 0;
-    double BindingE = 0;
+    NHad = 0;
+    BindingE = 0;
     getHadronicInformation(SimParticles[i], CurrentDaughters, NHad, BindingE);
-    std::cout << "Number Had interactions per primary: " << NHad << "BindingE: " << BindingE << std::endl;
+    std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
     }
   }
 
