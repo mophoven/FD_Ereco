@@ -1403,7 +1403,7 @@ namespace {
         const TLorentzVector& pripos = primary->Position(l);
         float epsilon = 0.1;
         double Ein = 0;
-        std::cout << "PDG of primary: " << primary->PdgCode() << std::cout;
+        std::cout << "PDG of primary: " << primary->PdgCode() << std::endl;
         if(abs(primary->PdgCode()) == 211){
           Ein = primary->E(l);
         }
