@@ -1387,9 +1387,9 @@ namespace {
   void getHadronicInformation(const simb::MCParticle* primary, const std::vector<const simb::MCParticle*>& daughters, int NHad, double BindingE){
     int pNTP = primary->NumberTrajectoryPoints();
     int pLast = pNTP - 1;
-    for(size_t k = 0; k < daughters->size(); k++){
+    for(size_t k = 0; k < daughters.size(); k++){
       int dNTP = daughters[k]->NumberTrajectoryPoints();
-      int dLast = dNTP - 1;
+      //int dLast = dNTP - 1;
       const TLorentzVector& daughterstart = daughters[k]->Position(0);
       const TLorentzVector& Edaughterstart = daughters[k]->Momentum(0);
       std::vector<float> X;
@@ -1400,11 +1400,11 @@ namespace {
         const TLorentzVector& pripos = primary->Position(l);
         float epsilon = 0.1;
         double Ein = 0;
-        if(abs(primary->PDGCode()) == 211){
+        if(abs(primary->PdgCode()) == 211){
           Ein = primary->E(l);
         }
         else{
-          Ein = primary->E(l) - primary->Mass()
+          Ein = primary->E(l) - primary->Mass();
         }
         double Eout = 0;
         if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
