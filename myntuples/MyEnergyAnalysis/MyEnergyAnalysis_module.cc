@@ -80,6 +80,8 @@ namespace {
   //Ancestor Mother is pi0
   bool IsAncestorMotherPi0(const simb::MCParticle&, std::vector<int>, std::map<int, const simb::MCParticle*>);
 
+  void getHadronicInformation(const simb::MCParticle&, const std::vector<const simb::MCParticle*>&, int, double);
+
   void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
 
 
@@ -960,6 +962,7 @@ namespace lar {
   // Collecting all Daughters of Each primary
  
 std::vector<std::vector<const simb::MCParticle*>> DaughterpartVec;
+std::vector<const simb::MCParticle*> primary_vec;
 
 for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
@@ -969,11 +972,16 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     int primary = fSimP_TrackID_vec[i];
     getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
     DaughterpartVec.push_back(CurrentDaughters);
-    std::cout << "Mother: " <<  SimParticles[i]->PdgCode() << std::endl;
-    for (const auto* part : CurrentDaughters) {
-      std::cout << "Descendant PDG: " << part->PdgCode() << " E: " << part->E() << " status: " << part->StatusCode() << std::endl;
-  }
+    primary_vec.push_back(SimParticles[i]);
+    getHadronicInformation(SimParticles[i], CurrentDaughters, NHad, BindingE);
+    std::cout << "Number Had interactions per primary: " << NHad << "BindingE: " << BindingE << std::endl;
     }
+  }
+
+  for(size_t n = 0; n < DaughterpartVec.size(); n++){
+    int NHad = 0;
+    int HadE = 0;
+    getHadronicInformation(primary_vec[n], DaughterpartVec[n], NHad, HadE);
   }
 
 
@@ -1389,22 +1397,34 @@ namespace {
       for(int l = 0; l < pLast; l++){
         const TLorentzVector& pripos = primary->Position(l);
         float epsilon = 0.1;
+        double Ein = 0;
+        if(abs(primary->PDGCode()) == 211){
+          Ein = primary->E(l);
+        }
+        else{
+          Ein = primary->E(l) - primary->Mass()
+        }
         double Eout = 0;
         if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
-          if(daughters[k]->PdgCode() == 211 || -211){
+          if(abs(daughters[k]->PdgCode()) == 211){
             Eout += Edaughterstart.E();
           }
           else{
             Eout += Edaughterstart.E() - daughters[k]->Mass();
           }
+          double currentBindingE = Ein - Eout;
+          BindingE += currentBindingE;
           X.push_back(daughterstart.X());
           Y.push_back(daughterstart.Y());
           Z.push_back(daughterstart.Z());
           T.push_back(daughterstart.T());
           int Xsize = X.size();
+          int Xlast = Xsize - 1;
+          int iterator = 0;
           for(size_t m = 0; m < X.size(); m++){
-            if X.last() = X[m]
+            if(X[Xlast] == X[m] && Y[Xlast] == Y[m] && Z[Xlast] == Z[m] && T[Xlast] == T[m]) iterator = iterator +1;
           }
+          if(iterator == 0) NHad = NHad +1;
         }
       }
 
