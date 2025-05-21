@@ -80,7 +80,7 @@ namespace {
   //Ancestor Mother is pi0
   bool IsAncestorMotherPi0(const simb::MCParticle&, std::vector<int>, std::map<int, const simb::MCParticle*>);
 
-  void getHadronicInformation(const simb::MCParticle&, const std::vector<const simb::MCParticle*>&, int, double);
+  void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
   void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
 
@@ -1384,7 +1384,7 @@ namespace {
 
   } // end GetAncestorMotherPi0TrkID
 
-  void getHadronicInformation(const simb::MCParticle& primary, const std::vector<const simb::MCParticle*>& daughters, int NHad, double BindingE){
+  void getHadronicInformation(const simb::MCParticle* primary, const std::vector<const simb::MCParticle*>& daughters, int NHad, double BindingE){
     int pNTP = primary->NumberTrajectoryPoints();
     int pLast = pNTP - 1;
     for(size_t k = 0; k < daughters->size(); k++){
