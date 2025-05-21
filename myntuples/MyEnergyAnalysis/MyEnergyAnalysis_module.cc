@@ -979,7 +979,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     NHad = 0;
     BindingE = 0;
     getHadronicInformation(SimParticles[i], CurrentDaughters, NHad, BindingE);
-    std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
+    //std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
     }
   }
 
@@ -1419,6 +1419,7 @@ namespace {
             Eout += Edaughterstart.E() - daughters[k]->Mass();
           }
           double currentBindingE = Ein - Eout;
+          std::cout << "current binding E: " << currentBindingE << std::endl;
           BindingE += currentBindingE;
           X.push_back(daughterstart.X());
           Y.push_back(daughterstart.Y());
