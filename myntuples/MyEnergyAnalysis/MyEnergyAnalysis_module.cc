@@ -1411,14 +1411,15 @@ namespace {
         }
         double Eout = 0;
         if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
-          //if(abs(daughters[k]->PdgCode()) == 211){
+          if(abs(daughters[k]->PdgCode()) == 211){
+            std::cout << "inside PDG if" << std::endl;
            Eout = Edaughterstart.E();
-          //}
-          //else{
-         //   Eout += Edaughterstart.E() - daughters[k]->Mass();
-          //}
+          }
+          else{
+            std::cout << "Edaughterstart: " << Edaughterstart.E() << ", daughter mass: " << daughters[k]->Mass() << std::endl;
+            Eout = Edaughterstart.E() - daughters[k]->Mass();
+          }
           double currentBindingE = Ein - Eout;
-          std::cout << "current binding E: " << currentBindingE << std::endl;
           BindingE += currentBindingE;
           X.push_back(daughterstart.X());
           Y.push_back(daughterstart.Y());
