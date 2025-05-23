@@ -1420,9 +1420,12 @@ namespace {
           else{
             Eout = Edaughterstart.E() - daughters[k]->Mass();
           }
+          std::cout << "Ein: " << Ein << std::endl;
+          std::cout << "Eout: " << Eout << std::endl;
           double currentBindingE = Ein - Eout;
           std::cout << "Current Binding Energy: " << currentBindingE << std::endl;
           BindingE += currentBindingE;
+          std::cout << "BindingE (inside func) : " << BindingE << std::endl;
           X.push_back(daughterstart.X());
           Y.push_back(daughterstart.Y());
           Z.push_back(daughterstart.Z());
@@ -1437,7 +1440,7 @@ namespace {
           if(iterator == 1) NHad = NHad +1;
         }
       }
-
+      std::cout << "NHad (inside): " << NHad << std::endl;
     }
   }
 
