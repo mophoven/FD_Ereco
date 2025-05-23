@@ -171,8 +171,6 @@ namespace lar {
       int nLep, nP, nN, nPip, nPim, nPi0, nOther;                            // number of particles
       double E_vis_true;                 // True vis energy [GeV]
 
-      int NHad;
-      double BindingE;
 
       //
       // Variables related to geneator/simulation
@@ -966,6 +964,9 @@ namespace lar {
  
 std::vector<std::vector<const simb::MCParticle*>> DaughterpartVec;
 std::vector<const simb::MCParticle*> primary_vec;
+int NHad;
+double BindingE;
+
 
 for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
@@ -1403,15 +1404,15 @@ namespace {
         const TLorentzVector& pripos = primary->Position(l);
         float epsilon = 0.01;
         double Ein = 0;
-        std::cout << "PDG of primary: " << primary->PdgCode() << std::endl;
-        if(abs(primary->PdgCode()) == 211){
-          Ein = primary->E(l);
-        }
-        else{
-          Ein = primary->E(l) - primary->Mass();
-        }
         double Eout = 0;
         if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
+          if(abs(primary->PdgCode()) == 211){
+            Ein = primary->E(l);
+          }
+          else{
+            Ein = primary->E(l) - primary->Mass();
+          }
+          std::cout << "PDG of primary: " << primary->PdgCode() << std::endl;
           std::cout << "PDG of daughter: " << daughters[k]->PdgCode() << std::endl;
           if(abs(daughters[k]->PdgCode()) == 211){
            Eout = Edaughterstart.E();
@@ -1433,7 +1434,7 @@ namespace {
             if(abs(X[Xlast] - X[m]) < epsilon && abs(Y[Xlast] - Y[m]) < epsilon && abs(Z[Xlast] - Z[m]) < epsilon && abs(T[Xlast] - T[m]) < epsilon) iterator = iterator +1;
             std::cout << "iterator: " << iterator << std::endl;
           }
-          if(iterator == 0) NHad = NHad +1;
+          if(iterator == 1) NHad = NHad +1;
         }
       }
 
