@@ -1401,7 +1401,7 @@ namespace {
       std::vector<float> T;
       for(int l = 0; l < pLast; l++){
         const TLorentzVector& pripos = primary->Position(l);
-        float epsilon = 0.1;
+        float epsilon = 0.01;
         double Ein = 0;
         std::cout << "PDG of primary: " << primary->PdgCode() << std::endl;
         if(abs(primary->PdgCode()) == 211){
@@ -1414,14 +1414,13 @@ namespace {
         if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
           std::cout << "PDG of daughter: " << daughters[k]->PdgCode() << std::endl;
           if(abs(daughters[k]->PdgCode()) == 211){
-            std::cout << "inside PDG if" << std::endl;
            Eout = Edaughterstart.E();
           }
           else{
-            std::cout << "Edaughterstart: " << Edaughterstart.E() << ", daughter mass: " << daughters[k]->Mass() << std::endl;
             Eout = Edaughterstart.E() - daughters[k]->Mass();
           }
           double currentBindingE = Ein - Eout;
+          std::cout << "Current Binding Energy: " << currentBindingE << std::endl;
           BindingE += currentBindingE;
           X.push_back(daughterstart.X());
           Y.push_back(daughterstart.Y());
@@ -1431,7 +1430,8 @@ namespace {
           int Xlast = Xsize - 1;
           int iterator = 0;
           for(size_t m = 0; m < X.size(); m++){
-            if(X[Xlast] == X[m] && Y[Xlast] == Y[m] && Z[Xlast] == Z[m] && T[Xlast] == T[m]) iterator = iterator +1;
+            if(abs(X[Xlast] - X[m]) < epsilon && abs(Y[Xlast] - Y[m]) < epsilon && abs(Z[Xlast] - Z[m]) < epsilon && abs(T[Xlast] - T[m]) < epsilon) iterator = iterator +1;
+            std::cout << "iterator: " << iterator << std::endl;
           }
           if(iterator == 0) NHad = NHad +1;
         }
