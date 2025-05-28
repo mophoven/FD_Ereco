@@ -946,14 +946,13 @@ namespace lar {
   fYmax =  geom.DetHalfWidth();
   fZmin = -geom.DetHalfHeight();
   fZmax =  geom.DetHalfHeight();
-    // 1) Get your MCParticles
-  auto const& particles
-    = *evt.getValidHandle<std::vector<simb::MCParticle>>(fInputTag);
 
   // 2) Loop over each particle
-  for (auto const& particleVec : particles) {
+  for (int l=0; l<fSim_nParticles; l++) {
+    const simb::MCParticle& particleVec = *(SimParticles[l]);
+   
 
-        fSim_start_4position.push_back(positionStart.X());
+     /*   fSim_start_4position.push_back(positionStart.X());
 		fSim_start_4position.push_back(positionStart.Y());
 		fSim_start_4position.push_back(positionStart.Z());
 		fSim_start_4position.push_back(positionStart.T());
@@ -968,7 +967,7 @@ namespace lar {
         fSim_end_4mommenta.push_back(momentumEnd.Px());
 		fSim_end_4mommenta.push_back(momentumEnd.Py());
 		fSim_end_4mommenta.push_back(momentumEnd.Pz());
-		fSim_end_4mommenta.push_back(momentumEnd.E());
+		fSim_end_4mommenta.push_back(momentumEnd.E()); */
     }
         // loop over every trajectory point, compare to geometry,
     // pull out E, subtract m, and do something with KE
