@@ -931,11 +931,11 @@ namespace lar {
 
 	    const size_t Ntrajpoints = particleVec.NumberTrajectoryPoints();
 
-  	  const int last = Ntrajpoints - 1;
+  	 /* const int last = Ntrajpoints - 1;
 	    const TLorentzVector& positionStart = particleVec.Position(0);
 	    const TLorentzVector& positionEnd = particleVec.Position(last);
 	    const TLorentzVector& momentumStart = particleVec.Momentum(0);
-	    const TLorentzVector& momentumEnd = particleVec.Momentum(last);
+	    const TLorentzVector& momentumEnd = particleVec.Momentum(last);*/
 
 // New stuff
   double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
