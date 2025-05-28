@@ -991,8 +991,8 @@ namespace lar {
       {
         std::cout << "Particle " << particleVec.TrackId()
                   << " exited at pt " << ipt
-                  << " with KE = " << KE << " GeV\n";
-        fEscapedKineticEnergies.push_back(KE);
+                  << " with KE = " << KE << " GeV\n" << std::endl;
+       // declare this fEscapedKineticEnergies.push_back(KE);
         break;  // stop at first exit
       }
     }
