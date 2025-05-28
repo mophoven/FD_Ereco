@@ -5,7 +5,7 @@
  *
  * Adapted from https://cdcvs.fnal.gov/redmine/projects/larsoft/wiki/_AnalysisExample_
  */
-// new comment
+
 // Include headers: starting from LArSoft and going up the software
 // layers (nusimdata, art, etc.), ending with C++ is standard.
 
@@ -79,8 +79,6 @@ namespace {
 
   //Ancestor Mother is pi0
   bool IsAncestorMotherPi0(const simb::MCParticle&, std::vector<int>, std::map<int, const simb::MCParticle*>);
-
-  void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
   void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
 
@@ -170,7 +168,6 @@ namespace lar {
       double eP, eN, ePip, ePim, ePi0, eOther;    // Energy of particles
       int nLep, nP, nN, nPip, nPim, nPi0, nOther;                            // number of particles
       double E_vis_true;                 // True vis energy [GeV]
-
 
       //
       // Variables related to geneator/simulation
@@ -940,6 +937,21 @@ namespace lar {
 	    const TLorentzVector& momentumStart = particleVec.Momentum(0);
 	    const TLorentzVector& momentumEnd = particleVec.Momentum(last);
 
+// New stuff
+  double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
+  auto const& geom = *fGeometryService;
+  fXmin = 0.0;
+  fXmax = geom.DetLength();
+  fYmin = -geom.DetHalfWidth();
+  fYmax =  geom.DetHalfWidth();
+  fZmin = -geom.DetHalfHeight();
+  fZmax =  geom.DetHalfHeight();
+    // 1) Get your MCParticles
+  auto const& particles
+    = *evt.getValidHandle<std::vector<simb::MCParticle>>(fInputTag);
+
+  // 2) Loop over each particle
+  for (auto const& particleVec : particles) {
 
         fSim_start_4position.push_back(positionStart.X());
 		fSim_start_4position.push_back(positionStart.Y());
@@ -958,15 +970,38 @@ namespace lar {
 		fSim_end_4mommenta.push_back(momentumEnd.Pz());
 		fSim_end_4mommenta.push_back(momentumEnd.E());
     }
+        // loop over every trajectory point, compare to geometry,
+    // pull out E, subtract m, and do something with KE
+    size_t Ntraj = particleVec.NumberTrajectoryPoints();
+    for (size_t ipt = 0; ipt < Ntraj; ++ipt) {
+      auto const& pos = particleVec.Position(ipt);
+      auto const& mom = particleVec.Momentum(ipt);
+
+      double x    = pos.X();
+      double y    = pos.Y();
+      double z    = pos.Z();
+      double Etot = mom.E();
+      double m0   = particleVec.Mass();
+      double KE   = Etot - m0;
+
+      // compare to cached bounds (set up in your ctor)
+      if ( x < fXmin || x > fXmax ||
+           y < fYmin || y > fYmax ||
+           z < fZmin || z > fZmax )
+      {
+        std::cout << "Particle " << particleVec.TrackId()
+                  << " exited at pt " << ipt
+                  << " with KE = " << KE << " GeV\n";
+        fEscapedKineticEnergies.push_back(KE);
+        break;  // stop at first exit
+      }
+    }
   //End four-vector collection
+
 
   // Collecting all Daughters of Each primary
  
 std::vector<std::vector<const simb::MCParticle*>> DaughterpartVec;
-std::vector<const simb::MCParticle*> primary_vec;
-int NHad;
-double BindingE;
-
 
 for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
@@ -976,19 +1011,12 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     int primary = fSimP_TrackID_vec[i];
     getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
     DaughterpartVec.push_back(CurrentDaughters);
-    primary_vec.push_back(SimParticles[i]);
-    NHad = 0;
-    BindingE = 0;
-    getHadronicInformation(SimParticles[i], CurrentDaughters, NHad, BindingE);
-    std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
+    std::cout << "Mother: " <<  SimParticles[i]->PdgCode() << std::endl;
+    for (const auto* part : CurrentDaughters) {
+      std::cout << "Descendant PDG: " << part->PdgCode() << " E: " << part->E() << " status: " << part->StatusCode() << std::endl;
+  }
     }
   }
-
-  //for(size_t n = 0; n < DaughterpartVec.size(); n++){
-  //  int NHad = 0;
-  //  int HadE = 0;
-   // getHadronicInformation(primary_vec[n], DaughterpartVec[n], NHad, HadE);
-  //}
 
 
   //Begin interaction classification and energy calculation
@@ -1388,12 +1416,12 @@ namespace {
 
   } // end GetAncestorMotherPi0TrkID
 
-  void getHadronicInformation(const simb::MCParticle* primary, const std::vector<const simb::MCParticle*>& daughters, int NHad, double BindingE){
+  void getHadronicInformation(const simb::MCParticle& primary, const std::vector<const simb::MCParticle*>& daughters, int NHad, double BindingE){
     int pNTP = primary->NumberTrajectoryPoints();
     int pLast = pNTP - 1;
-    for(size_t k = 0; k < daughters.size(); k++){
-      //int dNTP = daughters[k]->NumberTrajectoryPoints();
-      //int dLast = dNTP - 1;
+    for(size_t k = 0; k < daughters->size(); k++){
+      int dNTP = daughters[k]->NumberTrajectoryPoints();
+      int dLast = dNTP - 1;
       const TLorentzVector& daughterstart = daughters[k]->Position(0);
       const TLorentzVector& Edaughterstart = daughters[k]->Momentum(0);
       std::vector<float> X;
@@ -1402,45 +1430,26 @@ namespace {
       std::vector<float> T;
       for(int l = 0; l < pLast; l++){
         const TLorentzVector& pripos = primary->Position(l);
-        float epsilon = 0.01;
-        double Ein = 0;
+        float epsilon = 0.1;
         double Eout = 0;
         if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
-          if(abs(primary->PdgCode()) == 211){
-            Ein = primary->E(l);
+          if(daughters[k]->PdgCode() == 211 || -211){
+            Eout += Edaughterstart.E();
           }
           else{
-            Ein = primary->E(l) - primary->Mass();
+            Eout += Edaughterstart.E() - daughters[k]->Mass();
           }
-          std::cout << "PDG of primary: " << primary->PdgCode() << std::endl;
-          std::cout << "PDG of daughter: " << daughters[k]->PdgCode() << std::endl;
-          if(abs(daughters[k]->PdgCode()) == 211){
-           Eout = Edaughterstart.E();
-          }
-          else{
-            Eout = Edaughterstart.E() - daughters[k]->Mass();
-          }
-          std::cout << "Ein: " << Ein << std::endl;
-          std::cout << "Eout: " << Eout << std::endl;
-          double currentBindingE = Ein - Eout;
-          std::cout << "Current Binding Energy: " << currentBindingE << std::endl;
-          BindingE += currentBindingE;
-          std::cout << "BindingE (inside func) : " << BindingE << std::endl;
           X.push_back(daughterstart.X());
           Y.push_back(daughterstart.Y());
           Z.push_back(daughterstart.Z());
           T.push_back(daughterstart.T());
           int Xsize = X.size();
-          int Xlast = Xsize - 1;
-          int iterator = 0;
           for(size_t m = 0; m < X.size(); m++){
-            if(abs(X[Xlast] - X[m]) < epsilon && abs(Y[Xlast] - Y[m]) < epsilon && abs(Z[Xlast] - Z[m]) < epsilon && abs(T[Xlast] - T[m]) < epsilon) iterator = iterator +1;
-            std::cout << "iterator: " << iterator << std::endl;
+            if X.last() = X[m]
           }
-          if(iterator == 1) NHad = NHad +1;
         }
       }
-      std::cout << "NHad (inside): " << NHad << std::endl;
+
     }
   }
 
