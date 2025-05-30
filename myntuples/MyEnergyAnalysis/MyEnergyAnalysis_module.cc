@@ -56,6 +56,11 @@ namespace {
   // visible beyond this file. We will define functions at the end,
   // but we declare them here so that the module can freely use them.
 
+  struct Vertex{
+    float x, t, z, t;
+    std::vector<const simb::MCParticle*> daughters;
+  }
+
   // Utility function to get the diagonal of the detector
   double DetectorDiagonal(geo::GeometryCore const& geom);
 
@@ -80,7 +85,13 @@ namespace {
   //Ancestor Mother is pi0
   bool IsAncestorMotherPi0(const simb::MCParticle&, std::vector<int>, std::map<int, const simb::MCParticle*>);
 
-  void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
+  //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
+
+  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters);
+
+  double getPrimaryKE(const simb::MCParticle* particle, double x, double y, double z);
+
+  void getHadronic02(const simb::MCParticle* currentParticle, const std::vector<const simb::MCParticle*>& allParticles, double& totalBindingE, int& nHadronicInteractions);
 
   void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
 
@@ -979,7 +990,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     primary_vec.push_back(SimParticles[i]);
     NHad = 0;
     BindingE = 0;
-    getHadronicInformation(SimParticles[i], CurrentDaughters, NHad, BindingE);
+    getHadronic02(SimParticles[i], SimParticles, NHad, BindingE);
     std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
     }
   }
@@ -1388,61 +1399,136 @@ namespace {
 
   } // end GetAncestorMotherPi0TrkID
 
-  void getHadronicInformation(const simb::MCParticle* primary, const std::vector<const simb::MCParticle*>& daughters, int NHad, double BindingE){
-    int pNTP = primary->NumberTrajectoryPoints();
-    int pLast = pNTP - 1;
-    for(size_t k = 0; k < daughters.size(); k++){
-      //int dNTP = daughters[k]->NumberTrajectoryPoints();
-      //int dLast = dNTP - 1;
-      const TLorentzVector& daughterstart = daughters[k]->Position(0);
-      const TLorentzVector& Edaughterstart = daughters[k]->Momentum(0);
-      std::vector<float> X;
-      std::vector<float> Y;
-      std::vector<float> Z;
-      std::vector<float> T;
-      for(int l = 0; l < pLast; l++){
-        const TLorentzVector& pripos = primary->Position(l);
-        float epsilon = 0.01;
-        double Ein = 0;
-        double Eout = 0;
-        if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
-          if(abs(primary->PdgCode()) == 211){
-            Ein = primary->E(l);
-          }
-          else{
-            Ein = primary->E(l) - primary->Mass();
-          }
-          std::cout << "PDG of primary: " << primary->PdgCode() << std::endl;
-          std::cout << "PDG of daughter: " << daughters[k]->PdgCode() << std::endl;
-          if(abs(daughters[k]->PdgCode()) == 211){
-           Eout = Edaughterstart.E();
-          }
-          else{
-            Eout = Edaughterstart.E() - daughters[k]->Mass();
-          }
-          std::cout << "Ein: " << Ein << std::endl;
-          std::cout << "Eout: " << Eout << std::endl;
-          double currentBindingE = Ein - Eout;
-          std::cout << "Current Binding Energy: " << currentBindingE << std::endl;
-          BindingE += currentBindingE;
-          std::cout << "BindingE (inside func) : " << BindingE << std::endl;
-          X.push_back(daughterstart.X());
-          Y.push_back(daughterstart.Y());
-          Z.push_back(daughterstart.Z());
-          T.push_back(daughterstart.T());
-          int Xsize = X.size();
-          int Xlast = Xsize - 1;
-          int iterator = 0;
-          for(size_t m = 0; m < X.size(); m++){
-            if(abs(X[Xlast] - X[m]) < epsilon && abs(Y[Xlast] - Y[m]) < epsilon && abs(Z[Xlast] - Z[m]) < epsilon && abs(T[Xlast] - T[m]) < epsilon) iterator = iterator +1;
-            std::cout << "iterator: " << iterator << std::endl;
-          }
-          if(iterator == 1) NHad = NHad +1;
+  // void getHadronicInformation(const simb::MCParticle* primary, const std::vector<const simb::MCParticle*>& daughters, int& NHad, double& BindingE){
+  //   int pNTP = primary->NumberTrajectoryPoints();
+  //   int pLast = pNTP - 1;
+  //   for(size_t k = 0; k < daughters.size(); k++){
+  //     //int dNTP = daughters[k]->NumberTrajectoryPoints();
+  //     //int dLast = dNTP - 1;
+  //     const TLorentzVector& daughterstart = daughters[k]->Position(0);
+  //     const TLorentzVector& Edaughterstart = daughters[k]->Momentum(0);
+  //     std::vector<float> X;
+  //     std::vector<float> Y;
+  //     std::vector<float> Z;
+  //     std::vector<float> T;
+  //     for(int l = 0; l < pLast; l++){
+  //       const TLorentzVector& pripos = primary->Position(l);
+  //       float epsilon = 0.01;
+  //       double Ein = 0;
+  //       double Eout = 0;
+  //       if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
+  //         if(abs(primary->PdgCode()) == 211){
+  //           Ein = primary->E(l);
+  //         }
+  //         else{
+  //           Ein = primary->E(l) - primary->Mass();
+  //         }
+  //         std::cout << "PDG of primary: " << primary->PdgCode() << std::endl;
+  //         std::cout << "PDG of daughter: " << daughters[k]->PdgCode() << std::endl;
+  //         if(abs(daughters[k]->PdgCode()) == 211){
+  //          Eout = Edaughterstart.E();
+  //         }
+  //         else{
+  //           Eout = Edaughterstart.E() - daughters[k]->Mass();
+  //         }
+  //         std::cout << "Ein: " << Ein << std::endl;
+  //         std::cout << "Eout: " << Eout << std::endl;
+  //         double currentBindingE = Ein - Eout;
+  //         std::cout << "Current Binding Energy: " << currentBindingE << std::endl;
+  //         BindingE += currentBindingE;
+  //         std::cout << "BindingE (inside func) : " << BindingE << std::endl;
+  //         X.push_back(daughterstart.X());
+  //         Y.push_back(daughterstart.Y());
+  //         Z.push_back(daughterstart.Z());
+  //         T.push_back(daughterstart.T());
+  //         int Xsize = X.size();
+  //         int Xlast = Xsize - 1;
+  //         int iterator = 0;
+  //         for(size_t m = 0; m < X.size(); m++){
+  //           if(abs(X[Xlast] - X[m]) < epsilon && abs(Y[Xlast] - Y[m]) < epsilon && abs(Z[Xlast] - Z[m]) < epsilon && abs(T[Xlast] - T[m]) < epsilon) iterator = iterator +1;
+  //           std::cout << "iterator: " << iterator << std::endl;
+  //         }
+  //         if(iterator == 1) NHad = NHad +1;
+  //       }
+  //     }
+  //     std::cout << "NHad (inside): " << NHad << std::endl;
+  //   }
+  // }
+
+
+
+  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters, float epsilon = 0.01, float tepsilon = 1e-3){
+    std::vector<Vertex> vertices;
+    
+    for (const simb::MCParticle* d : daugters){
+      const TLorentzVector& pos = d->Position(0);
+      float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
+      bool found = false;
+      for (Vertex& v : vertices) {
+        if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon) {
+          v.daughters.push_back(d);
+          found = true;
+          break;
         }
       }
-      std::cout << "NHad (inside): " << NHad << std::endl;
+      if (!found){
+        Vertex vert = {x, y, z, t, {d}};
+        vertices.push_back(vert);
+      }
+  }
+  return vertices;
+}
+
+double getPrimaryKE(const simb::MCParticle* primary, float x, float y, float z){
+  double minDist = 1e10;
+  int closestDist = 0;
+
+  for(int m = 0; m < primary->NumberTrajectoryPoints(); ++m){
+    const TLorentzVector& position = primary->Position(m);
+    double dist = std::sqrt(std::pow(position.X() - x, 2) + std::pow(position.Y() - y, 2) + std::pow(position.Z() - z, 2));
+    if (dist < minDist) {
+      minDist = dist;
+      closestDist = m;
     }
   }
+  const TLorentzVector& ClosestMom = primary->Momentum(closestDist);
+  return ClosestMom.E() - primary->Mass();
+}
+
+void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, double& totalBindingE){
+  std::vector<const simb::MCParticle*> daughters;
+  TLorentzVector currentPos = currentParticle->Position(0);
+
+  for(const simb::MCParticle* p : allPart){
+    if(p->Mother() == currentParticle->TrackId()){
+      daughters.push_back(p)
+    }
+  }
+  
+  if(!daughters.empty()){
+    std::vector<Vertex> vertices = clusterVertices(daughters);
+
+    for(const auto& vertex : vertices){
+      double Ein = getPrimaryKE(particle, vertex.x, vertex.y, vertex.z);
+      double Eout = 0.0;
+
+      for(const simb::MCParticle* daughter : vertex.daughters){
+        if(daughter->PdgCode() == 211){ // Check if daughter is a pion
+          Eout += daughter->Momentum(0).E();
+        } else {
+          Eout += daughter->Momentum(0).E() - daughter->Mass(); // For other particles, subtract mass
+        }
+      }
+      if(Ein > Eout){
+        totalBindingE += (Ein - Eout);
+        NHad++;
+      }
+    }
+  }
+  for(const simb::MCParticle* daughter : daughters){
+    getHadronic02(daughter, allPart, NHad, totalBindingE);
+  }
+}
 
   void getDescendants(int motherID, const std::vector<int>& momVec, const std::vector<int>& TrkIDvec, const std::map<int, const simb::MCParticle*>& particleMap, std::vector<const simb::MCParticle*>& primaryDaughters){
     for (size_t j = 0; j < TrkIDvec.size(); j++){
