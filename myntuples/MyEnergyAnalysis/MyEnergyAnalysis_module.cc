@@ -87,11 +87,11 @@ namespace {
 
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
-  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters);
+  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
 
-  double getPrimaryKE(const simb::MCParticle* particle, double x, double y, double z);
+  double getPrimaryKE(const simb::MCParticle*, double, double, double);
 
-  void getHadronic02(const simb::MCParticle* currentParticle, const std::vector<const simb::MCParticle*>& allParticles, int& nHadronicInteractions, double& totalBindingE);
+  void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int& , double&);
 
   void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
 
@@ -1480,12 +1480,12 @@ double getPrimaryKE(const simb::MCParticle* primary, float x, float y, float z){
   double minDist = 1e10;
   int closestDist = 0;
 
-  for(unsigned dint m = 0; m < primary->NumberTrajectoryPoints(); ++m){
-    const TLorentzVector& position = primary->Position(m);
+  for(unsigned int n = 0; n < primary->NumberTrajectoryPoints(); ++n){
+    const TLorentzVector& position = primary->Position(n);
     double dist = std::sqrt(std::pow(position.X() - x, 2) + std::pow(position.Y() - y, 2) + std::pow(position.Z() - z, 2));
     if (dist < minDist) {
       minDist = dist;
-      closestDist = m;
+      closestDist = n;
     }
   }
   const TLorentzVector& ClosestMom = primary->Momentum(closestDist);
