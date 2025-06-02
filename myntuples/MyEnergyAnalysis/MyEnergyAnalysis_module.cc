@@ -1480,7 +1480,7 @@ double getPrimaryKE(const simb::MCParticle* primary, float x, float y, float z){
   double minDist = 1e10;
   int closestDist = 0;
 
-  for(int m = 0; m < primary->NumberTrajectoryPoints(); ++m){
+  for(unsigned dint m = 0; m < primary->NumberTrajectoryPoints(); ++m){
     const TLorentzVector& position = primary->Position(m);
     double dist = std::sqrt(std::pow(position.X() - x, 2) + std::pow(position.Y() - y, 2) + std::pow(position.Z() - z, 2));
     if (dist < minDist) {
@@ -1498,7 +1498,7 @@ void getHadronic02(const simb::MCParticle* particle, const std::vector<const sim
 
   for(const simb::MCParticle* p : allPart){
     if(p->Mother() == particle->TrackId()){
-      daughters.push_back(p)
+      daughters.push_back(p);
     }
   }
   
