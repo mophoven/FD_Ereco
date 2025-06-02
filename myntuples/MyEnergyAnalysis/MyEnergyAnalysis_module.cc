@@ -57,9 +57,9 @@ namespace {
   // but we declare them here so that the module can freely use them.
 
   struct Vertex{
-    float x, t, z, t;
+    float x, y, z, t;
     std::vector<const simb::MCParticle*> daughters;
-  }
+  };
 
   // Utility function to get the diagonal of the detector
   double DetectorDiagonal(geo::GeometryCore const& geom);
@@ -91,7 +91,7 @@ namespace {
 
   double getPrimaryKE(const simb::MCParticle* particle, double x, double y, double z);
 
-  void getHadronic02(const simb::MCParticle* currentParticle, const std::vector<const simb::MCParticle*>& allParticles, double& totalBindingE, int& nHadronicInteractions);
+  void getHadronic02(const simb::MCParticle* currentParticle, const std::vector<const simb::MCParticle*>& allParticles, int& nHadronicInteractions, double& totalBindingE);
 
   void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
 
@@ -975,9 +975,6 @@ namespace lar {
  
 std::vector<std::vector<const simb::MCParticle*>> DaughterpartVec;
 std::vector<const simb::MCParticle*> primary_vec;
-int NHad;
-double BindingE;
-
 
 for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
@@ -988,8 +985,8 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
     DaughterpartVec.push_back(CurrentDaughters);
     primary_vec.push_back(SimParticles[i]);
-    NHad = 0;
-    BindingE = 0;
+    int NHad = 0;
+    double BindingE = 0.0;
     getHadronic02(SimParticles[i], SimParticles, NHad, BindingE);
     std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
     }
@@ -1460,7 +1457,7 @@ namespace {
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters, float epsilon = 0.01, float tepsilon = 1e-3){
     std::vector<Vertex> vertices;
     
-    for (const simb::MCParticle* d : daugters){
+    for (const simb::MCParticle* d : daughters){
       const TLorentzVector& pos = d->Position(0);
       float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
       bool found = false;
@@ -1497,10 +1494,10 @@ double getPrimaryKE(const simb::MCParticle* primary, float x, float y, float z){
 
 void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, double& totalBindingE){
   std::vector<const simb::MCParticle*> daughters;
-  TLorentzVector currentPos = currentParticle->Position(0);
+  TLorentzVector currentPos = particle->Position(0);
 
   for(const simb::MCParticle* p : allPart){
-    if(p->Mother() == currentParticle->TrackId()){
+    if(p->Mother() == particle->TrackId()){
       daughters.push_back(p)
     }
   }
