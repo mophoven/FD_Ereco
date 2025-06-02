@@ -1479,7 +1479,7 @@ namespace {
   return vertices;
 }
 
-double getPrimaryKE(const simb::MCParticle* primary, float x, float y, float z){
+double getPrimaryKE(const simb::MCParticle* primary, double x, double y, double z){
   double minDist = 1e10;
   int closestDist = 0;
 
