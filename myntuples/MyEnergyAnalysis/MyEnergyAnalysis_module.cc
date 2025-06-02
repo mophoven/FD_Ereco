@@ -1454,8 +1454,11 @@ namespace {
 
 
 
-  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters, float epsilon = 0.01, float tepsilon = 1e-3){
+  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters){
     std::vector<Vertex> vertices;
+
+    float epsilon = 0.01; 
+    float tepsilon = 1e-3;
     
     for (const simb::MCParticle* d : daughters){
       const TLorentzVector& pos = d->Position(0);
