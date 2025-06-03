@@ -968,7 +968,7 @@ namespace lar {
 		fSim_end_4mommenta.push_back(momentumEnd.Py());
 		fSim_end_4mommenta.push_back(momentumEnd.Pz());
 		fSim_end_4mommenta.push_back(momentumEnd.E()); */
-    }
+    //}
         // loop over every trajectory point, compare to geometry,
     // pull out E, subtract m, and do something with KE
     size_t Ntraj = particleVec.NumberTrajectoryPoints();
@@ -995,6 +995,7 @@ namespace lar {
         break;  // stop at first exit
       }
     }
+  }
   //End four-vector collection
 
 
