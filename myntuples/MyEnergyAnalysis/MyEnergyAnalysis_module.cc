@@ -1276,6 +1276,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
 
   } // namespace example
 } // namespace lar
+}
 
 // Back to our local namespace.
 namespace {
