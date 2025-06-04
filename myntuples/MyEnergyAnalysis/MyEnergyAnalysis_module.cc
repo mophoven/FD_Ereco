@@ -1008,14 +1008,14 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   std::vector<const simb::MCParticle*> CurrentDaughters;
   CurrentDaughters.clear();
   if (currentMom == 0){
-    int primary = fSimP_TrackID_vec[i];
+    //int primary = fSimP_TrackID_vec[i];
     //getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
     DaughterpartVec.push_back(CurrentDaughters);
     //std::cout << "Mother: " <<  SimParticles[i]->PdgCode() << std::endl;
-    for (const auto* part : CurrentDaughters) {
+    //for (const auto* part : CurrentDaughters) {
       //std::cout << "Descendant PDG: " << part->PdgCode() << " E: " << part->E() << " status: " << part->StatusCode() << std::endl;
   }
-    }
+   // }
   }
 
 
