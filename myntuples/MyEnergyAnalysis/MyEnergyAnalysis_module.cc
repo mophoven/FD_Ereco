@@ -929,7 +929,7 @@ namespace lar {
     for (int i = 0; i < fSim_nParticles; i++){
 		  const simb::MCParticle& particleVec = *(SimParticles[i]);
 
-	    const size_t Ntrajpoints = particleVec.NumberTrajectoryPoints();
+	  
 
   	 /* const int last = Ntrajpoints - 1;
 	    const TLorentzVector& positionStart = particleVec.Position(0);
