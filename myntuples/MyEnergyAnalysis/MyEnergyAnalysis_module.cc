@@ -1023,9 +1023,10 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
   std::vector<const simb::MCParticle*> CurrentDaughters;
   CurrentDaughters.clear();
-  const simb::MCParticle currentpart = *(SimParticles[i]);
-  getDescendants(currentpart, SimParticles, currentMom, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
+  const simb::MCParticle currentpart = SimParticles[i];
+  getDescendants(fSimP_TrackID_vec[i], SimParticles, currentMom, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
   std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
+  std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
   for (const Vertex& vtx : interactionVertices){
     fillInteractionTree(currentpart, vtx, particleMap);
   } 
@@ -1531,7 +1532,7 @@ namespace {
     double minDist = 1e10;
     TLorentzVector bestMom;
     
-    for (int i = 0; i < incoming->NumberTrajectoryPoints(); ++i) {
+    for (unsigned int i = 0; i < incoming->NumberTrajectoryPoints(); ++i) {
       TLorentzVector pos = incoming->Position(i);
       double dist = std::sqrt(std::pow(pos.X() - vertex.x, 2) +
                               std::pow(pos.Y() - vertex.y, 2) +
@@ -1548,7 +1549,7 @@ namespace {
     fInE = bestMom.E();
     fInPDG = incoming->PdgCode();
 
-    for (const simb::MCParticle* daughter : vtx.daughters) {
+    for (const simb::MCParticle* daughter : vertex.daughters) {
       int dTrackID = daughter->TrackId();
   
       bool interacts = false;
@@ -1580,31 +1581,31 @@ namespace {
     }
   }
 
-  std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle* incoming, const std::vector<const simb::MCParticle*>& daughters){
-    float epsilon = 0.01;
-    float tepsilon = 1e-3;
-    std::vector<primaryVertex> vtxs;
+  // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle* incoming, const std::vector<const simb::MCParticle*>& daughters){
+  //   float epsilon = 0.01;
+  //   float tepsilon = 1e-3;
+  //   std::vector<primaryVertex> vtxs;
 
-    for (const simb::MCParticle* d : daughters){
-      const TLorentzVector& pos = d->Position(0);
-      float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
-      bool found = false;
+  //   for (const simb::MCParticle* d : daughters){
+  //     const TLorentzVector& pos = d->Position(0);
+  //     float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
+  //     bool found = false;
 
-      for (primaryVertex& v : vtxs) {
-        if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon) {
-          v.daughters.push_back(d);
-          found = true;
-          break;
-        }
-      }
+  //     for (primaryVertex& v : vtxs) {
+  //       if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon) {
+  //         v.daughters.push_back(d);
+  //         found = true;
+  //         break;
+  //       }
+  //     }
 
-      if (!found) {
-        primaryVertex vtx = {x, y, z, t, incoming, {d}};
-        vtxs.push_back(vtx);
-      }
-    }
-      return vtxs;
-  }
+  //     if (!found) {
+  //       primaryVertex vtx = {x, y, z, t, incoming, {d}};
+  //       vtxs.push_back(vtx);
+  //     }
+  //   }
+  //     return vtxs;
+  // }
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters){
     std::vector<Vertex> vertices;
