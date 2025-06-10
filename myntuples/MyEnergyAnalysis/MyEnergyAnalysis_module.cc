@@ -87,6 +87,8 @@ namespace {
 
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
+  void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&);
+
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
 
   double getPrimaryKE(const simb::MCParticle*, double, double, double);
@@ -171,6 +173,16 @@ namespace lar {
 
       // The n-tuple to create
       TTree* fNtuple;
+
+      TTree* fInteractionTree; // Tree for interaction information
+
+      float fInX, fInY, fInZ, fInT;
+      float fInPx, fInPy, fInPz, fInE;
+      int fInPDG;
+
+      std::vector<float> fOutX, fOutY, fOutZ, fOutT;
+      std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
+      std::vector<int> fOutPDG;
 
       // Event info
       int fEvent;  // number of the event being processed
@@ -356,6 +368,28 @@ namespace lar {
       art::ServiceHandle<art::TFileService const> tfs;
 
       // Define n-tuples
+      fInteractionTree = tfs->make<TTree>("HadronicTree", "Handronic Interaction Information");
+      fInteractionTree->Branch("InX", &fInX, "InX/F");
+      fInteractionTree->Branch("InY", &fInY, "InY/F");
+      fInteractionTree->Branch("InZ", &fInZ, "InZ/F");
+      fInteractionTree->Branch("InT", &fInT, "InT/F"); 
+      fInteractionTree->Branch("InPx", &fInPx, "InPx/F");
+      fInteractionTree->Branch("InPy", &fInPy, "InPy/F");
+      fInteractionTree->Branch("InPz", &fInPz, "InPz/F");
+      fInteractionTree->Branch("InE", &fInE, "InE/F");
+      fInteractionTree->Branch("InPDG", &fInPDG, "InPDG/I");
+      fInteractionTree->Branch("OutX", &fOutX);
+      fInteractionTree->Branch("OutY", &fOutY);
+      fInteractionTree->Branch("OutZ", &fOutZ);
+      fInteractionTree->Branch("OutT", &fOutT);
+      fInteractionTree->Branch("OutPx", &fOutPx);
+      fInteractionTree->Branch("OutPy", &fOutPy);
+      fInteractionTree->Branch("OutPz", &fOutPz);
+      fInteractionTree->Branch("OutE", &fOutE);
+      fInteractionTree->Branch("OutPDG", &fOutPDG);
+
+
+
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
       fNtuple->Branch("Event",                    &fEvent,                  "Event/I");
@@ -1452,7 +1486,73 @@ namespace {
   //   }
   // }
 
+  void fillInteractionTree(const simb::MCPaticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap){
+    fOutX.clear();
+    fOutY.clear();
+    fOutZ.clear();
+    fOutT.clear();
+    fOutPDG.clear();
+    fOutPx.clear();
+    fOutPy.clear();
+    fOutPz.clear();
+    fOutE.clear();
 
+    fInX = vertex.x;
+    fInY = vertex.y;
+    fInZ = vertex.z;
+    fInT = vertex.t;
+
+    double minDist = 1e10;
+    TLorentzVector bestMom;
+    
+    for (int i = 0; i < incoming->NumberTrajectoryPoints(); ++i) {
+      TLorentzVector pos = incoming->Position(i);
+      double dist = std::sqrt(std::pow(pos.X() - vertex.x, 2) +
+                              std::pow(pos.Y() - vertex.y, 2) +
+                              std::pow(pos.Z() - vertex.z, 2));
+      if (dist < minDist) {
+        minDist = dist;
+        bestMom = incoming->Momentum(i);
+      }
+    }
+
+    fInPx = bestMom.Px();
+    fInPy = bestMom.Py();
+    fInPz = bestMom.Pz();
+    fInE = bestMom.E();
+    fInPDG = incoming->PdgCode();
+
+    for (const simb::MCParticle* daughter : vtx.daughters) {
+      int dTrackID = daughter->TrackId();
+  
+      bool interacts = false;
+      for (const auto& entry : particleMap) {
+        const simb::MCParticle* p = entry.second;
+        if (p->Mother() == dTrackID) {
+          interacts = true;
+          break;
+        }
+      }
+
+      if(!interacts) continue;
+      const TLorentzVector& pos = daughter->Position(0);
+      const TLorentzVector& mom = daughter->Momentum(0);
+      fOutX.push_back(pos.X());
+      fOutY.push_back(pos.Y());
+      fOutZ.push_back(pos.Z());
+      fOutT.push_back(pos.T());
+
+      fOutPx.push_back(mom.Px());
+      fOutPy.push_back(mom.Py());
+      fOutPz.push_back(mom.Pz());
+      fOutE.push_back(mom.E());
+      fOutPDG.push_back(daughter->PdgCode());
+    }
+
+    if(!fOutX.empty()){
+      fInteractionTree->Fill();
+    }
+  }
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters){
     std::vector<Vertex> vertices;
