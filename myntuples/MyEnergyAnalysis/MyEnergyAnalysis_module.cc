@@ -61,6 +61,13 @@ namespace {
     std::vector<const simb::MCParticle*> daughters;
   };
 
+  struct primaryVertex{
+    float x, y, z, t;
+    const simb::MCParticle* incoming;
+    std::vector<const simb::MCParticle*> daughters;
+  };
+  
+
   // Utility function to get the diagonal of the detector
   double DetectorDiagonal(geo::GeometryCore const& geom);
 
@@ -97,6 +104,7 @@ namespace {
 
   void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
 
+  std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
 
 } // local namespace
 
@@ -369,6 +377,7 @@ namespace lar {
 
       // Define n-tuples
       fInteractionTree = tfs->make<TTree>("HadronicTree", "Handronic Interaction Information");
+
       fInteractionTree->Branch("InX", &fInX, "InX/F");
       fInteractionTree->Branch("InY", &fInY, "InY/F");
       fInteractionTree->Branch("InZ", &fInZ, "InZ/F");
@@ -1014,6 +1023,12 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
   std::vector<const simb::MCParticle*> CurrentDaughters;
   CurrentDaughters.clear();
+  simb::MCParticle currentpart = *(SimParticles[i])
+  getDescendants(currentpart, SimParticles, currentMom, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
+  std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
+  for (const Vertex& vtx : interactionVertices){
+    fillInteractionTree(currentpart, vtx, particleMap);
+  } 
   if (currentMom == 0){
     int primary = fSimP_TrackID_vec[i];
     getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
@@ -1022,9 +1037,11 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     int NHad = 0;
     double BindingE = 0.0;
     getHadronic02(SimParticles[i], SimParticles, NHad, BindingE);
-    std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
+    //std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
     }
   }
+
+
 
   //for(size_t n = 0; n < DaughterpartVec.size(); n++){
   //  int NHad = 0;
@@ -1487,6 +1504,7 @@ namespace {
   // }
 
   void fillInteractionTree(const simb::MCPaticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap){
+
     fOutX.clear();
     fOutY.clear();
     fOutZ.clear();
@@ -1552,6 +1570,32 @@ namespace {
     if(!fOutX.empty()){
       fInteractionTree->Fill();
     }
+  }
+
+  std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle* incoming, const std::vector<const simb::MCParticle*>& daughters){
+    float epsilon = 0.01;
+    float tepsilon = 1e-3;
+    std::vector<primaryVertex> vtxs;
+
+    for (const simb::MCParticle* d : daughters){
+      const TLorentzVector& pos = d->Position(0);
+      float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
+      bool found = false;
+
+      for (primaryVertex& v : vtxs) {
+        if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon) {
+          v.daughters.push_back(d);
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        primaryVertex vtx = {x, y, z, t, incoming, {d}};
+        vtxs.push_back(vtx);
+      }
+    }
+      return vtxs;
   }
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters){
