@@ -1023,7 +1023,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
   std::vector<const simb::MCParticle*> CurrentDaughters;
   CurrentDaughters.clear();
-  simb::MCParticle currentpart = *(SimParticles[i])
+  const simb::MCParticle currentpart = *(SimParticles[i]);
   getDescendants(currentpart, SimParticles, currentMom, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
   std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
   for (const Vertex& vtx : interactionVertices){
@@ -1503,7 +1503,15 @@ namespace {
   //   }
   // }
 
-  void fillInteractionTree(const simb::MCPaticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap){
+  void fillInteractionTree(const simb::MCParticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap){
+
+    float fInX, fInY, fInZ, fInT;
+    float fInPx, fInPy, fInPz, fInE;
+    int fInPDG;
+
+    std::vector<float> fOutX, fOutY, fOutZ, fOutT;
+    std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
+    std::vector<int> fOutPDG;
 
     fOutX.clear();
     fOutY.clear();
