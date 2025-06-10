@@ -104,7 +104,7 @@ namespace {
 
   void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
 
-  std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
+  //std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
 
 } // local namespace
 
@@ -1506,9 +1506,15 @@ namespace {
 
   void fillInteractionTree(const simb::MCParticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap, TTree* fInteractionTree){
 
-    float fInX, fInY, fInZ, fInT;
-    float fInPx, fInPy, fInPz, fInE;
-    int fInPDG;
+    float fInX = 0;
+    float fInY = 0;
+    float fInZ = 0;
+    float fInT = 0;
+    float fInPx = 0;
+    float fInPy = 0;
+    float fInPz = 0;
+    float fInE = 0;
+    int fInPDG = 0;
 
     std::vector<float> fOutX, fOutY, fOutZ, fOutT;
     std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
