@@ -94,7 +94,7 @@ namespace {
 
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
-  void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&);
+  void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*);
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
 
@@ -1023,12 +1023,12 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
   std::vector<const simb::MCParticle*> CurrentDaughters;
   CurrentDaughters.clear();
-  const simb::MCParticle currentpart = SimParticles[i];
-  getDescendants(fSimP_TrackID_vec[i], SimParticles, currentMom, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
+  const simb::MCParticle* currentpart = SimParticles[i];
+  getDescendants(fSimP_TrackID_vec[i], fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
   std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
   std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
   for (const Vertex& vtx : interactionVertices){
-    fillInteractionTree(currentpart, vtx, particleMap);
+    fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree);
   } 
   if (currentMom == 0){
     int primary = fSimP_TrackID_vec[i];
@@ -1504,7 +1504,7 @@ namespace {
   //   }
   // }
 
-  void fillInteractionTree(const simb::MCParticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap){
+  void fillInteractionTree(const simb::MCParticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap, TTree* fInteractionTree){
 
     float fInX, fInY, fInZ, fInT;
     float fInPx, fInPy, fInPz, fInE;
