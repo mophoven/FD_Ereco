@@ -1028,7 +1028,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
   std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
   for (const Vertex& vtx : interactionVertices){
-    fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree);
+    fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG);
   } 
   if (currentMom == 0){
     int primary = fSimP_TrackID_vec[i];
@@ -1504,17 +1504,8 @@ namespace {
   //   }
   // }
 
-  void fillInteractionTree(const simb::MCParticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap, TTree* fInteractionTree){
-
-    fInX = 0;
-    fInY = 0;
-    fInZ = 0;
-    fInT = 0;
-    fInPx = 0;
-    fInPy = 0;
-    fInPz = 0;
-    fInE = 0;
-    fInPDG = 0;
+  void fillInteractionTree(const simb::MCParticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap, TTree* fInteractionTree, float& fInX, float& fInY, float& fInZ, float& fInT, 
+                          float& fInPx, float& fInPy, float& fInPz, float& fInE, int& fInPDG) {
 
     std::vector<float> fOutX, fOutY, fOutZ, fOutT;
     std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
