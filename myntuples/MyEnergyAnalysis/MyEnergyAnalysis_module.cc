@@ -61,11 +61,11 @@ namespace {
     std::vector<const simb::MCParticle*> daughters;
   };
 
-  struct primaryVertex{
-    float x, y, z, t;
-    const simb::MCParticle* incoming;
-    std::vector<const simb::MCParticle*> daughters;
-  };
+  // struct primaryVertex{
+  //   float x, y, z, t;
+  //   const simb::MCParticle* incoming;
+  //   std::vector<const simb::MCParticle*> daughters;
+  // };
   
 
   // Utility function to get the diagonal of the detector
@@ -1506,15 +1506,15 @@ namespace {
 
   void fillInteractionTree(const simb::MCParticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap, TTree* fInteractionTree){
 
-    float fInX = 0;
-    float fInY = 0;
-    float fInZ = 0;
-    float fInT = 0;
-    float fInPx = 0;
-    float fInPy = 0;
-    float fInPz = 0;
-    float fInE = 0;
-    int fInPDG = 0;
+    fInX = 0;
+    fInY = 0;
+    fInZ = 0;
+    fInT = 0;
+    fInPx = 0;
+    fInPy = 0;
+    fInPz = 0;
+    fInE = 0;
+    fInPDG = 0;
 
     std::vector<float> fOutX, fOutY, fOutZ, fOutT;
     std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
