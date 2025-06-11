@@ -926,8 +926,8 @@ namespace lar {
 
       // Store info for leading E sim numu GEANT 4 level
 
-    //for (int i = 0; i < fSim_nParticles; i++){
-		  //const simb::MCParticle& particleVec = *(SimParticles[i]);
+    for (int i = 0; i < fSim_nParticles; i++){
+		  const simb::MCParticle& particleVec = *(SimParticles[i]);
 
 	  
 
@@ -937,8 +937,65 @@ namespace lar {
 	    const TLorentzVector& momentumStart = particleVec.Momentum(0);
 	    const TLorentzVector& momentumEnd = particleVec.Momentum(last);*/
 
+// New stuff
+  double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
+  auto const& geom = *fGeometryService;
+  fXmin = 0.0;
+  fXmax = geom.DetLength();
+  fYmin = -geom.DetHalfWidth();
+  fYmax =  geom.DetHalfWidth();
+  fZmin = -geom.DetHalfHeight();
+  fZmax =  geom.DetHalfHeight();
 
-  //}
+  // 2) Loop over each particle
+  for (int l=0; l<fSim_nParticles; l++) {
+    
+   
+
+     /*   fSim_start_4position.push_back(positionStart.X());
+		fSim_start_4position.push_back(positionStart.Y());
+		fSim_start_4position.push_back(positionStart.Z());
+		fSim_start_4position.push_back(positionStart.T());
+        fSim_end_4position.push_back(positionEnd.X());
+		fSim_end_4position.push_back(positionEnd.Y());
+		fSim_end_4position.push_back(positionEnd.Z());
+		fSim_end_4position.push_back(positionEnd.T());
+        fSim_start_4mommenta.push_back(momentumStart.Px());
+		fSim_start_4mommenta.push_back(momentumStart.Py());
+		fSim_start_4mommenta.push_back(momentumStart.Pz());
+		fSim_start_4mommenta.push_back(momentumStart.E());
+        fSim_end_4mommenta.push_back(momentumEnd.Px());
+		fSim_end_4mommenta.push_back(momentumEnd.Py());
+		fSim_end_4mommenta.push_back(momentumEnd.Pz());
+		fSim_end_4mommenta.push_back(momentumEnd.E()); */
+    
+        // loop over every trajectory point, compare to geometry,
+    // pull out E, subtract m, and do something with KE
+    size_t Ntraj = particleVec.NumberTrajectoryPoints();
+    for (size_t ipt = 0; ipt < Ntraj; ++ipt) {
+      auto const& pos = particleVec.Position(ipt);
+      auto const& mom = particleVec.Momentum(ipt);
+
+      double x    = pos.X();
+      double y    = pos.Y();
+      double z    = pos.Z();
+      double Etot = mom.E();
+      double m0   = particleVec.Mass();
+      double KE   = Etot - m0;
+
+      // compare to cached bounds (set up in your ctor)
+      if ( x < fXmin || x > fXmax ||
+           y < fYmin || y > fYmax ||
+           z < fZmin || z > fZmax )
+      {
+        std::cout << "Particle " << particleVec.TrackId()
+                  << " exited at pt " << ipt
+                  << " with KE = " << KE << " GeV\n" << std::endl;
+       // declare this fEscapedKineticEnergies.push_back(KE);
+        break;  // stop at first exit
+      }
+    }
+  }
   //End four-vector collection
 
 
