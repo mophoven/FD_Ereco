@@ -94,7 +94,9 @@ namespace {
 
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
-  void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, float&, float&, float&, float&, float&, float&, float&, float&, int&);
+  void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
+                            float&, float&, float&, float&, float&, float&, float&, float&, int&, std::vector<float>&, std::vector<float>&,
+                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<int>&);
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
 
@@ -1028,7 +1030,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
   std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
   for (const Vertex& vtx : interactionVertices){
-    fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG);
+    fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
   } 
   if (currentMom == 0){
     int primary = fSimP_TrackID_vec[i];
@@ -1505,11 +1507,10 @@ namespace {
   // }
 
   void fillInteractionTree(const simb::MCParticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap, TTree* fInteractionTree, float& fInX, float& fInY, float& fInZ, float& fInT, 
-                          float& fInPx, float& fInPy, float& fInPz, float& fInE, int& fInPDG) {
+                          float& fInPx, float& fInPy, float& fInPz, float& fInE, int& fInPDG, std::vector<float>& OutX, std::vector<float>& OutY, std::vector<float>& OutZ, std::vector<float>& OutT,
+                          std::vector<float>& OutPx, std::vector<float>& OutPy, std::vector<float>& OutPz, std::vector<float>& OutE, std::vector<int>& OutPDG) {
 
-    std::vector<float> fOutX, fOutY, fOutZ, fOutT;
-    std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
-    std::vector<int> fOutPDG;
+
 
     fOutX.clear();
     fOutY.clear();
