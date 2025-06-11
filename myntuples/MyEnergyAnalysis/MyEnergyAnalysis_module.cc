@@ -1507,8 +1507,8 @@ namespace {
   // }
 
   void fillInteractionTree(const simb::MCParticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap, TTree* fInteractionTree, float& fInX, float& fInY, float& fInZ, float& fInT, 
-                          float& fInPx, float& fInPy, float& fInPz, float& fInE, int& fInPDG, std::vector<float>& OutX, std::vector<float>& OutY, std::vector<float>& OutZ, std::vector<float>& OutT,
-                          std::vector<float>& OutPx, std::vector<float>& OutPy, std::vector<float>& OutPz, std::vector<float>& OutE, std::vector<int>& OutPDG) {
+                          float& fInPx, float& fInPy, float& fInPz, float& fInE, int& fInPDG, std::vector<float>& fOutX, std::vector<float>& fOutY, std::vector<float>& fOutZ, std::vector<float>& fOutT,
+                          std::vector<float>& fOutPx, std::vector<float>& fOutPy, std::vector<float>& fOutPz, std::vector<float>& fOutE, std::vector<int>& fOutPDG) {
 
 
 
