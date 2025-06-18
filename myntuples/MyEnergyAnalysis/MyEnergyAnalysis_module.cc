@@ -1029,7 +1029,28 @@ namespace lar {
     // pull out E, subtract m, and do something with KE
     size_t Ntraj = particleVec.NumberTrajectoryPoints();
     //for (size_t ipt = 0; ipt < Ntraj; ++ipt) {
+      auto const& pos = particleVec.Position(ipt);
+      auto const& mom = particleVec.Momentum(ipt);
 
+      double x    = pos.X();
+      double y    = pos.Y();
+      double z    = pos.Z();
+      double Etot = mom.E();
+      double m0   = particleVec.Mass();
+      double KE   = Etot - m0;
+
+      // compare to cached bounds (set up in your ctor)
+      if ( x < fXmin || x > fXmax ||
+           y < fYmin || y > fYmax ||
+           z < fZmin || z > fZmax )
+      {
+        std::cout << "Particle " << particleVec.TrackId()
+                  << " exited at pt " << ipt
+                  << " with KE = " << KE << " GeV\n" << std::endl;
+       // declare this fEscapedKineticEnergies.push_back(KE);
+        break;  // stop at first exit
+      }
+    }
   //End four-vector collection
     
   // Collecting all Daughters of Each primary
