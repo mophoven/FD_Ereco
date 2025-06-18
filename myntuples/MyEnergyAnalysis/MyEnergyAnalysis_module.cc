@@ -1027,7 +1027,7 @@ namespace lar {
     }
     // loop over every trajectory point, compare to geometry,
     // pull out E, subtract m, and do something with KE
-    size_t Ntraj = particleVec.NumberTrajectoryPoints();
+    size_t Ntraj = particleMap.NumberTrajectoryPoints();
     for (size_t ipt = 0; ipt < Ntraj; ++ipt) {
       auto const& pos = particleVec.Position(ipt);
       auto const& mom = particleVec.Momentum(ipt);
