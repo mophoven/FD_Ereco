@@ -1,3 +1,4 @@
+
 /**
  * @file   MyEnergyAnalysis_module.cc
  * @brief  A file to read and analyze art::Event records from a DUNE FD MC file,
@@ -20,7 +21,7 @@
 #include "larsim/Simulation/LArG4Parameters.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
-//com
+
 // Framework includes
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
@@ -56,6 +57,18 @@ namespace {
   // visible beyond this file. We will define functions at the end,
   // but we declare them here so that the module can freely use them.
 
+  struct Vertex{
+    float x, y, z, t;
+    std::vector<const simb::MCParticle*> daughters;
+  };
+
+  // struct primaryVertex{
+  //   float x, y, z, t;
+  //   const simb::MCParticle* incoming;
+  //   std::vector<const simb::MCParticle*> daughters;
+  // };
+  
+
   // Utility function to get the diagonal of the detector
   double DetectorDiagonal(geo::GeometryCore const& geom);
 
@@ -80,8 +93,21 @@ namespace {
   //Ancestor Mother is pi0
   bool IsAncestorMotherPi0(const simb::MCParticle&, std::vector<int>, std::map<int, const simb::MCParticle*>);
 
-  //void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
+  //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
+  void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
+                            float&, float&, float&, float&, float&, float&, float&, float&, int&, std::vector<float>&, std::vector<float>&,
+                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<int>&);
+
+  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
+
+  double getPrimaryKE(const simb::MCParticle*, double, double, double);
+
+  void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int& , double&);
+
+  void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
+
+  //std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
 
 } // local namespace
 
@@ -159,6 +185,16 @@ namespace lar {
       // The n-tuple to create
       TTree* fNtuple;
 
+      TTree* fInteractionTree; // Tree for interaction information
+
+      float fInX, fInY, fInZ, fInT;
+      float fInPx, fInPy, fInPz, fInE;
+      int fInPDG;
+
+      std::vector<float> fOutX, fOutY, fOutZ, fOutT;
+      std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
+      std::vector<int> fOutPDG;
+
       // Event info
       int fEvent;  // number of the event being processed
       int fRun;    // number of the run being processed
@@ -168,6 +204,7 @@ namespace lar {
       double eP, eN, ePip, ePim, ePi0, eOther;    // Energy of particles
       int nLep, nP, nN, nPip, nPim, nPi0, nOther;                            // number of particles
       double E_vis_true;                 // True vis energy [GeV]
+
 
       //
       // Variables related to geneator/simulation
@@ -342,6 +379,29 @@ namespace lar {
       art::ServiceHandle<art::TFileService const> tfs;
 
       // Define n-tuples
+      fInteractionTree = tfs->make<TTree>("HadronicTree", "Handronic Interaction Information");
+
+      fInteractionTree->Branch("InX", &fInX, "InX/F");
+      fInteractionTree->Branch("InY", &fInY, "InY/F");
+      fInteractionTree->Branch("InZ", &fInZ, "InZ/F");
+      fInteractionTree->Branch("InT", &fInT, "InT/F"); 
+      fInteractionTree->Branch("InPx", &fInPx, "InPx/F");
+      fInteractionTree->Branch("InPy", &fInPy, "InPy/F");
+      fInteractionTree->Branch("InPz", &fInPz, "InPz/F");
+      fInteractionTree->Branch("InE", &fInE, "InE/F");
+      fInteractionTree->Branch("InPDG", &fInPDG, "InPDG/I");
+      fInteractionTree->Branch("OutX", &fOutX);
+      fInteractionTree->Branch("OutY", &fOutY);
+      fInteractionTree->Branch("OutZ", &fOutZ);
+      fInteractionTree->Branch("OutT", &fOutT);
+      fInteractionTree->Branch("OutPx", &fOutPx);
+      fInteractionTree->Branch("OutPy", &fOutPy);
+      fInteractionTree->Branch("OutPz", &fOutPz);
+      fInteractionTree->Branch("OutE", &fOutE);
+      fInteractionTree->Branch("OutPDG", &fOutPDG);
+
+
+
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
       fNtuple->Branch("Event",                    &fEvent,                  "Event/I");
@@ -929,30 +989,16 @@ namespace lar {
     for (int i = 0; i < fSim_nParticles; i++){
 		  const simb::MCParticle& particleVec = *(SimParticles[i]);
 
-	  
+	    const size_t Ntrajpoints = particleVec.NumberTrajectoryPoints();
 
-  	 /* const int last = Ntrajpoints - 1;
+  	  const int last = Ntrajpoints - 1;
 	    const TLorentzVector& positionStart = particleVec.Position(0);
 	    const TLorentzVector& positionEnd = particleVec.Position(last);
 	    const TLorentzVector& momentumStart = particleVec.Momentum(0);
-	    const TLorentzVector& momentumEnd = particleVec.Momentum(last);*/
+	    const TLorentzVector& momentumEnd = particleVec.Momentum(last);
 
-// New stuff
-  double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
-  auto const& geom = *fGeometryService;
-  fXmin = 0.0;
-  fXmax = geom.DetLength();
-  fYmin = -geom.DetHalfWidth();
-  fYmax =  geom.DetHalfWidth();
-  fZmin = -geom.DetHalfHeight();
-  fZmax =  geom.DetHalfHeight();
 
-  // 2) Loop over each particle
-  for (int l=0; l<fSim_nParticles; l++) {
-    
-   
-
-     /*   fSim_start_4position.push_back(positionStart.X());
+        fSim_start_4position.push_back(positionStart.X());
 		fSim_start_4position.push_back(positionStart.Y());
 		fSim_start_4position.push_back(positionStart.Z());
 		fSim_start_4position.push_back(positionStart.T());
@@ -967,56 +1013,45 @@ namespace lar {
         fSim_end_4mommenta.push_back(momentumEnd.Px());
 		fSim_end_4mommenta.push_back(momentumEnd.Py());
 		fSim_end_4mommenta.push_back(momentumEnd.Pz());
-		fSim_end_4mommenta.push_back(momentumEnd.E()); */
-    
-        // loop over every trajectory point, compare to geometry,
-    // pull out E, subtract m, and do something with KE
-    size_t Ntraj = particleVec.NumberTrajectoryPoints();
-    for (size_t ipt = 0; ipt < Ntraj; ++ipt) {
-      auto const& pos = particleVec.Position(ipt);
-      auto const& mom = particleVec.Momentum(ipt);
-
-      double x    = pos.X();
-      double y    = pos.Y();
-      double z    = pos.Z();
-      double Etot = mom.E();
-      double m0   = particleVec.Mass();
-      double KE   = Etot - m0;
-
-      // compare to cached bounds (set up in your ctor)
-      if ( x < fXmin || x > fXmax ||
-           y < fYmin || y > fYmax ||
-           z < fZmin || z > fZmax )
-      {
-        std::cout << "Particle " << particleVec.TrackId()
-                  << " exited at pt " << ipt
-                  << " with KE = " << KE << " GeV\n" << std::endl;
-       // declare this fEscapedKineticEnergies.push_back(KE);
-        break;  // stop at first exit
-      }
+		fSim_end_4mommenta.push_back(momentumEnd.E());
     }
-  }
   //End four-vector collection
-
 
   // Collecting all Daughters of Each primary
  
 std::vector<std::vector<const simb::MCParticle*>> DaughterpartVec;
+std::vector<const simb::MCParticle*> primary_vec;
 
 for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
   std::vector<const simb::MCParticle*> CurrentDaughters;
   CurrentDaughters.clear();
+  const simb::MCParticle* currentpart = SimParticles[i];
+  getDescendants(fSimP_TrackID_vec[i], fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
+  std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
+  std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
+  for (const Vertex& vtx : interactionVertices){
+    fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
+  } 
   if (currentMom == 0){
-    //int primary = fSimP_TrackID_vec[i];
-    //getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
+    int primary = fSimP_TrackID_vec[i];
+    getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
     DaughterpartVec.push_back(CurrentDaughters);
-    //std::cout << "Mother: " <<  SimParticles[i]->PdgCode() << std::endl;
-    //for (const auto* part : CurrentDaughters) {
-      //std::cout << "Descendant PDG: " << part->PdgCode() << " E: " << part->E() << " status: " << part->StatusCode() << std::endl;
+    primary_vec.push_back(SimParticles[i]);
+    int NHad = 0;
+    double BindingE = 0.0;
+    getHadronic02(SimParticles[i], SimParticles, NHad, BindingE);
+    //std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
+    }
   }
-   // }
-  }
+
+
+
+  //for(size_t n = 0; n < DaughterpartVec.size(); n++){
+  //  int NHad = 0;
+  //  int HadE = 0;
+   // getHadronicInformation(primary_vec[n], DaughterpartVec[n], NHad, HadE);
+  //}
 
 
   //Begin interaction classification and energy calculation
@@ -1276,7 +1311,6 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
 
   } // namespace example
 } // namespace lar
-}
 
 // Back to our local namespace.
 namespace {
@@ -1417,43 +1451,237 @@ namespace {
 
   } // end GetAncestorMotherPi0TrkID
 
-  /*void getHadronicInformation(const simb::MCParticle& primary, const std::vector<const simb::MCParticle*>& daughters, int NHad, double BindingE){
-    int pNTP = primary->NumberTrajectoryPoints();
-    int pLast = pNTP - 1;
-    for(size_t k = 0; k < daughters->size(); k++){
-      int dNTP = daughters[k]->NumberTrajectoryPoints();
-      int dLast = dNTP - 1;
-      const TLorentzVector& daughterstart = daughters[k]->Position(0);
-      const TLorentzVector& Edaughterstart = daughters[k]->Momentum(0);
-      std::vector<float> X;
-      std::vector<float> Y;
-      std::vector<float> Z;
-      std::vector<float> T;
-      for(int l = 0; l < pLast; l++){
-        const TLorentzVector& pripos = primary->Position(l);
-        float epsilon = 0.1;
-        double Eout = 0;
-        if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
-          if(daughters[k]->PdgCode() == 211 || -211){
-            Eout += Edaughterstart.E();
-          }
-          else{
-            Eout += Edaughterstart.E() - daughters[k]->Mass();
-          }
-          X.push_back(daughterstart.X());
-          Y.push_back(daughterstart.Y());
-          Z.push_back(daughterstart.Z());
-          T.push_back(daughterstart.T());
-          int Xsize = X.size();
-          for(size_t m = 0; m < X.size(); m++){
-            if X.last() = X[m]
-          }
+  // void getHadronicInformation(const simb::MCParticle* primary, const std::vector<const simb::MCParticle*>& daughters, int& NHad, double& BindingE){
+  //   int pNTP = primary->NumberTrajectoryPoints();
+  //   int pLast = pNTP - 1;
+  //   for(size_t k = 0; k < daughters.size(); k++){
+  //     //int dNTP = daughters[k]->NumberTrajectoryPoints();
+  //     //int dLast = dNTP - 1;
+  //     const TLorentzVector& daughterstart = daughters[k]->Position(0);
+  //     const TLorentzVector& Edaughterstart = daughters[k]->Momentum(0);
+  //     std::vector<float> X;
+  //     std::vector<float> Y;
+  //     std::vector<float> Z;
+  //     std::vector<float> T;
+  //     for(int l = 0; l < pLast; l++){
+  //       const TLorentzVector& pripos = primary->Position(l);
+  //       float epsilon = 0.01;
+  //       double Ein = 0;
+  //       double Eout = 0;
+  //       if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
+  //         if(abs(primary->PdgCode()) == 211){
+  //           Ein = primary->E(l);
+  //         }
+  //         else{
+  //           Ein = primary->E(l) - primary->Mass();
+  //         }
+  //         std::cout << "PDG of primary: " << primary->PdgCode() << std::endl;
+  //         std::cout << "PDG of daughter: " << daughters[k]->PdgCode() << std::endl;
+  //         if(abs(daughters[k]->PdgCode()) == 211){
+  //          Eout = Edaughterstart.E();
+  //         }
+  //         else{
+  //           Eout = Edaughterstart.E() - daughters[k]->Mass();
+  //         }
+  //         std::cout << "Ein: " << Ein << std::endl;
+  //         std::cout << "Eout: " << Eout << std::endl;
+  //         double currentBindingE = Ein - Eout;
+  //         std::cout << "Current Binding Energy: " << currentBindingE << std::endl;
+  //         BindingE += currentBindingE;
+  //         std::cout << "BindingE (inside func) : " << BindingE << std::endl;
+  //         X.push_back(daughterstart.X());
+  //         Y.push_back(daughterstart.Y());
+  //         Z.push_back(daughterstart.Z());
+  //         T.push_back(daughterstart.T());
+  //         int Xsize = X.size();
+  //         int Xlast = Xsize - 1;
+  //         int iterator = 0;
+  //         for(size_t m = 0; m < X.size(); m++){
+  //           if(abs(X[Xlast] - X[m]) < epsilon && abs(Y[Xlast] - Y[m]) < epsilon && abs(Z[Xlast] - Z[m]) < epsilon && abs(T[Xlast] - T[m]) < epsilon) iterator = iterator +1;
+  //           std::cout << "iterator: " << iterator << std::endl;
+  //         }
+  //         if(iterator == 1) NHad = NHad +1;
+  //       }
+  //     }
+  //     std::cout << "NHad (inside): " << NHad << std::endl;
+  //   }
+  // }
+
+  void fillInteractionTree(const simb::MCParticle* incoming, const Vertex& vertex, const std::map<int, const simb::MCParticle*>& particleMap, TTree* fInteractionTree, float& fInX, float& fInY, float& fInZ, float& fInT, 
+                          float& fInPx, float& fInPy, float& fInPz, float& fInE, int& fInPDG, std::vector<float>& fOutX, std::vector<float>& fOutY, std::vector<float>& fOutZ, std::vector<float>& fOutT,
+                          std::vector<float>& fOutPx, std::vector<float>& fOutPy, std::vector<float>& fOutPz, std::vector<float>& fOutE, std::vector<int>& fOutPDG) {
+
+
+
+    fOutX.clear();
+    fOutY.clear();
+    fOutZ.clear();
+    fOutT.clear();
+    fOutPDG.clear();
+    fOutPx.clear();
+    fOutPy.clear();
+    fOutPz.clear();
+    fOutE.clear();
+
+    fInX = vertex.x;
+    fInY = vertex.y;
+    fInZ = vertex.z;
+    fInT = vertex.t;
+
+    double minDist = 1e10;
+    TLorentzVector bestMom;
+    
+    for (unsigned int i = 0; i < incoming->NumberTrajectoryPoints(); ++i) {
+      TLorentzVector pos = incoming->Position(i);
+      double dist = std::sqrt(std::pow(pos.X() - vertex.x, 2) +
+                              std::pow(pos.Y() - vertex.y, 2) +
+                              std::pow(pos.Z() - vertex.z, 2));
+      if (dist < minDist) {
+        minDist = dist;
+        bestMom = incoming->Momentum(i);
+      }
+    }
+
+    fInPx = bestMom.Px();
+    fInPy = bestMom.Py();
+    fInPz = bestMom.Pz();
+    fInE = bestMom.E();
+    fInPDG = incoming->PdgCode();
+
+    for (const simb::MCParticle* daughter : vertex.daughters) {
+      int dTrackID = daughter->TrackId();
+  
+      bool interacts = false;
+      for (const auto& entry : particleMap) {
+        const simb::MCParticle* p = entry.second;
+        if (p->Mother() == dTrackID) {
+          interacts = true;
+          break;
         }
       }
 
+      if(!interacts) continue;
+      const TLorentzVector& pos = daughter->Position(0);
+      const TLorentzVector& mom = daughter->Momentum(0);
+      fOutX.push_back(pos.X());
+      fOutY.push_back(pos.Y());
+      fOutZ.push_back(pos.Z());
+      fOutT.push_back(pos.T());
+
+      fOutPx.push_back(mom.Px());
+      fOutPy.push_back(mom.Py());
+      fOutPz.push_back(mom.Pz());
+      fOutE.push_back(mom.E());
+      fOutPDG.push_back(daughter->PdgCode());
+    }
+
+    if(!fOutX.empty()){
+      fInteractionTree->Fill();
     }
   }
-*/
+
+  // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle* incoming, const std::vector<const simb::MCParticle*>& daughters){
+  //   float epsilon = 0.01;
+  //   float tepsilon = 1e-3;
+  //   std::vector<primaryVertex> vtxs;
+
+  //   for (const simb::MCParticle* d : daughters){
+  //     const TLorentzVector& pos = d->Position(0);
+  //     float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
+  //     bool found = false;
+
+  //     for (primaryVertex& v : vtxs) {
+  //       if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon) {
+  //         v.daughters.push_back(d);
+  //         found = true;
+  //         break;
+  //       }
+  //     }
+
+  //     if (!found) {
+  //       primaryVertex vtx = {x, y, z, t, incoming, {d}};
+  //       vtxs.push_back(vtx);
+  //     }
+  //   }
+  //     return vtxs;
+  // }
+
+  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters){
+    std::vector<Vertex> vertices;
+
+    float epsilon = 0.01; 
+    float tepsilon = 1e-3;
+    
+    for (const simb::MCParticle* d : daughters){
+      const TLorentzVector& pos = d->Position(0);
+      float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
+      bool found = false;
+      for (Vertex& v : vertices) {
+        if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon) {
+          v.daughters.push_back(d);
+          found = true;
+          break;
+        }
+      }
+      if (!found){
+        Vertex vert = {x, y, z, t, {d}};
+        vertices.push_back(vert);
+      }
+  }
+  return vertices;
+}
+
+double getPrimaryKE(const simb::MCParticle* primary, double x, double y, double z){
+  double minDist = 1e10;
+  int closestDist = 0;
+
+  for(unsigned int n = 0; n < primary->NumberTrajectoryPoints(); ++n){
+    const TLorentzVector& position = primary->Position(n);
+    double dist = std::sqrt(std::pow(position.X() - x, 2) + std::pow(position.Y() - y, 2) + std::pow(position.Z() - z, 2));
+    if (dist < minDist) {
+      minDist = dist;
+      closestDist = n;
+    }
+  }
+  const TLorentzVector& ClosestMom = primary->Momentum(closestDist);
+  return ClosestMom.E() - primary->Mass();
+}
+
+void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, double& totalBindingE){
+  std::vector<const simb::MCParticle*> daughters;
+  TLorentzVector currentPos = particle->Position(0);
+
+  for(const simb::MCParticle* p : allPart){
+    if(p->Mother() == particle->TrackId()){
+      daughters.push_back(p);
+    }
+  }
+  
+  if(!daughters.empty()){
+    std::vector<Vertex> vertices = clusterVertices(daughters);
+
+    for(const auto& vertex : vertices){
+      double Ein = getPrimaryKE(particle, vertex.x, vertex.y, vertex.z);
+      double Eout = 0.0;
+
+      for(const simb::MCParticle* daughter : vertex.daughters){
+        if(daughter->PdgCode() == 211){ // Check if daughter is a pion
+          Eout += daughter->Momentum(0).E();
+        } else {
+          Eout += daughter->Momentum(0).E() - daughter->Mass(); // For other particles, subtract mass
+        }
+      }
+      if(Ein > Eout){
+        totalBindingE += (Ein - Eout);
+        NHad++;
+      }
+    }
+  }
+  for(const simb::MCParticle* daughter : daughters){
+    getHadronic02(daughter, allPart, NHad, totalBindingE);
+  }
+}
+
   void getDescendants(int motherID, const std::vector<int>& momVec, const std::vector<int>& TrkIDvec, const std::map<int, const simb::MCParticle*>& particleMap, std::vector<const simb::MCParticle*>& primaryDaughters){
     for (size_t j = 0; j < TrkIDvec.size(); j++){
       if(momVec[j] == motherID){
