@@ -989,7 +989,6 @@ namespace lar {
     for (int i = 0; i < fSim_nParticles; i++){
 		  const simb::MCParticle& particleVec = *(SimParticles[i]);
 
-	    const size_t Ntrajpoints = particleVec.NumberTrajectoryPoints();
 
   	  //const int last = Ntrajpoints - 1;
 	    //const TLorentzVector& positionStart = particleVec.Position(0);
@@ -1026,7 +1025,7 @@ namespace lar {
 		fSim_end_4mommenta.push_back(momentumEnd.E());
     }*/
     // loop over every trajectory point, compare to geometry,
-    //size_t Ntraj = particleVec.NumberTrajectoryPoints();
+    size_t Ntraj = particleVec.NumberTrajectoryPoints();
     for (size_t ipt = 0; ipt < Ntraj; ++ipt) {
       auto const& pos = particleVec.Position(ipt);
       auto const& mom = particleVec.Momentum(ipt);
