@@ -1005,7 +1005,8 @@ namespace lar {
       fYmax =  geom.DetHalfWidth();
       fZmin = -geom.DetHalfHeight();
       fZmax =  geom.DetHalfHeight();
-
+      // 2) Loop over each particle
+      for (int l=0; l<fSim_nParticles; l++) {
 
         fSim_start_4position.push_back(positionStart.X());
 		fSim_start_4position.push_back(positionStart.Y());
