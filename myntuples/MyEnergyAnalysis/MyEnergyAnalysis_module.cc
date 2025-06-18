@@ -1027,8 +1027,8 @@ namespace lar {
     }
     // loop over every trajectory point, compare to geometry,
     // pull out E, subtract m, and do something with KE
-    //size_t Ntraj = particleVec.NumberTrajectoryPoints();
-    for (size_t ipt = 0; ipt < Ntraj; ++ipt) {
+    size_t Ntraj = particleVec.NumberTrajectoryPoints();
+    //for (size_t ipt = 0; ipt < Ntraj; ++ipt) {
 
   //End four-vector collection
     
