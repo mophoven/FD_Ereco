@@ -1028,7 +1028,7 @@ namespace lar {
     // loop over every trajectory point, compare to geometry,
     // pull out E, subtract m, and do something with KE
     size_t Ntraj = particleVec.NumberTrajectoryPoints();
-    //for (size_t ipt = 0; ipt < Ntraj; ++ipt) {
+    for (size_t ipt = 0; ipt < Ntraj; ++ipt) {
       auto const& pos = particleVec.Position(ipt);
       auto const& mom = particleVec.Momentum(ipt);
 
@@ -1051,6 +1051,7 @@ namespace lar {
         break;  // stop at first exit
       }
     }
+  }
   //End four-vector collection
     
   // Collecting all Daughters of Each primary
