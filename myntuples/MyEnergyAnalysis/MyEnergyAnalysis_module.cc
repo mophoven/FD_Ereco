@@ -996,6 +996,15 @@ namespace lar {
 	    const TLorentzVector& positionEnd = particleVec.Position(last);
 	    const TLorentzVector& momentumStart = particleVec.Momentum(0);
 	    const TLorentzVector& momentumEnd = particleVec.Momentum(last);
+      // New stuff
+      double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
+      auto const& geom = *fGeometryService;
+      fXmin = 0.0;
+      fXmax = geom.DetLength();
+      fYmin = -geom.DetHalfWidth();
+      fYmax =  geom.DetHalfWidth();
+      fZmin = -geom.DetHalfHeight();
+      fZmax =  geom.DetHalfHeight();
 
 
         fSim_start_4position.push_back(positionStart.X());
@@ -1016,7 +1025,7 @@ namespace lar {
 		fSim_end_4mommenta.push_back(momentumEnd.E());
     }
   //End four-vector collection
-
+    
   // Collecting all Daughters of Each primary
  
 std::vector<std::vector<const simb::MCParticle*>> DaughterpartVec;
