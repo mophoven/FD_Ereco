@@ -1008,7 +1008,7 @@ namespace lar {
       // 2) Loop over each particle
       //for (int l=0; l<fSim_nParticles; l++) {
 
-        fSim_start_4position.push_back(positionStart.X());
+        /*fSim_start_4position.push_back(positionStart.X());
 		fSim_start_4position.push_back(positionStart.Y());
 		fSim_start_4position.push_back(positionStart.Z());
 		fSim_start_4position.push_back(positionStart.T());
@@ -1024,7 +1024,7 @@ namespace lar {
 		fSim_end_4mommenta.push_back(momentumEnd.Py());
 		fSim_end_4mommenta.push_back(momentumEnd.Pz());
 		fSim_end_4mommenta.push_back(momentumEnd.E());
-    }
+    }*/
     // loop over every trajectory point, compare to geometry,
     // pull out E, subtract m, and do something with KE
     size_t Ntraj = particleMap.NumberTrajectoryPoints();
