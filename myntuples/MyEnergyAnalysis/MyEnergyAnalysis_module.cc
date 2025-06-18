@@ -1050,7 +1050,6 @@ namespace lar {
       }
     }
   }
-  }
   //End four-vector collection
     
   // Collecting all Daughters of Each primary
