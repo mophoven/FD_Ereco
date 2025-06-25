@@ -1019,7 +1019,7 @@ namespace lar
         fYmax = geom.DetHalfWidth();
         fZmin = -geom.DetHalfHeight();
         fZmax = geom.DetHalfHeight();
-      
+        std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
         // 2) Loop over each particle
         // for (int l=0; l<fSim_nParticles; l++) {
 
@@ -1069,7 +1069,7 @@ namespace lar
         }
       }
       // End four-vector collection
-      std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
+      
       // Collecting all Daughters of Each primary
 
       std::vector<std::vector<const simb::MCParticle *>> DaughterpartVec;
