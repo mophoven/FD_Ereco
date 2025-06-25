@@ -1000,7 +1000,7 @@ namespace lar
       fSim_nParticles = SimParticles.size();
 
       // Store info for leading E sim numu GEANT 4 level
-      std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
+      
       for (int i = 0; i < fSim_nParticles; i++)
       {
         const simb::MCParticle &particleVec = *(SimParticles[i]);
@@ -1069,7 +1069,7 @@ namespace lar
         }
       }
       // End four-vector collection
-
+      std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
       // Collecting all Daughters of Each primary
 
       std::vector<std::vector<const simb::MCParticle *>> DaughterpartVec;
