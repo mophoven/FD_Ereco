@@ -1053,7 +1053,7 @@ namespace lar
           double Etot = mom.E();
           double m0 = particleVec.Mass();
           double KE = Etot - m0;
-
+          std::cout<<"position in x:"<< x <<"position in y:"<<y<<"position in z:"<<z<<std::endl;
           // compare to cached bounds (set up in your ctor)
           if (x < fXmin || x > fXmax ||
               y < fYmin || y > fYmax ||
@@ -1083,7 +1083,7 @@ namespace lar
         const simb::MCParticle *currentpart = SimParticles[i];
         getDescendants(fSimP_TrackID_vec[i], fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
         std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
-        std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
+        //std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
         for (const Vertex &vtx : interactionVertices)
         {
           fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
