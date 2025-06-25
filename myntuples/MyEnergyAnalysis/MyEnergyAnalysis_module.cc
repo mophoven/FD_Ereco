@@ -1015,10 +1015,10 @@ namespace lar
         auto const &geom = *fGeometryService;
         fXmin = -geom.DetLength();
         fXmax = geom.DetLength();
-        fYmin = -geom.DetfWidth();
-        fYmax = geom.DetfWidth();
-        fZmin = -geom.DetfHeight();
-        fZmax = geom.DetfHeight();
+        fYmin = -geom.DetHalfWidth()*2;
+        fYmax = geom.DetHalfWidth()*2;
+        fZmin = -geom.DetHalfHeight()*2;
+        fZmax = geom.DetHalfHeight()*2;
         std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
         // 2) Loop over each particle
         // for (int l=0; l<fSim_nParticles; l++) {
