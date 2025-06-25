@@ -1015,9 +1015,9 @@ namespace lar
         auto const &geom = *fGeometryService;
         fXmin = 0.0;
         fXmax = geom.DetLength();
-        fYmin = 0;
+        fYmin = -geom.DetHalfWidth();
         fYmax = geom.DetHalfWidth();
-        fZmin = 0;
+        fZmin = -geom.DetHalfHeight();
         fZmax = geom.DetHalfHeight();
         // 2) Loop over each particle
         // for (int l=0; l<fSim_nParticles; l++) {
