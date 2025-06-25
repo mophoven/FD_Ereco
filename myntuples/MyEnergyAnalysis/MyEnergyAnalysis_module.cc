@@ -1000,7 +1000,7 @@ namespace lar
       fSim_nParticles = SimParticles.size();
 
       // Store info for leading E sim numu GEANT 4 level
-
+      std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
       for (int i = 0; i < fSim_nParticles; i++)
       {
         const simb::MCParticle &particleVec = *(SimParticles[i]);
@@ -1019,6 +1019,7 @@ namespace lar
         fYmax = geom.DetHalfWidth();
         fZmin = -geom.DetHalfHeight();
         fZmax = geom.DetHalfHeight();
+      
         // 2) Loop over each particle
         // for (int l=0; l<fSim_nParticles; l++) {
 
