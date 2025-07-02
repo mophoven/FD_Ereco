@@ -1694,7 +1694,7 @@ void getHadronic02(const simb::MCParticle* particle, const std::vector<const sim
     }
   }
   for(const simb::MCParticle* daughter : daughters){
-    getHadronic02(daughter, allPart, NHad, totalBindingE);
+    getHadronic02(daughter, allPart, NHad, Nintlow, totalBindingE);
   }
 }
 
