@@ -102,7 +102,7 @@ namespace {
 
   double getPrimaryKE(const simb::MCParticle*, double, double, double);
 
-  void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int& , double&);
+  void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int&, int&, double&);
 
   void getDescendants(int, const std::vector<int>&, const std::vector<int>&, const std::map<int, const simb::MCParticle*>&, std::vector<const simb::MCParticle*>&);
 
@@ -189,10 +189,12 @@ namespace lar {
       float fInX, fInY, fInZ, fInT;
       float fInPx, fInPy, fInPz, fInE;
       int fInPDG;
+      //char fInProcess;
 
       std::vector<float> fOutX, fOutY, fOutZ, fOutT;
       std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
       std::vector<int> fOutPDG;
+      //std::vector<std::char> fOutProcess;
 
       // Event info
       int fEvent;  // number of the event being processed
@@ -398,6 +400,8 @@ namespace lar {
       fInteractionTree->Branch("OutPz", &fOutPz);
       fInteractionTree->Branch("OutE", &fOutE);
       fInteractionTree->Branch("OutPDG", &fOutPDG);
+      //fInteractionTree->Branch("OutProcess", &fOutProcess);
+      //fInteractionTree->Branch("InProcess", &fInProcess, "InProcess/C");
 
 
 
@@ -1028,7 +1032,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   const simb::MCParticle* currentpart = SimParticles[i];
   getDescendants(fSimP_TrackID_vec[i], fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
   std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
-  std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
+  //std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
   for (const Vertex& vtx : interactionVertices){
     fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
   } 
@@ -1038,12 +1042,20 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     DaughterpartVec.push_back(CurrentDaughters);
     primary_vec.push_back(SimParticles[i]);
     int NHad = 0;
+    int Nintlow = 0;
     double BindingE = 0.0;
-    getHadronic02(SimParticles[i], SimParticles, NHad, BindingE);
-    //std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
+    getHadronic02(SimParticles[i], SimParticles, NHad, Nintlow, BindingE);
+    std::cout << "Number Had interactions for primary "  << i << ": " << NHad << ", BindingE: " << BindingE << " GeV" << std::endl;
     }
   }
 
+  // .process():
+  // "primary"
+  // "decay"
+  // "hadElastic"
+  //nCapture
+  //pi+Inelastic
+  //protonInelastic
 
 
   //for(size_t n = 0; n < DaughterpartVec.size(); n++){
@@ -1646,7 +1658,7 @@ double getPrimaryKE(const simb::MCParticle* primary, double x, double y, double 
   return ClosestMom.E() - primary->Mass();
 }
 
-void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, double& totalBindingE){
+void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, double& totalBindingE, int& Nintlow){
   std::vector<const simb::MCParticle*> daughters;
   TLorentzVector currentPos = particle->Position(0);
 
@@ -1658,6 +1670,7 @@ void getHadronic02(const simb::MCParticle* particle, const std::vector<const sim
   
   if(!daughters.empty()){
     std::vector<Vertex> vertices = clusterVertices(daughters);
+    float BindingE = 0.0;
 
     for(const auto& vertex : vertices){
       double Ein = getPrimaryKE(particle, vertex.x, vertex.y, vertex.z);
@@ -1670,9 +1683,13 @@ void getHadronic02(const simb::MCParticle* particle, const std::vector<const sim
           Eout += daughter->Momentum(0).E() - daughter->Mass(); // For other particles, subtract mass
         }
       }
-      if(Ein > Eout){
-        totalBindingE += (Ein - Eout);
+      BindingE = Ein - Eout;
+      if(BindingE > 0.001){
+        totalBindingE += BindingE;
         NHad++;
+      }
+      if(BindingE < 0.001 && BindingE > -0.001){
+        Nintlow++;
       }
     }
   }
