@@ -1658,7 +1658,7 @@ double getPrimaryKE(const simb::MCParticle* primary, double x, double y, double 
   return ClosestMom.E() - primary->Mass();
 }
 
-void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, double& totalBindingE, int& Nintlow){
+void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, int& Nintlow, double& totalBindingE){
   std::vector<const simb::MCParticle*> daughters;
   TLorentzVector currentPos = particle->Position(0);
 
