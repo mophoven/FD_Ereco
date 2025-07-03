@@ -1027,12 +1027,12 @@ std::vector<const simb::MCParticle*> primary_vec;
 
 std::vector<Vertex> allvert = clusterVertices(SimParticles);
 
-for(const Vertex& vtx : allvert){
+for(const Vertex& vertex : allvert){
   
   const simb::MCParticle* incoming = nullptr;
 
-  for (const simb::MCParticle* part : vtx.daughters){
-    int MotherID = part->Mother();
+  for (const simb::MCParticle* part : vertex.daughters){
+    int motherID = part->Mother();
 
     if (particleMap.find(motherID) == particleMap.end()) continue;
 
@@ -1051,7 +1051,7 @@ for(const Vertex& vtx : allvert){
     if(incoming) break;
   }
   if(!incoming) continue;
-  
+
   fillInteractionTree(incoming, vertex, particleMap,
     fInteractionTree,
     fInX, fInY, fInZ, fInT,
@@ -1065,7 +1065,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
   std::vector<const simb::MCParticle*> CurrentDaughters;
   CurrentDaughters.clear();
-  const simb::MCParticle* currentpart = SimParticles[i];
+  //const simb::MCParticle* currentpart = SimParticles[i];
   getDescendants(fSimP_TrackID_vec[i], fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
   std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
   //std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
