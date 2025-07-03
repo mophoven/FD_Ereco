@@ -1025,6 +1025,42 @@ namespace lar {
 std::vector<std::vector<const simb::MCParticle*>> DaughterpartVec;
 std::vector<const simb::MCParticle*> primary_vec;
 
+std::vector<Vertex> allvert = clusterVertices(SimParticles);
+
+for(const Vertex& vtx : allvert){
+  
+  const simb::MCParticle* incoming = nullptr;
+
+  for (const simb::MCParticle* part : vtx.daughters){
+    int MotherID = part->Mother();
+
+    if (particleMap.find(motherID) == particleMap.end()) continue;
+
+    const simb::MCParticle* candidate = particleMap.at(motherID);
+      for (unsigned int i = 0; i < candidate->NumberTrajectoryPoints(); ++i) {
+        TLorentzVector pos = candidate->Position(i);
+
+        if (std::abs(pos.X() - vertex.x) < 1e-3 &&
+          std::abs(pos.Y() - vertex.y) < 1e-3 &&
+          std::abs(pos.Z() - vertex.z) < 1e-3) {
+          
+          incoming = candidate;
+          break;
+        }
+      }
+    if(incoming) break;
+  }
+  if(!incoming) continue;
+  
+  fillInteractionTree(incoming, vertex, particleMap,
+    fInteractionTree,
+    fInX, fInY, fInZ, fInT,
+    fInPx, fInPy, fInPz, fInE, fInPDG,
+    fOutX, fOutY, fOutZ, fOutT,
+    fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
+
+}
+
 for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   int currentMom = fSimP_Mom_vec[i];
   std::vector<const simb::MCParticle*> CurrentDaughters;
@@ -1033,9 +1069,9 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   getDescendants(fSimP_TrackID_vec[i], fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
   std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
   //std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
-  for (const Vertex& vtx : interactionVertices){
-    fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
-  } 
+  //for (const Vertex& vtx : interactionVertices){
+    //fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
+  //} 
   if (currentMom == 0){
     int primary = fSimP_TrackID_vec[i];
     getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
@@ -1053,9 +1089,9 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
   // "primary"
   // "decay"
   // "hadElastic"
-  //nCapture
-  //pi+Inelastic
-  //protonInelastic
+  // "nCapture"
+  // "pi+Inelastic"
+  // "protonInelastic"
 
 
   //for(size_t n = 0; n < DaughterpartVec.size(); n++){
