@@ -95,8 +95,8 @@ namespace {
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
   void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
-                            float&, float&, float&, float&, float&, float&, float&, float&, int&, std::vector<float>&, std::vector<float>&,
-                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<int>&);
+                            float&, float&, float&, float&, float&, float&, float&, float&, int&, std::strubg&, std::vector<float>&, std::vector<float>&,
+                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<int>&, std::vector<std::string>&);
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
 
@@ -189,7 +189,8 @@ namespace lar {
       float fInX, fInY, fInZ, fInT;
       float fInPx, fInPy, fInPz, fInE;
       int fInPDG;
-      //char fInProcess;
+      std::string fInProcess;
+      std::vector<std::string> fInProcess;
 
       std::vector<float> fOutX, fOutY, fOutZ, fOutT;
       std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
@@ -391,6 +392,7 @@ namespace lar {
       fInteractionTree->Branch("InPz", &fInPz, "InPz/F");
       fInteractionTree->Branch("InE", &fInE, "InE/F");
       fInteractionTree->Branch("InPDG", &fInPDG, "InPDG/I");
+      fInteractionTree->Branch("InProcess", &fInProcess, "InProcess/C");
       fInteractionTree->Branch("OutX", &fOutX);
       fInteractionTree->Branch("OutY", &fOutY);
       fInteractionTree->Branch("OutZ", &fOutZ);
@@ -400,8 +402,7 @@ namespace lar {
       fInteractionTree->Branch("OutPz", &fOutPz);
       fInteractionTree->Branch("OutE", &fOutE);
       fInteractionTree->Branch("OutPDG", &fOutPDG);
-      //fInteractionTree->Branch("OutProcess", &fOutProcess);
-      //fInteractionTree->Branch("InProcess", &fInProcess, "InProcess/C");
+      fInteractionTree->Branch("OutProcess", &fOutProcess);
 
 
 
@@ -1055,9 +1056,9 @@ for(const Vertex& vertex : allvert){
   fillInteractionTree(incoming, vertex, particleMap,
     fInteractionTree,
     fInX, fInY, fInZ, fInT,
-    fInPx, fInPy, fInPz, fInE, fInPDG,
+    fInPx, fInPy, fInPz, fInE, fInPDG, fInProcess
     fOutX, fOutY, fOutZ, fOutT,
-    fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
+    fOutPx, fOutPy, fOutPz, fOutE, fOutPDG, fOutProcess);
 
 }
 
@@ -1558,15 +1559,16 @@ namespace {
     const std::map<int, const simb::MCParticle*>& particleMap,
     TTree* fInteractionTree,
     float& fInX, float& fInY, float& fInZ, float& fInT,
-    float& fInPx, float& fInPy, float& fInPz, float& fInE, int& fInPDG,
+    float& fInPx, float& fInPy, float& fInPz, float& fInE, int& fInPDG, std::string& fInProcess,
     std::vector<float>& fOutX, std::vector<float>& fOutY,
     std::vector<float>& fOutZ, std::vector<float>& fOutT,
     std::vector<float>& fOutPx, std::vector<float>& fOutPy,
     std::vector<float>& fOutPz, std::vector<float>& fOutE,
-    std::vector<int>& fOutPDG) {
+    std::vector<int>& fOutPDG, std::vector<std::string>& fOutProcess) {
 
   fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
   fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear(); fOutPDG.clear();
+  fOutProcess.clear();
 
   fInX = vertex.x; fInY = vertex.y; fInZ = vertex.z; fInT = vertex.t;
   fInPDG = incoming->PdgCode();
@@ -1588,20 +1590,23 @@ namespace {
   fInPy = bestMom.Py();
   fInPz = bestMom.Pz();
   fInE  = bestMom.E();
+  fInProcess = incoming->Process();
 
   for (const simb::MCParticle* daughter : vertex.daughters) {
     if (daughter->TrackId() == incomingID) continue;  // Avoid double-counting self
 
 // Check if daughter produces further descendants (i.e., truly interacts)
-    bool producesDescendants = false;
+    /*bool producesDescendants = false;
     for (const auto& entry : particleMap) {
       if (entry.second->Mother() == daughter->TrackId()) {
         producesDescendants = true;
         break;
       }
     }
+    
 
     if (!producesDescendants) continue;
+    */
 
     const TLorentzVector& pos = daughter->Position(0);
     const TLorentzVector& mom = daughter->Momentum(0);
@@ -1615,6 +1620,7 @@ namespace {
     fOutPz.push_back(mom.Pz());
     fOutE.push_back(mom.E());
     fOutPDG.push_back(daughter->PdgCode());
+    fOutProcess.push_back(daughter->Process());
   }
 
   if (!fOutX.empty()) {
