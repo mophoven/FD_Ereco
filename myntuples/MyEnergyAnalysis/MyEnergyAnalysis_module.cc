@@ -95,7 +95,7 @@ namespace {
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
   void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
-                            float&, float&, float&, float&, float&, float&, float&, float&, int&, std::strubg&, std::vector<float>&, std::vector<float>&,
+                            float&, float&, float&, float&, float&, float&, float&, float&, int&, std::string&, std::vector<float>&, std::vector<float>&,
                             std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<int>&, std::vector<std::string>&);
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
