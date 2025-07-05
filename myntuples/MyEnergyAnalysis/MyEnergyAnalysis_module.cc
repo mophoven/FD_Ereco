@@ -1056,7 +1056,7 @@ for(const Vertex& vertex : allvert){
   fillInteractionTree(incoming, vertex, particleMap,
     fInteractionTree,
     fInX, fInY, fInZ, fInT,
-    fInPx, fInPy, fInPz, fInE, fInPDG, fInProcess
+    fInPx, fInPy, fInPz, fInE, fInPDG, fInProcess,
     fOutX, fOutY, fOutZ, fOutT,
     fOutPx, fOutPy, fOutPz, fOutE, fOutPDG, fOutProcess);
 
