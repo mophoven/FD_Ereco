@@ -190,7 +190,7 @@ namespace lar {
       float fInPx, fInPy, fInPz, fInE;
       int fInPDG;
       std::string fInProcess;
-      std::vector<std::string> fInProcess;
+      std::vector<std::string> fOutProcess;
 
       std::vector<float> fOutX, fOutY, fOutZ, fOutT;
       std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
