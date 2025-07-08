@@ -1570,7 +1570,7 @@ namespace {
   fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear(); fOutPDG.clear();
   fOutProcess.clear();
 
-  tepsilon = 1e-3; // Time epsilon for vertex clustering
+  float tepsilon = 1e-3; // Time epsilon for vertex clustering
 
   fInX = vertex.x; fInY = vertex.y; fInZ = vertex.z; fInT = vertex.t;
   fInPDG = incoming->PdgCode();
