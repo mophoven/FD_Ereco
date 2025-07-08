@@ -1570,6 +1570,8 @@ namespace {
   fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear(); fOutPDG.clear();
   fOutProcess.clear();
 
+  tepsilon = 1e-3; // Time epsilon for vertex clustering
+
   fInX = vertex.x; fInY = vertex.y; fInZ = vertex.z; fInT = vertex.t;
   fInPDG = incoming->PdgCode();
 
@@ -1586,14 +1588,10 @@ namespace {
   }
 }
 
-  fInPx = bestMom.Px();
-  fInPy = bestMom.Py();
-  fInPz = bestMom.Pz();
-  fInE  = bestMom.E();
-  fInProcess = incoming->Process();
 
   for (const simb::MCParticle* daughter : vertex.daughters) {
     if (daughter->TrackId() == incomingID) continue;  // Avoid double-counting self
+    if (daughter->Mother() != incoming->TrackId()) continue; // Exclude indirect descendants
 
 // Check if daughter produces further descendants (i.e., truly interacts)
     /*bool producesDescendants = false;
@@ -1608,7 +1606,18 @@ namespace {
     if (!producesDescendants) continue;
     */
 
+
     const TLorentzVector& pos = daughter->Position(0);
+
+    if (std::abs(pos.T() - vertex.t) > tepsilon) continue;
+
+    fInPx = bestMom.Px();
+    fInPy = bestMom.Py();
+    fInPz = bestMom.Pz();
+    fInE  = bestMom.E();
+    fInProcess = incoming->Process();
+
+
     const TLorentzVector& mom = daughter->Momentum(0);
 
     fOutX.push_back(pos.X());
