@@ -1572,8 +1572,7 @@ namespace {
 
   float tepsilon = 1e-3; // Time epsilon for vertex clustering
 
-  fInX = vertex.x; fInY = vertex.y; fInZ = vertex.z; fInT = vertex.t;
-  fInPDG = incoming->PdgCode();
+
 
   int incomingID = incoming->TrackId();
   double minDist = 1e10;
@@ -1607,9 +1606,12 @@ namespace {
     */
 
 
-    const TLorentzVector& pos = daughter->Position(0);
+   
 
     if (std::abs(pos.T() - vertex.t) > tepsilon) continue;
+
+    fInX = vertex.x; fInY = vertex.y; fInZ = vertex.z; fInT = vertex.t;
+    fInPDG = incoming->PdgCode();
 
     fInPx = bestMom.Px();
     fInPy = bestMom.Py();
@@ -1619,6 +1621,7 @@ namespace {
 
 
     const TLorentzVector& mom = daughter->Momentum(0);
+    const TLorentzVector& pos = daughter->Position(0);
 
     fOutX.push_back(pos.X());
     fOutY.push_back(pos.Y());
