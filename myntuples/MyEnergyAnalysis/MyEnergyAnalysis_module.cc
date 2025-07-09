@@ -1060,7 +1060,7 @@ namespace lar
           std::cout << "Particle is inside active volume at trajectory point " << i << std::endl;
           
         }
-          auto const &pos = particleVec.Position(ipt);
+          //auto const &position = particleVec.Position(ipt);
           auto const &mom = particleVec.Momentum(ipt);
           double Etot = mom.E();
           double m0 = particleVec.Mass();
