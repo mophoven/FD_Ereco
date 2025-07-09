@@ -1011,27 +1011,16 @@ namespace lar
         // const TLorentzVector& momentumStart = particleVec.Momentum(0);
         // const TLorentzVector& momentumEnd = particleVec.Momentum(last);
         //  New stuff
-        double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
-        auto const &geom = *fGeometryService;
-        fXmin = -geom.DetLength();
-        fXmax = geom.DetLength();
-        fYmin = -geom.DetHalfWidth()*2;
-        fYmax = geom.DetHalfWidth()*2;
-        fZmin = -geom.DetHalfHeight()*2;
-        fZmax = geom.DetHalfHeight()*2;
-        std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
-        double centerX = tpc.GetCenter().X();
-        double centerY = tpc.GetCenter().Y();
-        double centerZ = tpc.GetCenter().Z();
-        const TLorentzVector& pos = particle->Position(i);
-        double localX = pos.X() - centerX;
-        double localY = pos.Y() - centerY;
-        double localZ = pos.Z() - centerZ;
-        if (std::abs(localX) < tpc.HalfWidth() &&
-        std::abs(localY) < tpc.HalfHeight() &&
-        std::abs(localZ) < tpc.HalfLength()) {
-        std::cout << “Particle is inside active volume at trajectory point ” << i << std::endl;
-        }
+        //double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
+        //auto const &geom = *fGeometryService;
+       //fXmin = -geom.DetLength();
+        =//fXmax = geom.DetLength();
+        //fYmin = -geom.DetHalfWidth()*2;
+        //fYmax = geom.DetHalfWidth()*2;
+        //fZmin = -geom.DetHalfHeight()*2;
+        //fZmax = geom.DetHalfHeight()*2;
+        //std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
+       
         // 2) Loop over each particle
         // for (int l=0; l<fSim_nParticles; l++) {
 
@@ -1056,6 +1045,18 @@ namespace lar
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
+           double centerX = tpc.GetCenter().X();
+          double centerY = tpc.GetCenter().Y();
+          double centerZ = tpc.GetCenter().Z();
+          const TLorentzVector& pos = particle->Position(i);
+          double localX = pos.X() - centerX;
+          double localY = pos.Y() - centerY;
+          double localZ = pos.Z() - centerZ;
+          if (std::abs(localX) < tpc.HalfWidth() &&
+          std::abs(localY) < tpc.HalfHeight() &&
+          std::abs(localZ) < tpc.HalfLength()) {
+          std::cout << “Particle is inside active volume at trajectory point ” << i << std::endl;
+        }
           auto const &pos = particleVec.Position(ipt);
           auto const &mom = particleVec.Momentum(ipt);
 
@@ -1067,14 +1068,14 @@ namespace lar
           double KE = Etot - m0;
           std::cout<<"position in x:"<< x <<"position in y:"<<y<<"position in z:"<<z<<std::endl;
           // compare to cached bounds (set up in your ctor)
-          if (x < fXmin || x > fXmax ||
-              y < fYmin || y > fYmax ||
-              z < fZmin || z > fZmax)
+         // if (x < fXmin || x > fXmax ||
+           //   y < fYmin || y > fYmax ||
+             // z < fZmin || z > fZmax)
           {
-            std::cout << "Particle " << particleVec.TrackId()
-                      << " exited at pt " << ipt
-                      << " with KE = " << KE << " GeV\n"
-                      << std::endl;
+          //  std::cout << "Particle " << particleVec.TrackId()
+            //          << " exited at pt " << ipt
+              //        << " with KE = " << KE << " GeV\n"
+                //      << std::endl;
             // declare this fEscapedKineticEnergies.push_back(KE);
             break; // stop at first exit
           }
