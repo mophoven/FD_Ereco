@@ -1043,6 +1043,7 @@ namespace lar
     }*/
         // loop over every trajectory point, compare to geometry,
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
+        art::ServiceHandle<geo::Geometry const> geom;
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
           const geo::TPCGeo& tpc = geom.TPC(0);
