@@ -1058,7 +1058,10 @@ namespace lar
           std::abs(localY) < tpc.HalfHeight() &&
           std::abs(localZ) < tpc.HalfLength()) {
           std::cout << "Particle is inside active volume at trajectory point " << i << std::endl;
+      
         }
+        std ::cout << "Particle position at trajectory point " << i << ": "
+                  << "X: " << centerX << ", Y: " << centerY << ", Z: " << centerZ << std::endl;
           //auto const &pos = particleVec.Position(ipt);
           //auto const &mom = particleVec.Momentum(ipt);
 
