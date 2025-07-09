@@ -1051,9 +1051,9 @@ namespace lar
           double centerY = tpc.GetCenter().Y();
           double centerZ = tpc.GetCenter().Z();
           const TLorentzVector& pos = particleVec.Position(i);
-          double localX = pos.X() - centerX;
-          double localY = pos.Y() - centerY;
-          double localZ = pos.Z() - centerZ;
+          double localX = pos.X() - std::abs(centerX);
+          double localY = pos.Y() - std::abs(centerY);
+          double localZ = pos.Z() - std::abs(centerZ);
           if (std::abs(localX) < tpc.HalfWidth() &&
           std::abs(localY) < tpc.HalfHeight() &&
           std::abs(localZ) < tpc.HalfLength()) {
