@@ -1054,8 +1054,8 @@ namespace lar
           double localX = pos.X() - std::abs(centerX);
           double localY = pos.Y() - std::abs(centerY);
           double localZ = pos.Z() - std::abs(centerZ);
-          if (std::abs(localX) < tpc.HalfWidth() &&
-          std::abs(localY) < tpc.HalfHeight() &&
+          if (std::abs(localX) < tpc.HalfWidth() ||
+          std::abs(localY) < tpc.HalfHeight() ||
           std::abs(localZ) < tpc.HalfLength()) {
           std::cout << "Particle is inside active volume at trajectory point " << i << std::endl;
       
