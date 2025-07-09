@@ -1020,6 +1020,18 @@ namespace lar
         fZmin = -geom.DetHalfHeight()*2;
         fZmax = geom.DetHalfHeight()*2;
         std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
+        double centerX = tpc.GetCenter().X();
+        double centerY = tpc.GetCenter().Y();
+        double centerZ = tpc.GetCenter().Z();
+        const TLorentzVector& pos = particle->Position(i);
+        double localX = pos.X() - centerX;
+        double localY = pos.Y() - centerY;
+        double localZ = pos.Z() - centerZ;
+        if (std::abs(localX) < tpc.HalfWidth() &&
+        std::abs(localY) < tpc.HalfHeight() &&
+        std::abs(localZ) < tpc.HalfLength()) {
+        std::cout << “Particle is inside active volume at trajectory point ” << i << std::endl;
+        }
         // 2) Loop over each particle
         // for (int l=0; l<fSim_nParticles; l++) {
 
