@@ -1055,18 +1055,18 @@ namespace lar
           if (std::abs(localX) < tpc.HalfWidth() &&
           std::abs(localY) < tpc.HalfHeight() &&
           std::abs(localZ) < tpc.HalfLength()) {
-          std::cout << “Particle is inside active volume at trajectory point ” << i << std::endl;
+          std::cout << "Particle is inside active volume at trajectory point " << i << std::endl;
         }
-          auto const &pos = particleVec.Position(ipt);
-          auto const &mom = particleVec.Momentum(ipt);
+          //auto const &pos = particleVec.Position(ipt);
+          //auto const &mom = particleVec.Momentum(ipt);
 
-          double x = pos.X();
-          double y = pos.Y();
-          double z = pos.Z();
-          double Etot = mom.E();
-          double m0 = particleVec.Mass();
-          double KE = Etot - m0;
-          std::cout<<"position in x:"<< x <<"position in y:"<<y<<"position in z:"<<z<<std::endl;
+          //double x = pos.X();
+          //double y = pos.Y();
+          //double z = pos.Z();
+          //double Etot = mom.E();
+          //double m0 = particleVec.Mass();
+          //double KE = Etot - m0;
+          //std::cout<<"position in x:"<< x <<"position in y:"<<y<<"position in z:"<<z<<std::endl;
           // compare to cached bounds (set up in your ctor)
          // if (x < fXmin || x > fXmax ||
            //   y < fYmin || y > fYmax ||
