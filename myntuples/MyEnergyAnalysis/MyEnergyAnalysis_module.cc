@@ -1014,7 +1014,7 @@ namespace lar
         //double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
         //auto const &geom = *fGeometryService;
        //fXmin = -geom.DetLength();
-        =//fXmax = geom.DetLength();
+        //fXmax = geom.DetLength();
         //fYmin = -geom.DetHalfWidth()*2;
         //fYmax = geom.DetHalfWidth()*2;
         //fZmin = -geom.DetHalfHeight()*2;
@@ -1045,7 +1045,8 @@ namespace lar
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
-           double centerX = tpc.GetCenter().X();
+          const geo::TPCGeo& tpc = geo->TPC(0);
+          double centerX = tpc.GetCenter().X();
           double centerY = tpc.GetCenter().Y();
           double centerZ = tpc.GetCenter().Z();
           const TLorentzVector& pos = particle->Position(i);
