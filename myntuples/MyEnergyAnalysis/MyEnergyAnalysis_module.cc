@@ -1046,7 +1046,7 @@ namespace lar
         art::ServiceHandle<geo::Geometry const> geom;
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
-          const geo::TPCGeo& tpc = geom.TPC(0);
+          const geo::TPCGeo& tpc = geom->TPC(0);
           double centerX = tpc.GetCenter().X();
           double centerY = tpc.GetCenter().Y();
           double centerZ = tpc.GetCenter().Z();
