@@ -1058,7 +1058,7 @@ namespace lar
           if (std::abs(localX) < tpc.HalfWidth()*2 ||
           std::abs(localY) < tpc.HalfHeight()*2 ||
           std::abs(localZ) < tpc.HalfLength()*2) {
-          std::cout << "Particle is inside active volume at trajectory point " << i << std::endl;
+          std::cout << "Particle is inside active volume at trajectory point " << ipt << std::endl;
           
         }
           //auto const &position = particleVec.Position(ipt);
