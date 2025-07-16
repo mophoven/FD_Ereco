@@ -1046,13 +1046,12 @@ namespace lar
         art::ServiceHandle<geo::Geometry const> geom;
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
-          TLorentzVector pos = particleVec.Position(ipt);
           const geo::TPCGeo& tpc = geom->TPC(0);
           double centerX = tpc.GetCenter().X();
           double centerY = tpc.GetCenter().Y();
           double centerZ = tpc.GetCenter().Z();
           std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-          const TLorentzVector& pos = particleVec.Position(i);
+          const TLorentzVector& pos = particleVec.Position(ipt);
           double localX = pos.X() - std::abs(centerX);
           double localY = pos.Y() - std::abs(centerY);
           double localZ = pos.Z() - std::abs(centerZ);
