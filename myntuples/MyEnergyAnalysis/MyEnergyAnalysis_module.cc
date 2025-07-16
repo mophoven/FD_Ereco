@@ -1054,6 +1054,7 @@ namespace lar
           double localX = pos.X() - std::abs(centerX);
           double localY = pos.Y() - std::abs(centerY);
           double localZ = pos.Z() - std::abs(centerZ);
+          std::cout << localX << " ," << localY << "," << localZ << std::endl;
           if (std::abs(localX) < tpc.HalfWidth()*2 ||
           std::abs(localY) < tpc.HalfHeight()*2 ||
           std::abs(localZ) < tpc.HalfLength()*2) {
