@@ -1577,6 +1577,7 @@ namespace {
   int incomingID = incoming->TrackId();
   double minDist = 1e10;
   TLorentzVector bestMom;
+  bool dies;
 
   for (unsigned int i = 0; i < incoming->NumberTrajectoryPoints(); ++i) {
     TLorentzVector pos = incoming->Position(i);
@@ -1585,11 +1586,18 @@ namespace {
       minDist = dist;
       bestMom = incoming->Momentum(i);
   }
+  if (i < incoming->NumberTrajectoryPoints() -1){
+    dies = false;
+    TLorentzVector next = incoming->Position(i+1);
+  }
+  else{
+    dies = true;
+  }
 }
 
 
   for (const simb::MCParticle* daughter : vertex.daughters) {
-    if (daughter->TrackId() == incomingID) continue;  // Avoid double-counting self
+    if (dies && daughter->TrackId() == incomingID) continue;  // Avoid double-counting self
     if (daughter->Mother() != incoming->TrackId()) continue; // Exclude indirect descendants
 
 // Check if daughter produces further descendants (i.e., truly interacts)
