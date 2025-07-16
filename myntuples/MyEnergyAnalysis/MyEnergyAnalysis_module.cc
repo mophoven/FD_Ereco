@@ -1004,7 +1004,7 @@ namespace lar
       for (int i = 0; i < fSim_nParticles; i++)
       {
         const simb::MCParticle &particleVec = *(SimParticles[i]);
-
+      
         // const int last = Ntrajpoints - 1;
         // const TLorentzVector& positionStart = particleVec.Position(0);
         // const TLorentzVector& positionEnd = particleVec.Position(last);
@@ -1046,6 +1046,7 @@ namespace lar
         art::ServiceHandle<geo::Geometry const> geom;
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
+          TLorentzVector pos = particleVec.Position(ipt);
           const geo::TPCGeo& tpc = geom->TPC(0);
           double centerX = tpc.GetCenter().X();
           double centerY = tpc.GetCenter().Y();
