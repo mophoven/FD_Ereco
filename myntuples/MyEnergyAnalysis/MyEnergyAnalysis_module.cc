@@ -1614,7 +1614,7 @@ namespace {
     */
 
 
-   
+   const TLorentzVector& pos = daughter-> Position(0);
 
     if (std::abs(pos.T() - vertex.t) > tepsilon) continue;
 
