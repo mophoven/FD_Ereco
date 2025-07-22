@@ -1614,9 +1614,9 @@ namespace {
     */
 
 
-   const TLorentzVector& pos = daughter-> Position(0);
+   const TLorentzVector& dpos = daughter-> Position(0);
 
-    if (std::abs(pos.T() - vertex.t) > tepsilon) continue;
+    if (std::abs(dpos.T() - vertex.t) > tepsilon) continue;
 
     fInX = vertex.x; fInY = vertex.y; fInZ = vertex.z; fInT = vertex.t;
     fInPDG = incoming->PdgCode();
@@ -1631,10 +1631,10 @@ namespace {
     const TLorentzVector& mom = daughter->Momentum(0);
     const TLorentzVector& pos = daughter->Position(0);
 
-    fOutX.push_back(pos.X());
-    fOutY.push_back(pos.Y());
-    fOutZ.push_back(pos.Z());
-    fOutT.push_back(pos.T());
+    fOutX.push_back(dpos.X());
+    fOutY.push_back(dpos.Y());
+    fOutZ.push_back(dpos.Z());
+    fOutT.push_back(dpos.T());
     fOutPx.push_back(mom.Px());
     fOutPy.push_back(mom.Py());
     fOutPz.push_back(mom.Pz());
