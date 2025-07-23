@@ -1048,6 +1048,7 @@ namespace lar
         {
           std::cout<<Ntraj<<std::endl;
           const geo::TPCGeo& tpc = geom->TPC(0);
+          std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << std::endl;
           double centerX = tpc.GetCenter().X();
           double centerY = tpc.GetCenter().Y();
           double centerZ = tpc.GetCenter().Z();
