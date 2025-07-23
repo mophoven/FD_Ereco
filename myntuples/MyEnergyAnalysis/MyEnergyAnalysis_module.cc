@@ -1073,7 +1073,7 @@ namespace lar
                     << " with KE = " << KE << " GeV\n"
                     << std::endl;
             // declare this fEscapedKineticEnergies.push_back(KE);
-            break;
+            //break;
         }
           //auto const &position = particleVec.Position(ipt)
           
