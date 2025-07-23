@@ -1597,7 +1597,7 @@ namespace {
 
 
   for (const simb::MCParticle* daughter : vertex.daughters) {
-    if (dies && daughter->TrackId() == incomingID) continue;  // Avoid double-counting self
+    if (dies) continue;  // Avoid double-counting self
     if (daughter->Mother() != incoming->TrackId()) continue; // Exclude indirect descendants
 
 // Check if daughter produces further descendants (i.e., truly interacts)
