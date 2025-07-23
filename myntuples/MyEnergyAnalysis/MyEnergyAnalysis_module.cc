@@ -1056,24 +1056,28 @@ namespace lar
           double localX = pos.X() - std::abs(centerX);
           double localY = pos.Y() - std::abs(centerY);
           double localZ = pos.Z() - std::abs(centerZ);
-          std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-          std::cout << localX << " ," << localY << "," << localZ << std::endl;
-          std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
+          //std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
+          //std::cout << localX << " ," << localY << "," << localZ << std::endl;
+          //std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
           if (std::abs(localX) > tpc.HalfWidth()*2 ||
           std::abs(localY) > tpc.HalfHeight()*2 ||
           std::abs(localZ) > tpc.HalfLength()*2) {
-          std::cout << "Particle is outside active volume at trajectory point " << ipt << std::endl;
-          std::cout << tpc.HalfWidth()*2 << " ," << tpc.HalfHeight()*2 << "," << tpc.HalfLength()*2 << std::endl;
+          //std::cout << "Particle is outside active volume at trajectory point " << ipt << std::endl;
+          //std::cout << tpc.HalfWidth()*2 << " ," << tpc.HalfHeight()*2 << "," << tpc.HalfLength()*2 << std::endl;
           auto const &mom = particleVec.Momentum(ipt);
           double Etot = mom.E();
           double m0 = particleVec.Mass();
           double KE = Etot - m0;
-          std::cout << "Particle " << particleVec.TrackId()
-                    << " exited at pt " << ipt
-                    << " with KE = " << KE << " GeV\n"
-                    << std::endl;
+          //std::cout << "Particle " << particleVec.TrackId()
+                    //<< " exited at pt " << ipt
+                    //<< " with KE = " << KE << " GeV\n"
+                    //<< std::endl;
             // declare this fEscapedKineticEnergies.push_back(KE);
-            //break;
+          break;
+        }
+        else {
+          std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
+          std::cout << localX << " ," << localY << "," << localZ << std::endl;
         }
           //auto const &position = particleVec.Position(ipt)
           
