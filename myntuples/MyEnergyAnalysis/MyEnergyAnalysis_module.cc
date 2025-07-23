@@ -1064,7 +1064,7 @@ namespace lar
           std::abs(localZ) > tpc.HalfLength()*2) {
           //std::cout << "Particle is outside active volume at trajectory point " << ipt << std::endl;
           //std::cout << tpc.HalfWidth()*2 << " ," << tpc.HalfHeight()*2 << "," << tpc.HalfLength()*2 << std::endl;
-          auto const &mom = particleVec.Momentum(ipt);
+          //auto const &mom = particleVec.Momentum(ipt);
           //double Etot = mom.E();
           //double m0 = particleVec.Mass();
           //double KE = Etot - m0;
