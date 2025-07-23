@@ -1057,9 +1057,9 @@ namespace lar
           std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
           std::cout << localX << " ," << localY << "," << localZ << std::endl;
           std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
-          if (std::abs(localX) > tpc.HalfWidth()*2 ||
-          std::abs(localY) > tpc.HalfHeight()*2 ||
-          std::abs(localZ) > tpc.HalfLength()*2) {
+          if (std::abs(localX) > tpc.HalfWidth() ||
+          std::abs(localY) > tpc.HalfHeight() ||
+          std::abs(localZ) > tpc.HalfLength()) {
           std::cout << "Particle is outside active volume at trajectory point " << ipt << std::endl;
           std::cout << tpc.HalfWidth()*2 << " ," << tpc.HalfHeight()*2 << "," << tpc.HalfLength()*2 << std::endl;
           auto const &mom = particleVec.Momentum(ipt);
