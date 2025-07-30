@@ -1000,27 +1000,27 @@ namespace lar
       fSim_nParticles = SimParticles.size();
 
       // Store info for leading E sim numu GEANT 4 level
-      
+
       for (int i = 0; i < fSim_nParticles; i++)
       {
         const simb::MCParticle &particleVec = *(SimParticles[i]);
-      
+
         // const int last = Ntrajpoints - 1;
         // const TLorentzVector& positionStart = particleVec.Position(0);
         // const TLorentzVector& positionEnd = particleVec.Position(last);
         // const TLorentzVector& momentumStart = particleVec.Momentum(0);
         // const TLorentzVector& momentumEnd = particleVec.Momentum(last);
         //  New stuff
-        //double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
-        //auto const &geom = *fGeometryService;
-       //fXmin = -geom.DetLength();
-        //fXmax = geom.DetLength();
-        //fYmin = -geom.DetHalfWidth()*2;
-        //fYmax = geom.DetHalfWidth()*2;
-        //fZmin = -geom.DetHalfHeight()*2;
-        //fZmax = geom.DetHalfHeight()*2;
-        //std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
-       
+        // double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
+        // auto const &geom = *fGeometryService;
+        // fXmin = -geom.DetLength();
+        // fXmax = geom.DetLength();
+        // fYmin = -geom.DetHalfWidth()*2;
+        // fYmax = geom.DetHalfWidth()*2;
+        // fZmin = -geom.DetHalfHeight()*2;
+        // fZmax = geom.DetHalfHeight()*2;
+        // std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
+
         // 2) Loop over each particle
         // for (int l=0; l<fSim_nParticles; l++) {
 
@@ -1044,49 +1044,71 @@ namespace lar
         // loop over every trajectory point, compare to geometry,
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         art::ServiceHandle<geo::Geometry const> geom;
+        bool hasEntered = false;
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
-          //std::cout<<Ntraj<<std::endl;
-          const geo::TPCGeo& tpc = geom->TPC(0);
-          //std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << std::endl;
+          // std::cout<<Ntraj<<std::endl;
+          const geo::TPCGeo &tpc = geom->TPC(0);
+          // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << std::endl;
           double centerX = tpc.GetCenter().X();
           double centerY = tpc.GetCenter().Y();
           double centerZ = tpc.GetCenter().Z();
-          const TLorentzVector& pos = particleVec.Position(ipt);
+          const TLorentzVector &pos = particleVec.Position(ipt);
           double localX = pos.X() - std::abs(centerX);
           double localY = pos.Y() - std::abs(centerY);
           double localZ = pos.Z() - std::abs(centerZ);
-          //std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-          //std::cout << localX << " ," << localY << "," << localZ << std::endl;
-          //std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
-          if (std::abs(localX) > tpc.HalfWidth()*2 ||
-          std::abs(localY) > tpc.HalfHeight()*2 ||
-          std::abs(localZ) > tpc.HalfLength()*2) {
-          //std::cout << "Particle is outside active volume at trajectory point " << ipt << std::endl;
-          //std::cout << tpc.HalfWidth()*2 << " ," << tpc.HalfHeight()*2 << "," << tpc.HalfLength()*2 << std::endl;
-          //auto const &mom = particleVec.Momentum(ipt);
-          //double Etot = mom.E();
-          //double m0 = particleVec.Mass();
-          //double KE = Etot - m0;
-          //std::cout << "Particle " << particleVec.TrackId()
-                    //<< " exited at pt " << ipt
-                    //<< " with KE = " << KE << " GeV\n"
-                    //<< std::endl;
-            // declare this fEscapedKineticEnergies.push_back(KE);
-          break;
+          // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
+          // std::cout << localX << " ," << localY << "," << localZ << std::endl;
+          // std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
+          bool inside =
+              std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
+
+          if (!hasEntered)
+          {
+            if (inside)
+            {
+              hasEntered = true;
+              std::cout << "Particle " << particleVec.TrackId()
+                        << " ENTERED at pt " << ipt << "\n";
+            }
+          }
+          else
+          {
+            if (!inside)
+            {
+              // compute KE as before
+              auto const &mom = particleVec.Momentum(ipt);
+              double KE = mom.E() - particleVec.Mass();
+              std::cout << "Particle " << particleVec.TrackId()
+                        << " EXITED at pt " << ipt
+                        << " with KE=" << KE << " GeV\n";
+              break;
+            }
+          }
         }
-        else {
-          std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-          std::cout << localX << " ," << localY << "," << localZ << std::endl;
-          std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt<< " Ntraj:"<<Ntraj << std::endl;
-        }
-          //auto const &position = particleVec.Position(ipt)
-          
-           // stop at first exit
+        else
+        {
+          if (!inside)
+          {
+            // compute KE as before
+            auto const &mom = particleVec.Momentum(ipt);
+            double KE = mom.E() - particleVec.Mass();
+            std::cout << "Particle " << particleVec.TrackId()
+                      << " EXITED at pt " << ipt
+                      << " with KE=" << KE << " GeV\n";
+            fEscapedKineticEnergies.push_back(KE);
+            break;
+            // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
+            // std::cout << localX << " ," << localY << "," << localZ << std::endl;
+            // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
+          }
+          // auto const &position = particleVec.Position(ipt)
+
+          // stop at first exit
         }
       }
       // End four-vector collection
-      
+
       // Collecting all Daughters of Each primary
 
       std::vector<std::vector<const simb::MCParticle *>> DaughterpartVec;
@@ -1100,7 +1122,7 @@ namespace lar
         const simb::MCParticle *currentpart = SimParticles[i];
         getDescendants(fSimP_TrackID_vec[i], fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
         std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
-        //std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
+        // std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
         for (const Vertex &vtx : interactionVertices)
         {
           fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
@@ -1355,7 +1377,7 @@ namespace lar
                 else if (particle.PdgCode() == 111 || IsAncestorMotherPi0(particle, pi0_trkID, particleMap))
                 {
                   fSim_pi0_Edep_b2 += energyDeposit.energy;
-                }                                                                                                                                                                                                                                                                                                                                               // std::cout << "fire pi0! " << std::endl; } // end pi0 deposited energy
+                } // std::cout << "fire pi0! " << std::endl; } // end pi0 deposited energy
                 else if (particle.PdgCode() == 321 || particle.PdgCode() == -321 || particle.PdgCode() == 311 || particle.PdgCode() == -311 || particle.PdgCode() == 130 || particle.PdgCode() == 310 || particle.PdgCode() == 22 || (particle.PdgCode() >= 100 && particle.PdgCode() <= -9999) || (particle.PdgCode() >= -9999 && particle.PdgCode() <= -100)) // eOther which includes: kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
                 {
                   fSim_Other_Edep_b2 += energyDeposit.energy;
