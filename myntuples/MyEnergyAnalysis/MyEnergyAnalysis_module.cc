@@ -1078,7 +1078,7 @@ namespace lar
         else {
           std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
           std::cout << localX << " ," << localY << "," << localZ << std::endl;
-          std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt<< "Ntraj:"<<Ntraj << std::endl;
+          std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt<< " Ntraj:"<<Ntraj << std::endl;
         }
           //auto const &position = particleVec.Position(ipt)
           
