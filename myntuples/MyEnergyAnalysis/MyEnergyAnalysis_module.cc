@@ -1084,7 +1084,7 @@ namespace lar
               break;
             }
           }
-        
+        }
         else
         {
           if (!inside)
