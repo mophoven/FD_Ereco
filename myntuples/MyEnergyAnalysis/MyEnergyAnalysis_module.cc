@@ -1076,7 +1076,6 @@ namespace lar
           {
             if (!inside)
             {
-              // compute KE as before
               auto const &mom = particleVec.Momentum(ipt);
               double KE = mom.E() - particleVec.Mass();
               std::cout << "Particle " << particleVec.TrackId()
@@ -1085,7 +1084,7 @@ namespace lar
               break;
             }
           }
-        }
+        
         else
         {
           if (!inside)
@@ -1096,7 +1095,6 @@ namespace lar
             std::cout << "Particle " << particleVec.TrackId()
                       << " EXITED at pt " << ipt
                       << " with KE=" << KE << " GeV\n";
-            fEscapedKineticEnergies.push_back(KE);
             break;
             // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
             // std::cout << localX << " ," << localY << "," << localZ << std::endl;
