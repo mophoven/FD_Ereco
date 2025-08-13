@@ -1072,18 +1072,6 @@ namespace lar
                         << " ENTERED at pt " << ipt << "\n";
             }
           }
-          else
-          {
-            if (!inside)
-            {
-              auto const &mom = particleVec.Momentum(ipt);
-              double KE = mom.E() - particleVec.Mass();
-              std::cout << "Particle " << particleVec.TrackId()
-                        << " EXITED at pt " << ipt
-                        << " with KE=" << KE << " GeV\n";
-              break;
-            }
-          }
         }
         else
         {
@@ -1100,9 +1088,6 @@ namespace lar
             // std::cout << localX << " ," << localY << "," << localZ << std::endl;
             // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
           }
-          // auto const &position = particleVec.Position(ipt)
-
-          // stop at first exit
         }
       }
       // End four-vector collection
