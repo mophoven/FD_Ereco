@@ -1072,21 +1072,21 @@ namespace lar
                         << " ENTERED at pt " << ipt << "\n";
             }
           }
-        }
-        else
-        {
-          if (!inside)
+          else
           {
-            // compute KE as before
-            auto const &mom = particleVec.Momentum(ipt);
-            double KE = mom.E() - particleVec.Mass();
-            std::cout << "Particle " << particleVec.TrackId()
-                      << " EXITED at pt " << ipt
-                      << " with KE=" << KE << " GeV\n";
-            break;
+            if (!inside)
+            {
+              // compute KE as before
+              auto const &mom = particleVec.Momentum(ipt);
+              double KE = mom.E() - particleVec.Mass();
+              std::cout << "Particle " << particleVec.TrackId()
+                        << " EXITED at pt " << ipt
+                        << " with KE=" << KE << " GeV\n";
+              break;
             // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
             // std::cout << localX << " ," << localY << "," << localZ << std::endl;
             // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
+            }
           }
         }
       }
