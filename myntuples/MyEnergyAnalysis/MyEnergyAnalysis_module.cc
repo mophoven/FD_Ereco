@@ -1050,18 +1050,25 @@ namespace lar
           // std::cout<<Ntraj<<std::endl;
           const geo::TPCGeo &tpc = geom->TPC(0);
           // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << std::endl;
-          double centerX = tpc.GetCenter().X();
-          double centerY = tpc.GetCenter().Y();
-          double centerZ = tpc.GetCenter().Z();
+          //double centerX = tpc.GetCenter().X();
+          //double centerY = tpc.GetCenter().Y();
+          //double centerZ = tpc.GetCenter().Z();
           const TLorentzVector &pos = particleVec.Position(ipt);
-          double localX = pos.X() - std::abs(centerX);
-          double localY = pos.Y() - std::abs(centerY);
-          double localZ = pos.Z() - std::abs(centerZ);
+          double localX = pos.X() //- std::abs(centerX);
+          double localY = pos.Y() //- std::abs(centerY);
+          double localZ = pos.Z() //- std::abs(centerZ);
+          double X_MIN = -400.0, X_MAX =  400.0;
+          double Y_MIN = -600.0, Y_MAX =  600.0;
+          double Z_MIN =    0.0, Z_MAX = 1300.0;
+
           // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-          std::cout << localX << " ," << localY << "," << localZ << std::endl;
+          //std::cout << localX << " ," << localY << "," << localZ << std::endl;
           // std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
           bool inside =
-              std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
+              localX >= X_MIN && localX <= X_MAX &&
+              localY >= Y_MIN && localY <= Y_MAX &&
+              localZ >= Z_MIN && localZ <= Z_MAX;
+              //std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
 
           if (!hasEntered)
           {
