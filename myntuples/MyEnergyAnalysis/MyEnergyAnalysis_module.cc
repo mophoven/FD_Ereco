@@ -1048,15 +1048,15 @@ namespace lar
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
           // std::cout<<Ntraj<<std::endl;
-          const geo::TPCGeo &tpc = geom->TPC(0);
+          //const geo::TPCGeo &tpc = geom->TPC(0);
           // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << std::endl;
           //double centerX = tpc.GetCenter().X();
           //double centerY = tpc.GetCenter().Y();
           //double centerZ = tpc.GetCenter().Z();
           const TLorentzVector &pos = particleVec.Position(ipt);
-          double localX = pos.X() //- std::abs(centerX);
-          double localY = pos.Y() //- std::abs(centerY);
-          double localZ = pos.Z() //- std::abs(centerZ);
+          double localX = pos.X(); //- std::abs(centerX);
+          double localY = pos.Y(); //- std::abs(centerY);
+          double localZ = pos.Z(); //- std::abs(centerZ);
           double X_MIN = -400.0, X_MAX =  400.0;
           double Y_MIN = -600.0, Y_MAX =  600.0;
           double Z_MIN =    0.0, Z_MAX = 1300.0;
