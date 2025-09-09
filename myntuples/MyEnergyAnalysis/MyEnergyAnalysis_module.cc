@@ -1072,7 +1072,7 @@ namespace lar
 
           if (!hasEntered)
           {
-            if (inside)
+            if (inside && ipt != 0)
             {
               hasEntered = true;
               std::cout << "Particle " << particleVec.TrackId()
