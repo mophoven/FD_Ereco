@@ -1078,8 +1078,8 @@ namespace lar
               std::cout << "Particle " << particleVec.TrackId()
                         << " ENTERED at pt " << ipt << "\n";
                            "pdg: " << particleVec.PdgCode() << "\n"
-                            "Trajectory points: " << Ntraj << ", Position: (" << pos.X() << ", " << pos.Y() << ", " << pos.Z() << ")\n";
-                            "Momentum: (" << particleVec.Momentum(ipt).Px() << ", " << particleVec.Momentum(ipt).Py() << ", " << particleVec.Momentum(ipt).Pz() << ")\n";
+                            "Trajectory points: " << Ntraj << "," Position:  << pos.X() << ", " << pos.Y() << ","  << pos.Z() <<"\n";
+                            "Momentum: (" << particleVec.Momentum(ipt).Px() << ", " << particleVec.Momentum(ipt).Py() << ", " << particleVec.Momentum(ipt).Pz() << ")\n";<<std::endl;
             }
           }
           else
