@@ -1077,7 +1077,7 @@ namespace lar
                                              << q.Pz() << ", " << q.E() << ")\n";
         }
       }
-    }
+    //}
         //for (size_t ipt = 1; ipt < Ntraj; ++ipt)
         {
           // std::cout<<Ntraj<<std::endl;
