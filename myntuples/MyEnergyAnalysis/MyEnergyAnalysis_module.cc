@@ -1044,8 +1044,41 @@ namespace lar
         // loop over every trajectory point, compare to geometry,
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         art::ServiceHandle<geo::Geometry const> geom;
+        const TLorentzVector &pos = particleVec.Position(ipt);
+        double localX = pos.X(); //- std::abs(centerX);
+        double localY = pos.Y(); //- std::abs(centerY);
+        double localZ = pos.Z(); //- std::abs(centerZ);
+        double X_MIN = -400.0, X_MAX =  400.0;
+        double Y_MIN = -600.0, Y_MAX =  600.0;
+        double Z_MIN =    0.0, Z_MAX = 1300.0;
+
         bool hasEntered = false;
-        for (size_t ipt = 1; ipt < Ntraj; ++ipt)
+        if (Ntraj > 1) {
+        size_t firstInside = Ntraj;  
+        for (size_t ipt = 1; ipt < Ntraj; ++ipt) { 
+          auto const& p = particleVec.Position(ipt);
+          if (localX >= X_MIN && localX <= X_MAX &&
+              localY >= Y_MIN && localY <= Y_MAX &&
+              localZ >= Z_MIN && localZ <= Z_MAX)
+            {
+                firstInside = ipt;
+                break;
+            }
+          }
+
+        if (firstInside != Ntraj) {
+          auto const& p = particleVec.Position(firstInside);
+          auto const& q = particleVec.Momentum(firstInside);
+          std::cout << "Particle " << particleVec.TrackId()
+                    << " FIRST-IN pt " << firstInside
+                    << "  (x,y,z,t)=("<< p.X() << ", " << p.Y() << ", "
+                                      << p.Z() << ", " << p.T() << ")"
+                      << "  (px,py,pz,E)=(" << q.Px() << ", " << q.Py() << ", "
+                                             << q.Pz() << ", " << q.E() << ")\n";
+        }
+      }
+    }
+        //for (size_t ipt = 1; ipt < Ntraj; ++ipt)
         {
           // std::cout<<Ntraj<<std::endl;
           //const geo::TPCGeo &tpc = geom->TPC(0);
@@ -1053,14 +1086,6 @@ namespace lar
           //double centerX = tpc.GetCenter().X();
           //double centerY = tpc.GetCenter().Y();
           //double centerZ = tpc.GetCenter().Z();
-          const TLorentzVector &pos = particleVec.Position(ipt);
-          double localX = pos.X(); //- std::abs(centerX);
-          double localY = pos.Y(); //- std::abs(centerY);
-          double localZ = pos.Z(); //- std::abs(centerZ);
-          double X_MIN = -400.0, X_MAX =  400.0;
-          double Y_MIN = -600.0, Y_MAX =  600.0;
-          double Z_MIN =    0.0, Z_MAX = 1300.0;
-
           // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
           //std::cout << localX << " ," << localY << "," << localZ << std::endl;
           // std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
