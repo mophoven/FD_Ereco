@@ -1045,7 +1045,7 @@ namespace lar
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         art::ServiceHandle<geo::Geometry const> geom;
         for (size_t ipt = 1; ipt < Ntraj; ++ipt) { 
-        const TLorentzVector &pos = particleVec.Position(ipt)
+        const TLorentzVector &pos = particleVec.Position(ipt);
         double localX = pos.X(); 
         double localY = pos.Y(); 
         double localZ = pos.Z(); 
