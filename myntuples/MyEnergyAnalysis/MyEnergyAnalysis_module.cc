@@ -1044,7 +1044,8 @@ namespace lar
         // loop over every trajectory point, compare to geometry,
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         art::ServiceHandle<geo::Geometry const> geom;
-        
+        for (size_t ipt = 1; ipt < Ntraj; ++ipt) { 
+        const TLorentzVector &pos = particleVec.Position(ipt)
         double localX = pos.X(); 
         double localY = pos.Y(); 
         double localZ = pos.Z(); 
@@ -1055,8 +1056,6 @@ namespace lar
         bool hasEntered = false;
         if (Ntraj > 0) {
           size_t firstInside = Ntraj;  
-          for (size_t ipt = 1; ipt < Ntraj; ++ipt) { 
-            const TLorentzVector &pos = particleVec.Position(ipt);
            
             if (localX >= X_MIN && localX <= X_MAX &&
                 localY >= Y_MIN && localY <= Y_MAX &&
