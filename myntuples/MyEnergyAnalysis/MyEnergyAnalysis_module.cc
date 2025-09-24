@@ -1048,33 +1048,33 @@ namespace lar
 
         bool hasEntered = false;
         if (Ntraj > 0) {
-        size_t firstInside = Ntraj;  
-        for (size_t ipt = 1; ipt < Ntraj; ++ipt) { 
-          const TLorentzVector &pos = particleVec.Position(ipt);
-          double localX = pos.X(); 
-          double localY = pos.Y(); 
-          double localZ = pos.Z(); 
-          double X_MIN = -400.0, X_MAX =  400.0;
-          double Y_MIN = -600.0, Y_MAX =  600.0;
-          double Z_MIN = 0.0, Z_MAX = 1300.0;
-          if (localX >= X_MIN && localX <= X_MAX &&
-              localY >= Y_MIN && localY <= Y_MAX &&
-              localZ >= Z_MIN && localZ <= Z_MAX)
+          size_t firstInside = Ntraj;  
+          for (size_t ipt = 1; ipt < Ntraj; ++ipt) { 
+            const TLorentzVector &pos = particleVec.Position(ipt);
+            double localX = pos.X(); 
+            double localY = pos.Y(); 
+            double localZ = pos.Z(); 
+            double X_MIN = -400.0, X_MAX =  400.0;
+            double Y_MIN = -600.0, Y_MAX =  600.0;
+            double Z_MIN = 0.0, Z_MAX = 1300.0;
+            if (localX >= X_MIN && localX <= X_MAX &&
+                localY >= Y_MIN && localY <= Y_MAX &&
+                localZ >= Z_MIN && localZ <= Z_MAX)
             {
                 firstInside = ipt;
                 break;
             }
           //}
 
-        if (firstInside != Ntraj) {
-          auto const& p = particleVec.Position(firstInside);
-          auto const& q = particleVec.Momentum(firstInside);
-          std::cout << "Particle " << particleVec.TrackId()
-                    << " FIRST-IN pt " << firstInside
-                    << "  (x,y,z,t)=("<< p.X() << ", " << p.Y() << ", "
-                                      << p.Z() << ", " << p.T() << ")"
-                      << "  (px,py,pz,E)=(" << q.Px() << ", " << q.Py() << ", "
-                                             << q.Pz() << ", " << q.E() << ")\n";
+          if (firstInside != Ntraj) {
+            auto const& p = particleVec.Position(firstInside);
+            auto const& q = particleVec.Momentum(firstInside);
+            std::cout << "Particle " << particleVec.TrackId()
+                      << " FIRST-IN pt " << firstInside
+                      << "  (x,y,z,t)=("<< p.X() << ", " << p.Y() << ", "
+                                        << p.Z() << ", " << p.T() << ")"
+                        << "  (px,py,pz,E)=(" << q.Px() << ", " << q.Py() << ", "
+                                              << q.Pz() << ", " << q.E() << ")\n";
         }
       }
     //}
