@@ -1066,16 +1066,16 @@ namespace lar
         }
           //}
 
-          if (firstInside != Ntraj) {
-            auto const& p = particleVec.Position(firstInside);
-            auto const& q = particleVec.Momentum(firstInside);
-            std::cout << "Particle " << particleVec.TrackId()
-                      << " FIRST-IN pt " << firstInside
-                      << "  (x,y,z,t)=("<< p.X() << ", " << p.Y() << ", "
-                                        << p.Z() << ", " << p.T() << ")"
-                        << "  (px,py,pz,E)=(" << q.Px() << ", " << q.Py() << ", "
-                                              << q.Pz() << ", " << q.E() << ")\n";
-        }
+          //if (firstInside != Ntraj) {
+           // auto const& p = particleVec.Position(firstInside);
+            //auto const& q = particleVec.Momentum(firstInside);
+            //std::cout << "Particle " << particleVec.TrackId()
+                     // << " FIRST-IN pt " << firstInside
+                      //<< "  (x,y,z,t)=("<< p.X() << ", " << p.Y() << ", "
+                         //               << p.Z() << ", " << p.T() << ")"
+                        //<< "  (px,py,pz,E)=(" << q.Px() << ", " << q.Py() << ", "
+                          //                    << q.Pz() << ", " << q.E() << ")\n";
+        //}
       }
     }
     //}
