@@ -1057,16 +1057,12 @@ namespace lar
         if (localX >= X_MIN && localX <= X_MAX &&
                 localY >= Y_MIN && localY <= Y_MAX &&
                 localZ >= Z_MIN && localZ <= Z_MAX){
-        bool hasEntered = true;
+        hasEntered = true;
       }
-        if (!hasEntered && ipt > 0 ) {
-          size_t firstInside = Ntraj;  
-           
-            
-            
-                firstInside = ipt;
-                std::cout << "Found first inside at pt " << firstInside << "\n";
-                break;
+        if (!hasEntered && ipt > 0 ) { 
+              
+          std::cout << "Found first inside at pt " << ipt << "\n";
+          break;
         }
           //}
 
