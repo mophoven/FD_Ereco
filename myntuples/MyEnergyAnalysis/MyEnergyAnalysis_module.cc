@@ -1054,9 +1054,7 @@ namespace lar
         double Z_MIN = 0.0, Z_MAX = 1300.0;
         const size_t Ntraj = particleVec.NumberTrajectoryPoints();
         bool hasEntered = false;
-          if (Ntraj <= 1) {
-          continue;
-        }
+        if (Ntraj > 0) {
           size_t firstInside = Ntraj;  
            
             if (localX >= X_MIN && localX <= X_MAX &&
