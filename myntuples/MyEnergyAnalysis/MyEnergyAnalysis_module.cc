@@ -1081,8 +1081,9 @@ namespace lar
                                               << q.Pz() << ", " << q.E() << ")\n";
         }
       }
+    }
     //}
-          bool inside =
+         /* bool inside =
               localX >= X_MIN && localX <= X_MAX &&
               localY >= Y_MIN && localY <= Y_MAX &&
               localZ >= Z_MIN && localZ <= Z_MAX;
@@ -1116,7 +1117,7 @@ namespace lar
             }
           }
         }
-      }
+      }*/
       // End four-vector collection
 
       // Collecting all Daughters of Each primary
