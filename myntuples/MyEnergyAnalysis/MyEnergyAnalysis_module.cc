@@ -1062,6 +1062,7 @@ namespace lar
                 localZ >= Z_MIN && localZ <= Z_MAX)
             {
                 firstInside = ipt;
+                std::cout << "Found first inside at pt " << firstInside << "\n";
                 break;
             }
           //}
