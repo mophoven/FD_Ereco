@@ -1053,6 +1053,7 @@ namespace lar
         double Y_MIN = -600.0, Y_MAX =  600.0;
         double Z_MIN = 0.0, Z_MAX = 1300.0;
         bool hasEntered = false;
+        auto const& q = particleVec.Momentum(ipt);
         if (localX >= X_MIN && localX <= X_MAX &&
                 localY >= Y_MIN && localY <= Y_MAX &&
                 localZ >= Z_MIN && localZ <= Z_MAX){
@@ -1061,7 +1062,8 @@ namespace lar
         if (!hasEntered && ipt > 0 ) { 
               
           std::cout << "Found first inside at pt " << ipt << "\n";
-          std::cout << "Track ID: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << "Position x" << pos.X() << "Position y" << pos.Y() << pos.Z() << "Position z" std ::endl;
+          std::cout << "Track ID: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << "Position x" << pos.X() << "Position y" << pos.Y() << pos.Z() << "Position z" << std ::endl;
+          std::cout << "  (px,py,pz,E)=(" << q.Px() << ", " << q.Py() << ", " << q.Pz() << ", " << q.E() << ")\n" << std::endl;
           break;
         }
           //}
