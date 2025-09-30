@@ -1061,7 +1061,7 @@ namespace lar
         if (!hasEntered && ipt > 0 ) { 
               
           std::cout << "Found first inside at pt " << ipt << "\n";
-          std::cout << "Track ID: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << std ::endl;
+          std::cout << "Track ID: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << "Position x" << pos.X() << "Position y" << pos.Y() << pos.Z() << "Position z" std ::endl;
           break;
         }
           //}
