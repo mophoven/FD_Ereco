@@ -1066,8 +1066,9 @@ namespace lar
               localZ >= Z_MIN && localZ <= Z_MAX;
               //std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
 
-          if (!hasEntered)
-          {
+          
+          
+
             if (inside)
             {
               hasEntered = true;
@@ -1078,30 +1079,21 @@ namespace lar
             {
               std::cout << "Particle " << particleVec.TrackId()
                         << " NOT entered yet at pt " << ipt << "\n";
-              for (size_t jpt = ipt + 1; jpt < Ntraj; ++jpt)
-              {
-                particleVec.Position(jpt).Print();
-                break;
-              }
-              break;
-            }
-          }
-          else
-          {
-            if (!inside)
-            {
-              // compute KE as before
+              // for (size_t jpt = ipt + 1; jpt < Ntraj; ++jpt)
+              // {
+              //   particleVec.Position(jpt).Print();
+              // }
+              // break;
+            
               auto const &mom = particleVec.Momentum(ipt);
               double KE = mom.E() - particleVec.Mass();
               std::cout << "Particle " << particleVec.TrackId()
                         << " EXITED at pt " << ipt
                         << " with KE=" << KE << " GeV\n";
               break;
-            // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-            // std::cout << localX << " ," << localY << "," << localZ << std::endl;
-            // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
+            
             }
-          }
+          
         }
       }
       // End four-vector collection
