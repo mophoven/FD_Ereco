@@ -1081,11 +1081,11 @@ namespace lar
               std::cout << "Particle " << particleVec.TrackId()
                       << " Not ENTERED yet at pt " << ipt << "\n";
               particleVec.Position(ipt).Print();
-              break;
+              //break;
             
               
             }
-            break;
+            //break;
           }
           else
           {
