@@ -1076,11 +1076,13 @@ namespace lar
             }
             else
             {
-              for (size_t jpt = ipt + 1; jpt < Ntraj; ++jpt)
-              {
-                particleVec.Position(jpt).Print();
-                break;
-              }
+              
+              
+              std::cout << "Particle " << particleVec.TrackId()
+                      << " Not ENTERED yet at pt " << ipt << "\n";
+              particleVec.Position(jpt).Print();
+              break;
+            
               
             }
             break;
