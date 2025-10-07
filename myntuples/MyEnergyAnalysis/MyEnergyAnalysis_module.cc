@@ -1059,7 +1059,8 @@ namespace lar
           // double Z_MIN = 0.0, Z_MAX = 1300.0;
           //auto const &q = particleVec.Momentum(ipt);
           double KE = particleVec.Momentum(ipt).E() - particleVec.Mass();
-          particleVec.Momentum(ipt).E().Print();
+          double E = particleVec.Momentum(ipt).E();
+          std :: cout << E << std :: endl;
           std :: cout << KE << std :: endl;
           
           // if (localX >= X_MIN && localX <= X_MAX &&
