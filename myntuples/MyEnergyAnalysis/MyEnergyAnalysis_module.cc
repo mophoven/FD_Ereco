@@ -1072,13 +1072,13 @@ namespace lar
             {
               hasEntered = true;
               std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
-                        << " ENTERED at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << ") "<< std ::endl
+                        << " ENTERED at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << ") "<< std ::endl;
                        
             }
             else
             {
               std::cout << " ! Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
-                      << " Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << ") "<< std ::endl
+                      << " Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << ") "<< std ::endl;
               //fin
               particleVec.Position(ipt).Print();
             }
