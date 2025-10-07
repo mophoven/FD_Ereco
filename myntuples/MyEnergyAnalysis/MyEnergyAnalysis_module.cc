@@ -1079,8 +1079,6 @@ namespace lar
             {
               std::cout << " ! Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
                       << " Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << ") "<< std ::endl;
-              //fin
-              particleVec.Position(ipt).Print();
             }
           
           }
