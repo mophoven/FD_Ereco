@@ -1048,11 +1048,7 @@ namespace lar
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
           // std::cout<<Ntraj<<std::endl;
-          //const geo::TPCGeo &tpc = geom->TPC(0);
-          // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << std::endl;
-          //double centerX = tpc.GetCenter().X();
-          //double centerY = tpc.GetCenter().Y();
-          //double centerZ = tpc.GetCenter().Z();
+          
           const TLorentzVector &pos = particleVec.Position(ipt);
           double localX = pos.X(); //- std::abs(centerX);
           double localY = pos.Y(); //- std::abs(centerY);
@@ -1077,6 +1073,13 @@ namespace lar
               hasEntered = true;
               std::cout << "Particle " << particleVec.TrackId()
                         << " ENTERED at pt " << ipt << "\n";
+            }
+            else
+            {
+              for (size_t jpt = ipt + 1; jpt < Ntraj; ++jpt)
+              {
+                particleVec.Position(jpt).Print();
+              }
             }
           }
           else
