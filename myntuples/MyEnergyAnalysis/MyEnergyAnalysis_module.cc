@@ -1071,21 +1071,18 @@ namespace lar
             if (inside)
             {
               hasEntered = true;
-              std::cout << "Particle " << particleVec.TrackId()
-                        << " ENTERED at pt " << ipt << "\n";
+              std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
+                        << " ENTERED at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << ") "<< std ::endl
+                       
             }
             else
             {
-              
-              
-              std::cout << "Particle " << particleVec.TrackId()
-                      << " Not ENTERED yet at pt " << ipt << "\n";
+              std::cout << " ! Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
+                      << " Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << ") "<< std ::endl
+              //fin
               particleVec.Position(ipt).Print();
-              //break;
-            
-              
             }
-            //break;
+          
           }
           else
           {
