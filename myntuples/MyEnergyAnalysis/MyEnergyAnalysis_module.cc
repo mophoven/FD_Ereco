@@ -1050,9 +1050,9 @@ namespace lar
           // std::cout<<Ntraj<<std::endl;
           
           const TLorentzVector &pos = particleVec.Position(ipt);
-          double localX = pos.X(); //- std::abs(centerX);
-          double localY = pos.Y(); //- std::abs(centerY);
-          double localZ = pos.Z(); //- std::abs(centerZ);
+          double localX = pos.X(); 
+          double localY = pos.Y(); 
+          double localZ = pos.Z(); 
           double X_MIN = -400.0, X_MAX =  400.0;
           double Y_MIN = -600.0, Y_MAX =  600.0;
           double Z_MIN =    0.0, Z_MAX = 1300.0;
@@ -1079,7 +1079,9 @@ namespace lar
               for (size_t jpt = ipt + 1; jpt < Ntraj; ++jpt)
               {
                 particleVec.Position(jpt).Print();
+                break;
               }
+              break;
             }
           }
           else
