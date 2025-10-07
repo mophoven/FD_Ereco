@@ -1058,13 +1058,13 @@ namespace lar
           double Y_MIN = -600.0, Y_MAX = 600.0;
           double Z_MIN = 0.0, Z_MAX = 1300.0;
           auto const &q = particleVec.Momentum(ipt);
-          if (localX >= X_MIN && localX <= X_MAX &&
-              localY >= Y_MIN && localY <= Y_MAX &&
-              localZ >= Z_MIN && localZ <= Z_MAX)
-          {
-            hasEntered = true;
-          }
-          if (!hasEntered && ipt > 0)
+          // if (localX >= X_MIN && localX <= X_MAX &&
+          //     localY >= Y_MIN && localY <= Y_MAX &&
+          //     localZ >= Z_MIN && localZ <= Z_MAX)
+          // {
+          //   hasEntered = true;
+          // }
+          /*if (!hasEntered && ipt > 0)
           {
 
             std::cout << "Found first inside at pt " << ipt << "\n";
@@ -1072,7 +1072,7 @@ namespace lar
             std::cout << "  (px,py,pz,E)=(" << q.Px() << ", " << q.Py() << ", " << q.Pz() << ", " << q.E() << ")\n"
                       << std::endl;
             break;
-          }
+          }*/
           //}
 
           // if (firstInside != Ntraj) {
