@@ -1000,7 +1000,6 @@ namespace lar
       fSim_nParticles = SimParticles.size();
 
       // Store info for leading E sim numu GEANT 4 level
-
       for (int i = 0; i < fSim_nParticles; i++)
       {
         const simb::MCParticle &particleVec = *(SimParticles[i]);
@@ -1074,8 +1073,9 @@ namespace lar
               auto const &mom = particleVec.Momentum(ipt);
               double stepKE = (mom.E() - particleVec.Mass()) *1000;
               std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
-                        << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << ") "<< ", Step Energy: " << stepKE <<" GeV" << std ::endl;
-                       
+                        << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE <<" GeV" << std ::endl;
+                      // calculate step length (sqrt(x^2+y^2+z^2))
+                      // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
             }
             else
             {
