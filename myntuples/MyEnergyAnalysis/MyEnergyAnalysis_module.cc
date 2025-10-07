@@ -1048,7 +1048,7 @@ namespace lar
         for (size_t ipt = 0; ipt < Ntraj; ipt++)
         {
           std::cout << ipt << std::endl;
-          particleVec.Position(ipt).Print();
+          //particleVec.Position(ipt).Print();
           //const TLorentzVector &pos = particleVec.Position(ipt);
           
           // double localX = pos.X();
@@ -1058,7 +1058,7 @@ namespace lar
           // double Y_MIN = -600.0, Y_MAX = 600.0;
           // double Z_MIN = 0.0, Z_MAX = 1300.0;
           //auto const &q = particleVec.Momentum(ipt);
-          //std :: cout << particleVec.Momentum(ipt) << std:: endl;
+          particleVec.Momentum(ipt).Print();
           // if (localX >= X_MIN && localX <= X_MAX &&
           //     localY >= Y_MIN && localY <= Y_MAX &&
           //     localZ >= Z_MIN && localZ <= Z_MAX)
