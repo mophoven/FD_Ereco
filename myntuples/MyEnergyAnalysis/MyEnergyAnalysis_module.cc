@@ -1081,8 +1081,9 @@ namespace lar
                 particleVec.Position(jpt).Print();
                 break;
               }
-              break;
+              
             }
+            break;
           }
           else
           {
