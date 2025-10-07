@@ -1049,7 +1049,7 @@ namespace lar
         {
           std::cout << ipt << std::endl;
           std::cout << particleVec.Position(ipt) << std::endl;
-          /*const TLorentzVector &pos = particleVec.Position(ipt);
+          const TLorentzVector &pos = particleVec.Position(ipt);
           
           double localX = pos.X();
           double localY = pos.Y();
@@ -1085,7 +1085,7 @@ namespace lar
           //<< "  (px,py,pz,E)=(" << q.Px() << ", " << q.Py() << ", "
           //                    << q.Pz() << ", " << q.E() << ")\n";
           //}
-        }*/
+        }
       }
       //}
       /* bool inside =
