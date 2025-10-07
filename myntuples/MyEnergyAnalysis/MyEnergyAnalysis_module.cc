@@ -1057,8 +1057,8 @@ namespace lar
           // double X_MIN = -400.0, X_MAX = 400.0;
           // double Y_MIN = -600.0, Y_MAX = 600.0;
           // double Z_MIN = 0.0, Z_MAX = 1300.0;
-          auto const &q = particleVec.Momentum(ipt);
-          std :: cout << q << std:: endl;
+          //auto const &q = particleVec.Momentum(ipt);
+          std :: cout << particleVec.Momentum(ipt) << std:: endl;
           // if (localX >= X_MIN && localX <= X_MAX &&
           //     localY >= Y_MIN && localY <= Y_MAX &&
           //     localZ >= Z_MIN && localZ <= Z_MAX)
