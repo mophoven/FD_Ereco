@@ -1048,7 +1048,7 @@ namespace lar
         for (size_t ipt = 0; ipt < Ntraj; ipt++)
         {
           std::cout << ipt << std::endl;
-          //std::cout << particleVec.Position(ipt) << std::endl;
+          std::cout << particleVec.Position(ipt) << std::endl;
           //const TLorentzVector &pos = particleVec.Position(ipt);
           
           // double localX = pos.X();
