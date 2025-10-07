@@ -1042,7 +1042,7 @@ namespace lar
     fSim_end_4mommenta.push_back(momentumEnd.E());
     }*/
         // loop over every trajectory point, compare to geometry,
-        size_t Ntraj = particleVec.NumberTrajectoryPoints();
+        int Ntraj = particleVec.NumberTrajectoryPoints();
         art::ServiceHandle<geo::Geometry const> geom;
         bool hasEntered = false;
         for (int ipt = 0; ipt < Ntraj; ipt++)
