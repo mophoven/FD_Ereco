@@ -1044,7 +1044,6 @@ namespace lar
         // loop over every trajectory point, compare to geometry,
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         art::ServiceHandle<geo::Geometry const> geom;
-        bool hasEntered = false;
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
           // std::cout<<Ntraj<<std::endl;
