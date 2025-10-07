@@ -1044,6 +1044,7 @@ namespace lar
         // loop over every trajectory point, compare to geometry,
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         art::ServiceHandle<geo::Geometry const> geom;
+        bool hasEntered = false;
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
           // std::cout<<Ntraj<<std::endl;
@@ -1070,7 +1071,7 @@ namespace lar
 
             if (inside)
             {
-              
+              hasEntered = true;
               std::cout << "Particle " << particleVec.TrackId()
                         << " ENTERED at pt " << ipt << "\n";
             }
@@ -1083,7 +1084,13 @@ namespace lar
               //   particleVec.Position(jpt).Print();
               // }
               // break;
-            
+            }
+          
+          
+          
+            if (!inside)
+            {
+              // compute KE as before
               auto const &mom = particleVec.Momentum(ipt);
               double KE = mom.E() - particleVec.Mass();
               std::cout << "Particle " << particleVec.TrackId()
