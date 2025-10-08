@@ -1074,6 +1074,13 @@ namespace lar
               double stepKE = (mom.E() - particleVec.Mass()) *1000;
               std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
                         << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE <<" GeV" << std ::endl;
+              for (size_t i = 0; i + 1 < Ntraj; ++i) {
+                auto const& a = particleVec.Position(i);
+                auto const& b = particleVec.Position(i+1);
+                double dx = b.X() - a.X(), dy = b.Y() - a.Y(), dz = b.Z() - a.Z();
+                double ds = std::sqrt(dx*dx + dy*dy + dz*dz);
+                std::cout << "seg " << i << "->" << (i+1) << "  ds=" << ds << " cm\n";
+              }
                       // calculate step length (sqrt(x^2+y^2+z^2))
                       // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
             }
