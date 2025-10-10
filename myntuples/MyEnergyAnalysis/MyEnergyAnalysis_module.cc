@@ -1038,7 +1038,7 @@ for(const Vertex& vertex : allvert){
     if (particleMap.find(motherID) == particleMap.end()) continue;
 
     const simb::MCParticle* candidate = particleMap.at(motherID);
-      for (unsigned int i = 0; i < candidate->NumberTrajectoryPoints(); ++i) {
+      for (unsigned int i = 0; i <= candidate->NumberTrajectoryPoints() - 1; i++) {
         TLorentzVector pos = candidate->Position(i);
 
         if (std::abs(pos.X() - vertex.x) < 1e-3 &&
@@ -1082,7 +1082,7 @@ for(size_t i = 0; i < fSimP_TrackID_vec.size(); i++){
     int Nintlow = 0;
     double BindingE = 0.0;
     getHadronic02(SimParticles[i], SimParticles, NHad, Nintlow, BindingE);
-    std::cout << "Number Had interactions for primary "  << i << ": " << NHad << ", BindingE: " << BindingE << " GeV" << std::endl;
+    //std::cout << "Number Had interactions for primary "  << i << ": " << NHad << ", BindingE: " << BindingE << " GeV" << std::endl;
     }
   }
 
@@ -1555,7 +1555,7 @@ namespace {
   //   }
   // }
 
-void fillInteractionTree(const simb::MCParticle* incoming,
+  void fillInteractionTree(const simb::MCParticle* incoming,
     const Vertex& vertex,
     const std::map<int, const simb::MCParticle*>& particleMap,
     TTree* fInteractionTree,
@@ -1573,61 +1573,52 @@ void fillInteractionTree(const simb::MCParticle* incoming,
   fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear();
   fOutPDG.clear(); fOutProcess.clear();
 
-  // Basic incoming particle info (per-vertex baseline)
-  fInX = vertex.x;
-  fInY = vertex.y;
-  fInZ = vertex.z;
+  // Basic incoming particle info
+  fInX = vertex.x; 
+  fInY = vertex.y; 
+  fInZ = vertex.z; 
   fInT = vertex.t;
   fInPDG = incoming->PdgCode();
   fInProcess = incoming->Process();
 
   int incomingID = incoming->TrackId();
-
-  // find best momentum at vertex (unchanged)
   double minDist = 1e10;
   TLorentzVector bestMom;
-  for (unsigned int i = 0; i < incoming->NumberTrajectoryPoints(); ++i) {
+  bool dies = false;
+  TLorentzVector nextpos;
+  TLorentzVector nextmom;
+
+  for (unsigned int i = 0; i <= incoming->NumberTrajectoryPoints(); i++) {
     TLorentzVector pos = incoming->Position(i);
     double dist = std::hypot(pos.X() - vertex.x, pos.Y() - vertex.y, pos.Z() - vertex.z);
     if (dist < minDist) {
       minDist = dist;
       bestMom = incoming->Momentum(i);
+      if (i == incoming->NumberTrajectoryPoints()) {
+      dies = true;
+      }
+      if (i != incoming-> NumberTrajectoryPoints()){
+        dies = false;
+      nextpos = incoming->Position(i+1);
+      nextmom = incoming->Momentum(i+1);
+      }
     }
   }
+  
 
-  // store original incoming kinematics (we may temporarily overwrite for a decay group)
-  const double origInPx = bestMom.Px();
-  const double origInPy = bestMom.Py();
-  const double origInPz = bestMom.Pz();
-  const double origInE  = bestMom.E();
-
-  // default set incoming values to the measured bestMom (will be used unless overwritten per group)
-  fInPx = origInPx;
-  fInPy = origInPy;
-  fInPz = origInPz;
-  fInE  = origInE;
-
-  // --- Precompute muon last-time if incoming is muon ---
-  const bool incomingIsMuon = (std::abs(fInPDG) == 13);
-  double muonLastTime = -1.0;
-  TLorentzVector muonLastPos;
-  if (incomingIsMuon) {
-    int nPts = incoming->NumberTrajectoryPoints();
-    if (nPts > 0) {
-      muonLastPos = incoming->Position(nPts - 1);
-      muonLastTime = muonLastPos.T();
-    }
-  }
 
   // --- Group daughters by production time ---
-  const double timeEpsilon = 1e-3; // ns tolerance
+  const double timeEpsilon = 1e-3; // ns, small tolerance for clustering
   std::map<double, std::vector<const simb::MCParticle*>> timeGroups;
+
   for (const simb::MCParticle* daughter : vertex.daughters) {
-    if (daughter->TrackId() == incomingID) continue;
-    if (daughter->Mother() != incomingID) continue;
+    if (daughter->TrackId() == incomingID) continue;        // skip self
+    if (daughter->Mother() != incoming->TrackId()) continue; // skip indirect descendants
 
     double t = daughter->Position(0).T();
     bool added = false;
+
+    // Look for an existing time bin within tolerance
     for (auto& kv : timeGroups) {
       if (std::fabs(kv.first - t) < timeEpsilon) {
         kv.second.push_back(daughter);
@@ -1635,52 +1626,31 @@ void fillInteractionTree(const simb::MCParticle* incoming,
         break;
       }
     }
-    if (!added) timeGroups[t].push_back(daughter);
+
+    // If none exists, create a new time bin
+    if (!added) {
+      timeGroups[t].push_back(daughter);
+    }
   }
+
+  fInPx = bestMom.Px();
+  fInPy = bestMom.Py();
+  fInPz = bestMom.Pz();
+  fInE  = bestMom.E();
+
+  if(!dies){
+    std::cout << "Dies false" << std::endl;
+  }
+
 
   // --- Fill one TTree entry per time group ---
   for (const auto& kv : timeGroups) {
-    const double groupTime = kv.first;
-    const auto& daughters = kv.second;
-
-    // reset outgoing vectors for this time cluster
+    // Clear outgoing vectors for this time cluster
     fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
     fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear();
     fOutPDG.clear(); fOutProcess.clear();
 
-    // By default use original incoming kinematics; we may override below (temporarily)
-    double useInPx = origInPx;
-    double useInPy = origInPy;
-    double useInPz = origInPz;
-    double useInE  = origInE;
-
-    // Determine whether this group is the stopping group or a later decay group (only relevant for muons)
-    bool thisIsStoppingGroup = false;
-    bool thisIsLaterDecayGroup = false;
-    if (incomingIsMuon && muonLastTime >= 0) {
-      if (std::fabs(groupTime - muonLastTime) <= timeEpsilon) {
-        thisIsStoppingGroup = true;
-      } else if (groupTime > muonLastTime + timeEpsilon) {
-        thisIsLaterDecayGroup = true;
-      }
-    }
-
-    // If this is a later-decay group, set the incoming muon to be at-rest for this entry
-    if (thisIsLaterDecayGroup && incomingIsMuon) {
-      useInPx = 0.0;
-      useInPy = 0.0;
-      useInPz = 0.0;
-      useInE  = 0.105658; // muon mass [GeV]
-    }
-
-    // set the fIn* values for THIS entry
-    fInPx = static_cast<float>(useInPx);
-    fInPy = static_cast<float>(useInPy);
-    fInPz = static_cast<float>(useInPz);
-    fInE  = static_cast<float>(useInE);
-
-    // Fill outgoing daughters normally (for this time group)
-    for (const simb::MCParticle* daughter : daughters) {
+    for (const simb::MCParticle* daughter : kv.second) {
       const TLorentzVector& pos = daughter->Position(0);
       const TLorentzVector& mom = daughter->Momentum(0);
 
@@ -1696,48 +1666,52 @@ void fillInteractionTree(const simb::MCParticle* incoming,
       fOutPDG.push_back(daughter->PdgCode());
       fOutProcess.push_back(daughter->Process());
     }
-
-    // If this group matches the muon's last traj point -> stopping group:
-    // add a synthetic at-rest muon to the outgoing list (bridge). Do NOT add it for later-decay groups.
-    if (thisIsStoppingGroup && incomingIsMuon) {
-      // Only add if one isn't already present (avoid accidental duplicates)
-      bool foundRestMuon = false;
-      for (size_t i = 0; i < fOutPDG.size(); ++i) {
-        if (std::abs(fOutPDG[i]) == 13) {
-          // if there is a muon already present with small momentum, treat as rest present
-          const double px = fOutPx[i], py = fOutPy[i], pz = fOutPz[i];
-          const double pmag = std::sqrt(px*px + py*py + pz*pz);
-          if (pmag < 1e-6) { foundRestMuon = true; break; }
-        }
+    std::cout << "Incoming particle process: " << fInProcess << std::endl;
+    if(!fOutT.empty()){
+      if(!dies && (fInProcess == "neutronInelastic" || fInProcess == "protonInelastic" || fInProcess == "pi+Inelastic" || fInProcess == "pi-Inelastic" || fInProcess == "pi0Inelastic")){
+        std::cout << "Incoming nucleon or pion scattered, adding incoming particle to outgoing list to preserve energy/momentum conservation" << std::endl;
+        fOutX.push_back(nextpos.X());
+        fOutY.push_back(nextpos.Y());
+        fOutZ.push_back(nextpos.Z());
+        fOutT.push_back(nextpos.T());
+        fOutPx.push_back(nextmom.Px());
+        fOutPy.push_back(nextmom.Py());
+        fOutPz.push_back(nextmom.Pz());
+        fOutE.push_back(nextmom.E());
+        fOutPDG.push_back(incoming->PdgCode());
+        fOutProcess.push_back("nucleonScat");
       }
-      if (!foundRestMuon) {
-        // place rest muon at the muon's last position/time
-        fOutX.push_back(static_cast<float>(muonLastPos.X()));
-        fOutY.push_back(static_cast<float>(muonLastPos.Y()));
-        fOutZ.push_back(static_cast<float>(muonLastPos.Z()));
-        fOutT.push_back(static_cast<float>(muonLastPos.T()));
-        fOutPx.push_back(0.0f);
-        fOutPy.push_back(0.0f);
-        fOutPz.push_back(0.0f);
-        fOutE.push_back(static_cast<float>(0.105658)); // muon rest mass
-        fOutPDG.push_back(fInPDG);
-        fOutProcess.push_back(std::string("StoppedMuon"));
+
+      if(dies && fInProcess == "Decay" && std::abs(fOutT.back() - fInT) < timeEpsilon){
+        std::cout << "Incoming particle decayed at rest, adding artificial daughter to preserve energy/momentum conservation" << std::endl;
+       fOutX.push_back(fOutX.back());
+       fOutY.push_back(fOutY.back());
+       fOutZ.push_back(fOutZ.back());
+       fOutT.push_back(fOutT.back());
+
+       fOutPx.push_back(0.0);
+       fOutPy.push_back(0.0);
+       fOutPz.push_back(0.0);
+       fOutE.push_back(incoming->Mass());
+       fOutPDG.push_back(incoming->PdgCode());
+       fOutProcess.push_back("artificialAtRest");
+      }
+      if(dies && fInProcess == "Decay" && std::abs(fInT - fOutT.back()) > 3){
+        std::cout << "Incoming particle decayed at rest with time delay, setting incoming momentum to 0 to preserve energy/momentum conservation" << std::endl;
+        fInPx = 0.0;
+        fInPy = 0.0;
+        fInPz = 0.0;
+        fInE = incoming->Mass();
+        fInProcess = "artificialAtRest";
       }
     }
-
-    // Only fill the tree if we have something meaningful
+    // Only fill if we have outgoing particles for this time group
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
     }
-    // Note: fIn* will be overwritten by next group (we restore at top of loop)
   }
-
-  // restore fIn to original (safety)
-  fInPx = static_cast<float>(origInPx);
-  fInPy = static_cast<float>(origInPy);
-  fInPz = static_cast<float>(origInPz);
-  fInE  = static_cast<float>(origInE);
 }
+
 
   // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle* incoming, const std::vector<const simb::MCParticle*>& daughters){
   //   float epsilon = 0.01;
@@ -1862,4 +1836,3 @@ void getHadronic02(const simb::MCParticle* particle, const std::vector<const sim
   }
 
 } // local namespace
-
