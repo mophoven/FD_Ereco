@@ -1071,7 +1071,7 @@ namespace lar
             {
               hasEntered = true;
               auto const &mom = particleVec.Momentum(ipt);
-              double stepKE = (mom.E() - particleVec.Mass()) *1000;
+              double stepKE = (mom.E() - particleVec.Mass()); // in GeV
               std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
                         << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE <<" GeV" << std ::endl;
               for (size_t i = 0; i + 1 < Ntraj; ++i) {
