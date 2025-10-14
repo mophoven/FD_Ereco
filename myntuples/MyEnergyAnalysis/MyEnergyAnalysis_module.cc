@@ -44,6 +44,8 @@
 #include "TTree.h"
 #include "TVector3.h"
 #include "TH1D.h"
+#include "TCanvas.h"
+#include "TStyle.h"
 
 // C++ includes
 #include <cmath>
