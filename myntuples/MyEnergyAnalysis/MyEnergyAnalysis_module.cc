@@ -1013,6 +1013,63 @@ namespace lar
       for (int i = 0; i < fSim_nParticles; i++)
       {
         const simb::MCParticle &particleVec = *(SimParticles[i]);
+        // --- pick the right histogram for this particle species ---
+        TH1D *h = nullptr;
+        switch (particleVec.PdgCode())
+        {
+        case 2212:
+          h = fHKE_proton;
+          break; // proton
+        case 2112:
+          h = fHKE_neutron;
+          break; // neutron
+        case 11: // e-
+        case -11:
+          h = fHKE_electron;
+          break; // e+
+        case 13: // mu-
+        case -13:
+          h = fHKE_muon;
+          break; // mu+
+        case 211:
+          h = fHKE_piPlus;
+          break; // π+
+        case -211:
+          h = fHKE_piMinus;
+          break; // π-
+        case 111:
+          h = fHKE_pi0;
+          break; // π0
+        default:
+          h = nullptr; // not one we’re tracking
+        }
+        if (!h)
+        { /* not a tracked PDG → skip */
+        }
+        else
+        {
+          const size_t Ntraj = particleVec.NumberTrajectoryPoints();
+
+          // (Optional) only fill when inside your manual detector box:
+          // const double X_MIN=-400, X_MAX=400, Y_MIN=-600, Y_MAX=600, Z_MIN=0, Z_MAX=1300;
+
+          for (size_t ipt = 0; ipt < Ntraj; ++ipt)
+          {
+            const TLorentzVector &p4 = particleVec.Momentum(ipt);
+            double KE = p4.E() - particleVec.Mass(); // kinetic = total − rest (GeV)
+            if (KE < 0)
+              KE = 0; // guard tiny negatives from rounding
+
+            // Uncomment to require the point be inside your box:
+            // const TLorentzVector& x4 = particleVec.Position(ipt);
+            // bool inside = (x4.X() >= X_MIN && x4.X() <= X_MAX) &&
+            //               (x4.Y() >= Y_MIN && x4.Y() <= Y_MAX) &&
+            //               (x4.Z() >= Z_MIN && x4.Z() <= Z_MAX);
+            // if (!inside) continue;
+
+            h->Fill(KE);
+          }
+        }
 
         // const int last = Ntrajpoints - 1;
         // const TLorentzVector& positionStart = particleVec.Position(0);
