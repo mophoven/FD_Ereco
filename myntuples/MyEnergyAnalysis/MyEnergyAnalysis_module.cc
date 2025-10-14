@@ -45,7 +45,6 @@
 #include "TVector3.h"
 #include "TH1D.h"
 
-
 // C++ includes
 #include <cmath>
 #include <map>
@@ -183,6 +182,15 @@ namespace lar
       virtual void analyze(const art::Event &event) override;
 
     private:
+      // Step-KE histograms (one per particle type)
+      TH1D *fHKE_proton = nullptr;   // PDG 2212
+      TH1D *fHKE_neutron = nullptr;  // PDG 2112
+      TH1D *fHKE_electron = nullptr; // PDG ±11
+      TH1D *fHKE_muon = nullptr;     // PDG ±13
+      TH1D *fHKE_piPlus = nullptr;   // PDG 211
+      TH1D *fHKE_piMinus = nullptr;  // PDG -211
+      TH1D *fHKE_pi0 = nullptr;      // PDG 111
+
       // The parameters we will read from the .fcl file.
       art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
@@ -1049,23 +1057,23 @@ namespace lar
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
           // std::cout<<Ntraj<<std::endl;
-          
+
           const TLorentzVector &pos = particleVec.Position(ipt);
-          double localX = pos.X(); 
-          double localY = pos.Y(); 
-          double localZ = pos.Z(); 
-          double X_MIN = -400.0, X_MAX =  400.0;
-          double Y_MIN = -600.0, Y_MAX =  600.0;
-          double Z_MIN =    0.0, Z_MAX = 1300.0;
+          double localX = pos.X();
+          double localY = pos.Y();
+          double localZ = pos.Z();
+          double X_MIN = -400.0, X_MAX = 400.0;
+          double Y_MIN = -600.0, Y_MAX = 600.0;
+          double Z_MIN = 0.0, Z_MAX = 1300.0;
 
           // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-          //std::cout << localX << " ," << localY << "," << localZ << std::endl;
+          // std::cout << localX << " ," << localY << "," << localZ << std::endl;
           // std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
           bool inside =
               localX >= X_MIN && localX <= X_MAX &&
               localY >= Y_MIN && localY <= Y_MAX &&
               localZ >= Z_MIN && localZ <= Z_MAX;
-              //std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
+          // std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
 
           if (!hasEntered)
           {
@@ -1075,23 +1083,23 @@ namespace lar
               auto const &mom = particleVec.Momentum(ipt);
               double stepKE = (mom.E() - particleVec.Mass()); // in GeV
               std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
-                        << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE <<" GeV" << std ::endl;
-              for (size_t i = 0; i + 1 < Ntraj; ++i) {
-                auto const& a = particleVec.Position(i);
-                auto const& b = particleVec.Position(i+1);
+                        << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE << " GeV" << std ::endl;
+              for (size_t i = 0; i + 1 < Ntraj; ++i)
+              {
+                auto const &a = particleVec.Position(i);
+                auto const &b = particleVec.Position(i + 1);
                 double dx = b.X() - a.X(), dy = b.Y() - a.Y(), dz = b.Z() - a.Z();
-                double ds = std::sqrt(dx*dx + dy*dy + dz*dz);
-                std::cout << "seg " << i << "->" << (i+1) << "  ds=" << ds << " cm\n";
+                double ds = std::sqrt(dx * dx + dy * dy + dz * dz);
+                std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
               }
-                      // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
-                      //go back to my branch
+              // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
+              // go back to my branch
             }
             else
             {
               std::cout << " ! Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
-                      << ", Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," <<  pos.Y() << "," << pos.Z() << ") "<< std ::endl;
+                        << ", Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << ") " << std ::endl;
             }
-          
           }
           else
           {
@@ -1104,9 +1112,9 @@ namespace lar
                         << " EXITED at pt " << ipt
                         << " with KE=" << KE << " GeV\n";
               break;
-            // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-            // std::cout << localX << " ," << localY << "," << localZ << std::endl;
-            // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
+              // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
+              // std::cout << localX << " ," << localY << "," << localZ << std::endl;
+              // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
             }
           }
         }
