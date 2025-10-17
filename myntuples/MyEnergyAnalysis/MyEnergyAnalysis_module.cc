@@ -43,6 +43,8 @@
 #include "TLorentzVector.h"
 #include "TTree.h"
 #include "TVector3.h"
+#include "TH1D.h"
+#include "TCanvas.h"
 
 // C++ includes
 #include <cmath>
@@ -179,9 +181,15 @@ namespace lar
 
       // The analysis routine, called once per event.
       virtual void analyze(const art::Event &event) override;
+      virtual void endJob() override;
 
     private:
       // Step-KE histograms (one per particle type)
+      TH1D *hProton = nullptr;
+      TH1D *hNeutron = nullptr;
+      TH1D *hElectron = nullptr;
+      TH1D *hMuon = nullptr;
+      TH1D *hPion = nullptr;
 
       // The parameters we will read from the .fcl file.
       art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
@@ -528,8 +536,35 @@ namespace lar
 
       fNtuple->Branch("P_int_class_string", &fP_int_class_string);
       fNtuple->Branch("P_int_class", &fP_int_class);
+      hProton = tfs->make<TH1D>("hProton_StepKE", "Proton Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
+      hNeutron = tfs->make<TH1D>("hNeutron_StepKE", "Neutron Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
+      hElectron = tfs->make<TH1D>("hElectron_StepKE", "Electron Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
+      hMuon = tfs->make<TH1D>("hMuon_StepKE", "Muon Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
+      hPion = tfs->make<TH1D>("hPion_StepKE", "Pion Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
     }
 
+    void lar::example::MyEnergyAnalysis::endJob()
+    {
+      TCanvas *c = new TCanvas("c_stepke", "Energy Step Histograms", 900, 700);
+
+      auto save = [&](TH1D *h, const char *pdfName)
+      {
+        if (!h)
+          return;
+        c->cd();
+        h->SetLineWidth(2);
+        h->Draw("HIST");
+        c->SaveAs(pdfName);
+      };
+
+      save(hProton, "hProton_StepKE.pdf");
+      save(hNeutron, "hNeutron_StepKE.pdf");
+      save(hElectron, "hElectron_StepKE.pdf");
+      save(hMuon, "hMuon_StepKE.pdf");
+      save(hPion, "hPion_StepKE.pdf");
+
+      delete c;
+    }
     //-----------------------------------------------------------------------
     void MyEnergyAnalysis::beginRun(const art::Run & /*run*/)
     {
@@ -1085,7 +1120,37 @@ namespace lar
                 std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
               }
               // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
-              // go back to my branch
+              {
+                const int pdg = particleVec.PdgCode();
+                const auto &mom_now = particleVec.Momentum(ipt);
+                const double stepKE_now = mom_now.E() - particleVec.Mass(); // GeV
+
+                if (pdg == 2212)
+                {
+                  if (hProton)
+                    hProton->Fill(stepKE_now);
+                }
+                else if (pdg == 2112)
+                {
+                  if (hNeutron)
+                    hNeutron->Fill(stepKE_now);
+                }
+                else if (std::abs(pdg) == 11)
+                {
+                  if (hElectron)
+                    hElectron->Fill(stepKE_now);
+                }
+                else if (std::abs(pdg) == 13)
+                {
+                  if (hMuon)
+                    hMuon->Fill(stepKE_now);
+                }
+                else if (std::abs(pdg) == 211)
+                {
+                  if (hPion)
+                    hPion->Fill(stepKE_now);
+                }
+              }
             }
             else
             {
