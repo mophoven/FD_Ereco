@@ -181,6 +181,11 @@ namespace lar
       virtual void analyze(const art::Event &event) override;
 
     private:
+<<<<<<< Updated upstream
+=======
+      // Step-KE histograms (one per particle type)
+
+>>>>>>> Stashed changes
       // The parameters we will read from the .fcl file.
       art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
@@ -1047,87 +1052,67 @@ namespace lar
         //bool hasEntered = false;
         for (size_t ipt = 0; ipt < Ntraj; ipt++)
         {
-          std::cout << ipt << std::endl;
-          //particleVec.Position(ipt).Print();
-          //const TLorentzVector &pos = particleVec.Position(ipt);
-          
-          // double localX = pos.X();
-          // double localY = pos.Y();
-          // double localZ = pos.Z();
-          // double X_MIN = -400.0, X_MAX = 400.0;
-          // double Y_MIN = -600.0, Y_MAX = 600.0;
-          // double Z_MIN = 0.0, Z_MAX = 1300.0;
-          //auto const &q = particleVec.Momentum(ipt);
-          double KE = particleVec.Momentum(ipt).E() - particleVec.Mass();
-          double E = particleVec.Momentum(ipt).E();
-          std :: cout << E << std :: endl;
-          std :: cout << KE << std :: endl;
-          
-          // if (localX >= X_MIN && localX <= X_MAX &&
-          //     localY >= Y_MIN && localY <= Y_MAX &&
-          //     localZ >= Z_MIN && localZ <= Z_MAX)
-          // {
-          //   hasEntered = true;
-          // }
-          /*if (!hasEntered && ipt > 0)
+          const TLorentzVector &pos = particleVec.Position(ipt);
+          double localX = pos.X();
+          double localY = pos.Y();
+          double localZ = pos.Z();
+          double X_MIN = -400.0, X_MAX = 400.0;
+          double Y_MIN = -600.0, Y_MAX = 600.0;
+          double Z_MIN = 0.0, Z_MAX = 1300.0;
+
+          // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
+          // std::cout << localX << " ," << localY << "," << localZ << std::endl;
+          // std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
+          bool inside =
+              localX >= X_MIN && localX <= X_MAX &&
+              localY >= Y_MIN && localY <= Y_MAX &&
+              localZ >= Z_MIN && localZ <= Z_MAX;
+          // std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
+
+          if (!hasEntered)
           {
-
-            std::cout << "Found first inside at pt " << ipt << "\n";
-            std::cout << "Track ID: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << " " << " Position x: " << pos.X() << " " << " Position y: " << pos.Y() << " " << " Position z: " << pos.Z() << std ::endl;
-            std::cout << "  (px,py,pz,E)=(" << q.Px() << ", " << q.Py() << ", " << q.Pz() << ", " << q.E() << ")\n"
-                      << std::endl;
-            break;
-          }*/
-          //}
-
-          // if (firstInside != Ntraj) {
-          //  auto const& p = particleVec.Position(firstInside);
-          // auto const& q = particleVec.Momentum(firstInside);
-          // std::cout << "Particle " << particleVec.TrackId()
-          //  << " FIRST-IN pt " << firstInside
-          //<< "  (x,y,z,t)=("<< p.X() << ", " << p.Y() << ", "
-          //                << p.Z() << ", " << p.T() << ")"
-          //<< "  (px,py,pz,E)=(" << q.Px() << ", " << q.Py() << ", "
-          //                    << q.Pz() << ", " << q.E() << ")\n";
-          //}
+            if (inside)
+            {
+              hasEntered = true;
+              auto const &mom = particleVec.Momentum(ipt);
+              double stepKE = (mom.E() - particleVec.Mass()); // in GeV
+              std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
+                        << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE << " GeV" << std ::endl;
+              for (size_t i = 0; i + 1 < Ntraj; ++i)
+              {
+                auto const &a = particleVec.Position(i);
+                auto const &b = particleVec.Position(i + 1);
+                double dx = b.X() - a.X(), dy = b.Y() - a.Y(), dz = b.Z() - a.Z();
+                double ds = std::sqrt(dx * dx + dy * dy + dz * dz);
+                std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
+              }
+              // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
+              // go back to my branch
+            }
+            else
+            {
+              std::cout << " ! Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
+                        << ", Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << ") " << std ::endl;
+            }
+          }
+          else
+          {
+            if (!inside)
+            {
+              // compute KE as before
+              auto const &mom = particleVec.Momentum(ipt);
+              double KE = mom.E() - particleVec.Mass();
+              std::cout << "Particle " << particleVec.TrackId()
+                        << " EXITED at pt " << ipt
+                        << " with KE=" << KE << " GeV\n";
+              break;
+              // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
+              // std::cout << localX << " ," << localY << "," << localZ << std::endl;
+              // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
+            }
+          }
         }
       }
-      //}
-      /* bool inside =
-           localX >= X_MIN && localX <= X_MAX &&
-           localY >= Y_MIN && localY <= Y_MAX &&
-           localZ >= Z_MIN && localZ <= Z_MAX;
-           //std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
-
-       if (!hasEntered)
-       {
-         if (inside)
-         {
-           hasEntered = true;
-           std::cout << "Particle " << particleVec.TrackId()
-                     << " ENTERED at pt " << ipt << "\n";
-           std::cout << "Position: (" << pos.X() << ", " << pos.Y() << ", " << pos.Z() << ")\n";
-           std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
-         }
-       }
-       else
-       {
-         if (!inside)
-         {
-           // compute KE as before
-           auto const &mom = particleVec.Momentum(ipt);
-           double KE = mom.E() - particleVec.Mass();
-           std::cout << "Particle " << particleVec.TrackId()
-                     << " EXITED at pt " << ipt
-                     << " with KE=" << KE << " GeV\n";
-           break;
-         // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-         // std::cout << localX << " ," << localY << "," << localZ << std::endl;
-         // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
-         }
-       }
-     }
-   }*/
       // End four-vector collection
 
       // Collecting all Daughters of Each primary
