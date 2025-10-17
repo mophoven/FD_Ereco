@@ -1533,6 +1533,39 @@ namespace lar
 
     void MyEnergyAnalysis::endJob()
     {
+      gROOT->SetBatch(kTRUE);
+      gStyle->SetOptStat(1110);
+      TCanvas c("c", "c", 900, 700);
+
+      auto save = [&](TH1 *h, const char *name)
+      {
+        if (!h)
+          return;
+        c.cd();
+        h->SetLineWidth(2);
+        h->Draw();
+        c.SaveAs(Form("%s.pdf", name));
+      };
+
+      save(fHKE_proton, "hKE_proton");
+      save(fHKE_neutron, "hKE_neutron");
+      save(fHKE_electron, "hKE_electron");
+      save(fHKE_muon, "hKE_muon");
+      save(fHKE_piPlus, "hKE_piplus");
+      save(fHKE_piMinus, "hKE_piminus");
+      save(fHKE_pi0, "hKE_pi0");
+
+      c.Print("all_hKE.pdf[");
+      auto print = [&](TH1 *h)
+      { if(h){ h->Draw(); c.Print("all_hKE.pdf"); } };
+      print(fHKE_proton);
+      print(fHKE_neutron);
+      print(fHKE_electron);
+      print(fHKE_muon);
+      print(fHKE_piPlus);
+      print(fHKE_piMinus);
+      print(fHKE_pi0);
+      c.Print("all_hKE.pdf]");
     }
 
     // This macro has to be defined for this module to be invoked from a
