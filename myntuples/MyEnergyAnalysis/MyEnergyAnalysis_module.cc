@@ -46,6 +46,7 @@
 #include "TH1D.h"
 #include "TCanvas.h"
 #include "TStyle.h"
+#include "TROOT.h"
 
 // C++ includes
 #include <cmath>
@@ -182,6 +183,7 @@ namespace lar
 
       // The analysis routine, called once per event.
       virtual void analyze(const art::Event &event) override;
+      void endJob() override;
 
     private:
       // Step-KE histograms (one per particle type)
@@ -387,6 +389,13 @@ namespace lar
       // Access art's TFileService, which will handle creating and writing
       // histograms and n-tuples for us.
       art::ServiceHandle<art::TFileService const> tfs;
+      fHKE_proton = tfs->make<TH1D>("hKE_proton", "Step KE (protons);KE [GeV];Steps", 200, 0.0, 5.0);
+      fHKE_neutron = tfs->make<TH1D>("hKE_neutron", "Step KE (neutrons);KE [GeV];Steps", 200, 0.0, 5.0);
+      fHKE_electron = tfs->make<TH1D>("hKE_electron", "Step KE (electrons);KE [GeV];Steps", 200, 0.0, 2.0);
+      fHKE_muon = tfs->make<TH1D>("hKE_muon", "Step KE (muons);KE [GeV];Steps", 200, 0.0, 5.0);
+      fHKE_piPlus = tfs->make<TH1D>("hKE_piplus", "Step KE (#pi^{+});KE [GeV];Steps", 200, 0.0, 5.0);
+      fHKE_piMinus = tfs->make<TH1D>("hKE_piminus", "Step KE (#pi^{-});KE [GeV];Steps", 200, 0.0, 5.0);
+      fHKE_pi0 = tfs->make<TH1D>("hKE_pi0", "Step KE (#pi^{0});KE [GeV];Steps", 200, 0.0, 5.0);
 
       // Define n-tuples
       fInteractionTree = tfs->make<TTree>("HadronicTree", "Handronic Interaction Information");
@@ -1521,6 +1530,10 @@ namespace lar
       fNtuple->Fill();
 
     } // MyEnergyAnalysis::analyze()
+
+    void MyEnergyAnalysis::endJob()
+    {
+    }
 
     // This macro has to be defined for this module to be invoked from a
     // .fcl file; see MyEnergyAnalysis.fcl for more information.
