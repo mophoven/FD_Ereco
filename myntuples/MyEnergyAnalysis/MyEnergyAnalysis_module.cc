@@ -1050,7 +1050,7 @@ namespace lar
         for (size_t ipt = 0; ipt < Ntraj; ipt++)
         {
           const TLorentzVector &pos = particleVec.Position(ipt);
-          hasEntered=false;
+          bool hasEntered = false;
           double localX = pos.X();
           double localY = pos.Y();
           double localZ = pos.Z();
