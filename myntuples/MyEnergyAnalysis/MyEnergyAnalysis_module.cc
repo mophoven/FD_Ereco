@@ -181,11 +181,8 @@ namespace lar
       virtual void analyze(const art::Event &event) override;
 
     private:
-<<<<<<< Updated upstream
-=======
       // Step-KE histograms (one per particle type)
 
->>>>>>> Stashed changes
       // The parameters we will read from the .fcl file.
       art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
@@ -1049,7 +1046,7 @@ namespace lar
         // loop over every trajectory point, compare to geometry,
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         art::ServiceHandle<geo::Geometry const> geom;
-        //bool hasEntered = false;
+        // bool hasEntered = false;
         for (size_t ipt = 0; ipt < Ntraj; ipt++)
         {
           const TLorentzVector &pos = particleVec.Position(ipt);
