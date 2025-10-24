@@ -1117,17 +1117,21 @@ namespace lar
                 auto const &b = particleVec.Position(i + 1);
                 double dx = b.X() - a.X(), dy = b.Y() - a.Y(), dz = b.Z() - a.Z();
                 double ds = std::sqrt(dx * dx + dy * dy + dz * dz);
-                std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
+                //std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
+                double Sums += ds
+                // sum all ds to get total track length inside the fiducial volume
               }
+              std::cout<<Sums<<std::endl;
               // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
               // add more events
               // install pdf reader
-              // make sure histograms are correct
               // merge my code with main
+              // plot histograms for 10 cm unit length
               {
                 const int pdg = particleVec.PdgCode();
                 const auto &mom_now = particleVec.Momentum(ipt);
                 const double stepKE_now = mom_now.E() - particleVec.Mass(); // GeV
+                // sum all stepKE_now to get total KE inside the fiducial volume
 
                 if (pdg == 2212)
                 {
