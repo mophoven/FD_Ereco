@@ -1111,6 +1111,7 @@ namespace lar
               double stepKE = (mom.E() - particleVec.Mass()); // in GeV
               std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
                         << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE << " GeV" << std ::endl;
+              double Sums = 0.0;
               for (size_t i = 0; i + 1 < Ntraj; ++i)
               {
                 auto const &a = particleVec.Position(i);
@@ -1118,7 +1119,6 @@ namespace lar
                 double dx = b.X() - a.X(), dy = b.Y() - a.Y(), dz = b.Z() - a.Z();
                 double ds = std::sqrt(dx * dx + dy * dy + dz * dz);
                 //std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
-                double Sums = 0.0;
                 Sums += ds;
                 // sum all ds to get total track length inside the fiducial volume
               }
