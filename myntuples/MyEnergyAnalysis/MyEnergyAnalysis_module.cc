@@ -1122,7 +1122,7 @@ namespace lar
                 Sums += ds;
                 // sum all ds to get total track length inside the fiducial volume
               }
-              std::cout<<Sums<<std::endl;
+              std::cout<< "Sum of ds" << Sums << std::endl;
               // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
               // add more events
               // install pdf reader
