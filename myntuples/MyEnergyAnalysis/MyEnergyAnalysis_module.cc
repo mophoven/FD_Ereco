@@ -1118,7 +1118,8 @@ namespace lar
                 double dx = b.X() - a.X(), dy = b.Y() - a.Y(), dz = b.Z() - a.Z();
                 double ds = std::sqrt(dx * dx + dy * dy + dz * dz);
                 //std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
-                double Sums += ds;
+                double Sums = 0.0;
+                Sums += ds;
                 // sum all ds to get total track length inside the fiducial volume
               }
               std::cout<<Sums<<std::endl;
