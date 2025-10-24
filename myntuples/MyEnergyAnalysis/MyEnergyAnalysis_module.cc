@@ -537,8 +537,8 @@ namespace lar
       fNtuple->Branch("P_int_class_string", &fP_int_class_string);
       fNtuple->Branch("P_int_class", &fP_int_class);
       hProton = tfs->make<TH1D>("hProton_StepKE", "Proton Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
-      hNeutron = tfs->make<TH1D>("hNeutron_StepKE", "Neutron Step KE;Kinetic Energy [MeV];Counts", 600, 0.0, 100.0);
-      hElectron = tfs->make<TH1D>("hElectron_StepKE", "Electron Step KE;Kinetic Energy [MeV];Counts", 600, 0.0, 100.0);
+      hNeutron = tfs->make<TH1D>("hNeutron_StepKE", "Neutron Step KE;Kinetic Energy [MeV];Counts", 600, 0.0, 10.0);
+      hElectron = tfs->make<TH1D>("hElectron_StepKE", "Electron Step KE;Kinetic Energy [MeV];Counts", 600, 0.0, 5.0);
       hMuon = tfs->make<TH1D>("hMuon_StepKE", "Muon Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
       hPion = tfs->make<TH1D>("hPion_StepKE", "Pion Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
     }
