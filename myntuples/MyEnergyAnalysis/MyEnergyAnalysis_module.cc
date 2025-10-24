@@ -1120,6 +1120,10 @@ namespace lar
                 std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
               }
               // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
+              // add more events
+              // install pdf reader
+              // make sure histograms are correct
+              // merge my code with main
               {
                 const int pdg = particleVec.PdgCode();
                 const auto &mom_now = particleVec.Momentum(ipt);
@@ -1128,7 +1132,7 @@ namespace lar
                 if (pdg == 2212)
                 {
                   if (hProton)
-                    hProton->Fill(stepKE_now);
+                    hProton->Fill(stepKE_now*1000.0); // convert to MeV
                 }
                 else if (pdg == 2112)
                 {
