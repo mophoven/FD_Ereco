@@ -1132,7 +1132,7 @@ namespace lar
                 if (pdg == 2212)
                 {
                   if (hProton)
-                    hProton->Fill(stepKE_now*1000.0); // convert to MeV
+                    hProton->Fill(stepKE_now); 
                 }
                 else if (pdg == 2112)
                 {
