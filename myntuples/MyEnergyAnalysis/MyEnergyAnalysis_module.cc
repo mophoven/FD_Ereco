@@ -1112,6 +1112,7 @@ namespace lar
               std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
                         << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE << " GeV" << std ::endl;
               double Sums = 0.0;
+              double stepKE_Sum = 0.0;
               for (size_t i = 0; i + 1 < Ntraj; ++i)
               {
                 auto const &a = particleVec.Position(i);
@@ -1132,32 +1133,36 @@ namespace lar
                 const int pdg = particleVec.PdgCode();
                 const auto &mom_now = particleVec.Momentum(ipt);
                 const double stepKE_now = mom_now.E() - particleVec.Mass(); // GeV
+                stepKE_Sum += stepKE_now; 
+                const double avgKE_GeV = stepKE_Sum / Sums;               
+                const int nUnits = static_cast<int>(std::floor(Sums / 10.0));
                 // sum all stepKE_now to get total KE inside the fiducial volume
+
 
                 if (pdg == 2212)
                 {
                   if (hProton)
-                    hProton->Fill(stepKE_now*1000.0); // convert to MeV
+                    hProton->Fill(avgKE_GeV*1000.0,nUnits); // convert to MeV
                 }
                 else if (pdg == 2112)
                 {
                   if (hNeutron)
-                    hNeutron->Fill(stepKE_now*1000.0); // convert to MeV
+                    hNeutron->Fill(avgKE_GeV*1000.0,nUnits); // convert to MeV
                 }
                 else if (std::abs(pdg) == 11)
                 {
                   if (hElectron)
-                    hElectron->Fill(stepKE_now);
+                    hElectron->Fill(avgKE_GeV,nUnits);
                 }
                 else if (std::abs(pdg) == 13)
                 {
                   if (hMuon)
-                    hMuon->Fill(stepKE_now);
+                    hMuon->Fill(avgKE_GeV,nUnits);
                 }
                 else if (std::abs(pdg) == 211)
                 {
                   if (hPion)
-                    hPion->Fill(stepKE_now);
+                    hPion->Fill(avgKE_GeV,nUnits);
                 }
               }
             }
