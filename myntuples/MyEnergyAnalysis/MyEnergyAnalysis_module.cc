@@ -1594,10 +1594,10 @@ namespace
   // Basic incoming particle info
   fInX = vertex.x; 
   fInY = vertex.y; 
-  fInZ = vertex.z; 
+  fInZ = vertex.z;
   fInT = vertex.t;
   fInPDG = incoming->PdgCode();
-  fInProcess = incoming->Process();
+  fInProcess = incoming->EndProcess();
 
   int incomingID = incoming->TrackId();
   double minDist = 1e10;
@@ -1682,12 +1682,12 @@ namespace
       fOutPz.push_back(mom.Pz());
       fOutE.push_back(mom.E());
       fOutPDG.push_back(daughter->PdgCode());
-      fOutProcess.push_back(daughter->Process());
+      fOutProcess.push_back(daughter->EndProcess());
     }
     std::cout << "Incoming particle process: " << fInProcess << std::endl;
     if(!fOutT.empty()){
-      if(!dies && (fInProcess == "neutronInelastic" || fInProcess == "protonInelastic" || fInProcess == "pi+Inelastic" || fInProcess == "pi-Inelastic" || fInProcess == "pi0Inelastic")){
-        std::cout << "Incoming nucleon or pion scattered, adding incoming particle to outgoing list to preserve energy/momentum conservation" << std::endl;
+      if(!dies){
+        std::cout << "Incoming scattered, adding incoming particle to outgoing list to preserve energy/momentum conservation" << std::endl;
         fOutX.push_back(nextpos.X());
         fOutY.push_back(nextpos.Y());
         fOutZ.push_back(nextpos.Z());
@@ -1700,20 +1700,20 @@ namespace
         fOutProcess.push_back("nucleonScat");
       }
 
-      if(dies && fInProcess == "Decay" && std::abs(fOutT.back() - fInT) < timeEpsilon){
-        std::cout << "Incoming particle decayed at rest, adding artificial daughter to preserve energy/momentum conservation" << std::endl;
-       fOutX.push_back(fOutX.back());
-       fOutY.push_back(fOutY.back());
-       fOutZ.push_back(fOutZ.back());
-       fOutT.push_back(fOutT.back());
+      // if(dies && fInProcess == "Decay" && std::abs(fOutT.back() - fInT) < timeEpsilon){
+      //   std::cout << "Incoming particle decayed at rest, adding artificial daughter to preserve energy/momentum conservation" << std::endl;
+      //  fOutX.push_back(fOutX.back());
+      //  fOutY.push_back(fOutY.back());
+      //  fOutZ.push_back(fOutZ.back());
+      //  fOutT.push_back(fOutT.back());
 
-       fOutPx.push_back(0.0);
-       fOutPy.push_back(0.0);
-       fOutPz.push_back(0.0);
-       fOutE.push_back(incoming->Mass());
-       fOutPDG.push_back(incoming->PdgCode());
-       fOutProcess.push_back("artificialAtRest");
-      }
+      //  fOutPx.push_back(0.0);
+      //  fOutPy.push_back(0.0);
+      //  fOutPz.push_back(0.0);
+      //  fOutE.push_back(incoming->Mass());
+      //  fOutPDG.push_back(incoming->PdgCode());
+      //  fOutProcess.push_back("artificialAtRest");
+      // }
       if(dies && fInProcess == "Decay" && std::abs(fInT - fOutT.back()) > 3){
         std::cout << "Incoming particle decayed at rest with time delay, setting incoming momentum to 0 to preserve energy/momentum conservation" << std::endl;
         fInPx = 0.0;
