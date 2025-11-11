@@ -98,12 +98,6 @@ namespace
 
   // void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
-  void fillInteractionTree(const simb::MCParticle *, const Vertex &, const std::map<int, const simb::MCParticle *> &, TTree *,
-                           float &, float &, float &, float &, float &, float &, float &, float &, int &, std::vector<float> &, std::vector<float> &,
-                           std::vector<float> &, std::vector<float> &, std::vector<float> &, std::vector<float> &, std::vector<float> &, std::vector<float> &, std::vector<int> &);
-
-  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle *> &);
-
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
   void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
@@ -115,8 +109,6 @@ namespace
   double getPrimaryKE(const simb::MCParticle*, double, double, double);
 
   void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int&, int&, double&);
-
-  void getHadronic02(const simb::MCParticle *, const std::vector<const simb::MCParticle *> &, int &, double &);
 
   //std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
   void getDescendants(int, const std::vector<int> &, const std::vector<int> &, const std::map<int, const simb::MCParticle *> &, std::vector<const simb::MCParticle *> &);
