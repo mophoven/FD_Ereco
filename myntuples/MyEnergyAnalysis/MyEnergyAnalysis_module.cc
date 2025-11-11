@@ -200,18 +200,6 @@ namespace lar
       art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
 
-      // The n-tuple to create
-      TTree *fNtuple;
-
-      TTree *fInteractionTree; // Tree for interaction information
-
-      float fInX, fInY, fInZ, fInT;
-      float fInPx, fInPy, fInPz, fInE;
-      int fInPDG;
-
-      std::vector<float> fOutX, fOutY, fOutZ, fOutT;
-      std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
-      std::vector<int> fOutPDG;
 
       TTree* fInteractionTree; // Tree for interaction information
 
@@ -224,12 +212,17 @@ namespace lar
       std::vector<float> fOutX, fOutY, fOutZ, fOutT;
       std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
       std::vector<int> fOutPDG;
-      //std::vector<std::char> fOutProcess;
+      std::vector<std::char> fOutProcess;
+
+      // The n-tuple to create
+      TTree *fNtuple;
 
       // Event info
       int fEvent;  // number of the event being processed
       int fRun;    // number of the run being processed
       int fSubRun; // number of the sub-run being processed
+
+
 
       // Add nu information
       double eP, eN, ePip, ePim, ePi0, eOther;    // Energy of particles
@@ -1075,6 +1068,8 @@ namespace lar
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         art::ServiceHandle<geo::Geometry const> geom;
         bool hasEntered = false;
+        simb::MCParticle const &particleVec = *(SimParticles[i]);
+
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
           // std::cout<<Ntraj<<std::endl;
@@ -1105,14 +1100,14 @@ namespace lar
               double stepKE = (mom.E() - particleVec.Mass()); // in GeV
               std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
                         << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE << " GeV" << std ::endl;
-              for (size_t i = 0; i + 1 < Ntraj; ++i)
-              {
-                auto const &a = particleVec.Position(i);
-                auto const &b = particleVec.Position(i + 1);
-                double dx = b.X() - a.X(), dy = b.Y() - a.Y(), dz = b.Z() - a.Z();
-                double ds = std::sqrt(dx * dx + dy * dy + dz * dz);
-                std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
-              }
+              // for (size_t i = 0; i + 1 < Ntraj; ++i)
+              // {
+              //   auto const &a = particleVec.Position(i);
+              //   auto const &b = particleVec.Position(i + 1);
+              //   double dx = b.X() - a.X(), dy = b.Y() - a.Y(), dz = b.Z() - a.Z();
+              //   double ds = std::sqrt(dx * dx + dy * dy + dz * dz);
+              //   std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
+              // }
               // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
               // go back to my branch
             }
