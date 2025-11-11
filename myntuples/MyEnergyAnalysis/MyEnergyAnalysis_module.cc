@@ -212,7 +212,7 @@ namespace lar
       std::vector<float> fOutX, fOutY, fOutZ, fOutT;
       std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
       std::vector<int> fOutPDG;
-      std::vector<std::char> fOutProcess;
+      //std::vector<std::char> fOutProcess;
 
       // The n-tuple to create
       TTree *fNtuple;
@@ -1065,10 +1065,10 @@ namespace lar
     fSim_end_4mommenta.push_back(momentumEnd.E());
     }*/
         // loop over every trajectory point, compare to geometry,
+        simb::MCParticle const &particleVec = *(SimParticles[i]);
         size_t Ntraj = particleVec.NumberTrajectoryPoints();
         art::ServiceHandle<geo::Geometry const> geom;
         bool hasEntered = false;
-        simb::MCParticle const &particleVec = *(SimParticles[i]);
 
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
