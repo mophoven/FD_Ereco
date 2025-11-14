@@ -108,7 +108,7 @@ namespace
 
   double getPrimaryKE(const simb::MCParticle*, double, double, double);
 
-  void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int&, int&, double&);
+  void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int&, int&, double);
 
   //std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
   void getDescendants(int, const std::vector<int> &, const std::vector<int> &, const std::map<int, const simb::MCParticle *> &, std::vector<const simb::MCParticle *> &);
@@ -1785,7 +1785,7 @@ double getPrimaryKE(const simb::MCParticle* primary, double x, double y, double 
   return ClosestMom.E() - primary->Mass();
 }
 
-void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, int& Nintlow, double& totalBindingE){
+void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, int& Nintlow, double totalBindingE){
   std::vector<const simb::MCParticle*> daughters;
   TLorentzVector currentPos = particle->Position(0);
 
