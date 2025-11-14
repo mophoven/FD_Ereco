@@ -108,7 +108,7 @@ namespace
 
   double getPrimaryKE(const simb::MCParticle*, double, double, double);
 
-  void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int&, int&, double&);
+  void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int&, int&, const double&);
 
   //std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
   void getDescendants(int, const std::vector<int> &, const std::vector<int> &, const std::map<int, const simb::MCParticle *> &, std::vector<const simb::MCParticle *> &);
