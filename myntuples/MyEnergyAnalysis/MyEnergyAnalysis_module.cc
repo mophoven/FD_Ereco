@@ -110,6 +110,8 @@ namespace
 
   void getDescendants(int, const std::vector<int> &, const std::vector<int> &, const std::map<int, const simb::MCParticle *> &, std::vector<const simb::MCParticle *> &);
 
+  void getAncestors(const simb::MCParticle* currentpart, std::vector<int> &Mothers, const std::map<int, const simb::MCParticle *> &particleMap);//need to put right names
+
   // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
 
 } // local namespace
@@ -536,11 +538,11 @@ namespace lar
 
       fNtuple->Branch("P_int_class_string", &fP_int_class_string);
       fNtuple->Branch("P_int_class", &fP_int_class);
-      hProton = tfs->make<TH1D>("hProton_StepKE", "Proton Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
-      hNeutron = tfs->make<TH1D>("hNeutron_StepKE", "Neutron Step KE;Kinetic Energy [MeV];Counts", 600, 0.0, 2.0);
-      hElectron = tfs->make<TH1D>("hElectron_StepKE", "Electron Step KE;Kinetic Energy [MeV];Counts", 600, 0.0, 0.10);
-      hMuon = tfs->make<TH1D>("hMuon_StepKE", "Muon Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
-      hPion = tfs->make<TH1D>("hPion_StepKE", "Pion Step KE;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
+      hProton = tfs->make<TH1D>("hProton_StepKE", "Proton Step KE per 10 cm unit length;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
+      hNeutron = tfs->make<TH1D>("hNeutron_StepKE", "Neutron Step KE per 10 cm unit length;Kinetic Energy [MeV];Counts", 600, 0.0, 2.0);
+      hElectron = tfs->make<TH1D>("hElectron_StepKE", "Electron Step KE per 10 cm unit length;Kinetic Energy [MeV];Counts", 600, 0.0, 0.10);
+      hMuon = tfs->make<TH1D>("hMuon_StepKE", "Muon Step KE per 10 cm unit length;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
+      hPion = tfs->make<TH1D>("hPion_StepKE", "Pion Step KE per 10 cm unit length;Kinetic Energy [GeV];Counts", 120, 0.0, 6.0);
     }
 
     void lar::example::MyEnergyAnalysis::endJob()
@@ -1041,6 +1043,7 @@ namespace lar
       for (int i = 0; i < fSim_nParticles; i++)
       {
         const simb::MCParticle &particleVec = *(SimParticles[i]);
+        int currentID = particleVec.TrackId();
 
         // const int last = Ntrajpoints - 1;
         // const TLorentzVector& positionStart = particleVec.Position(0);
@@ -1089,9 +1092,9 @@ namespace lar
           double localX = pos.X();
           double localY = pos.Y();
           double localZ = pos.Z();
-          double X_MIN = -400.0, X_MAX = 400.0;
-          double Y_MIN = -600.0, Y_MAX = 600.0;
-          double Z_MIN = 0.0, Z_MAX = 1300.0;
+          double X_MIN = -400.0, X_MAX = 400.0;//cm
+          double Y_MIN = -600.0, Y_MAX = 600.0;//cm
+          double Z_MIN = 0.0, Z_MAX = 1300.0;//cm
 
           // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
           // std::cout << localX << " ," << localY << "," << localZ << std::endl;
@@ -1135,7 +1138,7 @@ namespace lar
                 const double stepKE_now = mom_now.E() - particleVec.Mass(); // GeV
                 stepKE_Sum += stepKE_now; 
                 const double avgKE_GeV = stepKE_Sum / Sums;               
-                const int nUnits = static_cast<int>(std::floor(Sums / 10.0));
+                const double nUnits = static_cast<int>(std::floor(Sums / 10.0)); 
                 // sum all stepKE_now to get total KE inside the fiducial volume
 
 
@@ -1987,5 +1990,46 @@ namespace
       }
     }
   }
+void getAncestors(const simb::MCParticle* currentpart, std::vector<int> &Mothers, const std::map<int, const simb::MCParticle *> &particleMap){
+  int currentmother = currentpart.mother();
+  auto nextmom =particleMap.find(currentmother);
+  Mothers.push_back(currentmother);
+  getAncestors(nextmom, Mothers, particleMap );
+
+
+
+}
 
 } // local namespace
+/*
+
+ void getDescendant(int daughterID, const std::vector<int> &momVec, const std::vector<int> &TrkIDvec, const std::map<int, const simb::MCParticle *> &particleMap, std::vector<const simb::MCParticle *> &primaryDaughters)
+  {
+    for (size_t j = 0; j < TrkIDvec.size(); j++)
+    {
+      if (momVec[j] == motherID)
+      {
+        int daughterID = TrkIDvec[j];
+        auto it = particleMap.find(daughterID);
+        if (it != particleMap.end())
+        {
+          primaryDaughters.push_back(it->second);
+          getDescendants(daughterID, momVec, TrkIDvec, particleMap, primaryDaughters);
+        }
+      }
+    }
+  }
+
+
+
+
+*/
+// crate new vector and pushback particles trak ids that leave
+//Std::vector<int> leftParticles
+//if(left){
+//leftParticles.push_back(current part)
+//}
+//primary particles have mother 0
+//get a leaving track ID of particles
+//min particle loops
+//make the part of my code to a function that takes in a particle and returns  if it leaves
