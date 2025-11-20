@@ -108,7 +108,7 @@ namespace
 
   double getPrimaryKE(const simb::MCParticle*, double, double, double);
 
-  void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int&, int&, const double&);
+  void getHadronic02(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int&, double&);
 
   //std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
   void getDescendants(int, const std::vector<int> &, const std::vector<int> &, const std::map<int, const simb::MCParticle *> &, std::vector<const simb::MCParticle *> &);
@@ -1154,7 +1154,7 @@ namespace lar
           DaughterpartVec.push_back(CurrentDaughters);
           primary_vec.push_back(SimParticles[i]);
           int NHad = 0;
-          const double BindingE = 0.0;
+          double BindingE;
           getHadronic02(SimParticles[i], SimParticles, NHad, BindingE);
           // std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
         }
@@ -1785,7 +1785,7 @@ double getPrimaryKE(const simb::MCParticle* primary, double x, double y, double 
   return ClosestMom.E() - primary->Mass();
 }
 
-void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, int& Nintlow, const double& totalBindingE){
+void getHadronic02(const simb::MCParticle* particle, const std::vector<const simb::MCParticle*>& allPart, int& NHad, double& totalBindingE){
   std::vector<const simb::MCParticle*> daughters;
   TLorentzVector currentPos = particle->Position(0);
 
