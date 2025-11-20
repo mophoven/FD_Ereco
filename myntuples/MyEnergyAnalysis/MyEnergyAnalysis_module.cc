@@ -1815,13 +1815,13 @@ void getHadronic02(const simb::MCParticle* particle, const std::vector<const sim
         totalBindingE += BindingE;
         NHad++;
       }
-      if(BindingE < 0.001 && BindingE > -0.001){
-        Nintlow++;
-      }
+      // if(BindingE < 0.001 && BindingE > -0.001){
+      //   Nintlow++;
+      // }
     }
   }
   for(const simb::MCParticle* daughter : daughters){
-    getHadronic02(daughter, allPart, NHad, Nintlow, totalBindingE);
+    getHadronic02(daughter, allPart, NHad, totalBindingE);
   }
 }
 
