@@ -101,8 +101,8 @@ namespace
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
   void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
-                            float&, float&, float&, float&, float&, float&, float&, float&, int&, std::string&, std::vector<float>&, std::vector<float>&,
-                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<int>&, std::vector<std::string>&);
+                            float&, float&, float&, float&, float&, float&, float&, float&, float&, int&, std::string&, std::vector<float>&, std::vector<float>&,
+                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>& , std::vector<int>&, std::vector<std::string>&);
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
 
@@ -197,12 +197,14 @@ namespace lar
 
       float fInX, fInY, fInZ, fInT;
       float fInPx, fInPy, fInPz, fInE;
+      float fInMass;
       int fInPDG;
       std::string fInProcess;
       std::vector<std::string> fOutProcess;
 
       std::vector<float> fOutX, fOutY, fOutZ, fOutT;
       std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
+      std::vector<float> fOutMass;
       std::vector<int> fOutPDG;
       //std::vector<std::char> fOutProcess;
 
@@ -1090,8 +1092,8 @@ namespace lar
               hasEntered = true;
               auto const &mom = particleVec.Momentum(ipt);
               double stepKE = (mom.E() - particleVec.Mass()); // in GeV
-              std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
-                        << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE << " GeV" << std ::endl;
+              //std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
+                       // << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE << " GeV" << std ::endl;
               // for (size_t i = 0; i + 1 < Ntraj; ++i)
               // {
               //   auto const &a = particleVec.Position(i);
@@ -1103,11 +1105,11 @@ namespace lar
               // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
               // go back to my branch
             }
-            else
-            {
-              std::cout << " ! Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
-                        << ", Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << ") " << std ::endl;
-            }
+            // else
+            // {
+            //   std::cout << " ! Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
+            //             << ", Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << ") " << std ::endl;
+            // }
           }
           else
           {
@@ -1116,9 +1118,9 @@ namespace lar
               // compute KE as before
               auto const &mom = particleVec.Momentum(ipt);
               double KE = mom.E() - particleVec.Mass();
-              std::cout << "Particle " << particleVec.TrackId()
-                        << " EXITED at pt " << ipt
-                        << " with KE=" << KE << " GeV\n";
+              //std::cout << "Particle " << particleVec.TrackId()
+                //        << " EXITED at pt " << ipt
+                  //      << " with KE=" << KE << " GeV\n";
               break;
               // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
               // std::cout << localX << " ," << localY << "," << localZ << std::endl;
@@ -1145,7 +1147,7 @@ namespace lar
         // std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
         for (const Vertex &vtx : interactionVertices)
         {
-          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG, fInProcess, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutPDG, fOutProcess);
+          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInMass fInPDG, fInProcess, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutMass, fOutPDG, fOutProcess);
         }
         if (currentMom == 0)
         {
@@ -1583,6 +1585,7 @@ namespace
   fInY = vertex.y; 
   fInZ = vertex.z;
   fInT = vertex.t;
+  fInMass = incoming->Mass();
   fInPDG = incoming->PdgCode();
   fInProcess = incoming->EndProcess();
 
@@ -1668,13 +1671,14 @@ namespace
       fOutPy.push_back(mom.Py());
       fOutPz.push_back(mom.Pz());
       fOutE.push_back(mom.E());
+      fOutMass.push_back(daughter->Mass());
       fOutPDG.push_back(daughter->PdgCode());
       fOutProcess.push_back(daughter->EndProcess());
     }
-    std::cout << "Incoming particle process: " << fInProcess << std::endl;
+    //std::cout << "Incoming particle process: " << fInProcess << std::endl;
     if(!fOutT.empty()){
       if(!dies){
-        std::cout << "Incoming scattered, adding incoming particle to outgoing list to preserve energy/momentum conservation" << std::endl;
+       // std::cout << "Incoming scattered, adding incoming particle to outgoing list to preserve energy/momentum conservation" << std::endl;
         fOutX.push_back(nextpos.X());
         fOutY.push_back(nextpos.Y());
         fOutZ.push_back(nextpos.Z());
@@ -1683,6 +1687,7 @@ namespace
         fOutPy.push_back(nextmom.Py());
         fOutPz.push_back(nextmom.Pz());
         fOutE.push_back(nextmom.E());
+        fOutMass.push_back(incoming->Mass());
         fOutPDG.push_back(incoming->PdgCode());
         fOutProcess.push_back("nucleonScat");
       }
@@ -1711,6 +1716,27 @@ namespace
       }
     }
     // Only fill if we have outgoing particles for this time group
+    double totalOutKE = 0.0;
+    double totalInKE = 0.0;
+    for (size_t i = 0; i < fOutE.size(); i++) {
+       if(std::abs(fOutPDG[i]) == 111 || 211){
+        totalOutKE += fOutE[i];
+       }
+       else{
+        totalOutKE += (fOutE[i] - fOutMass[i]);
+       }
+    }
+    if(std::abs(fInPDG) == 111 ||| 211){
+      totalInKE = fInE;
+    }
+    else{
+      totalInKE = fInE - fInMass;
+    }
+    double deltaKE = totalInKE - totalOutKE;
+    if(fInPDG == 13 && deltaKE > 0.01 && deltaKE < 105.7){
+      std::cout << "Muon interaction delta KE: " << deltaKE << " MeV" << std::endl;
+    }
+    if{std::abs(fInPDG == 13) && }
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
     }
