@@ -1646,9 +1646,9 @@ namespace
   fInPz = bestMom.Pz();
   fInE  = bestMom.E();
 
-  if(!dies){
-    std::cout << "Dies false" << std::endl;
-  }
+  // if(!dies){
+  //   std::cout << "Dies false" << std::endl;
+  // }
 
 
   // --- Fill one TTree entry per time group ---
