@@ -1726,7 +1726,7 @@ namespace
         totalOutKE += (fOutE[i] - fOutMass[i]);
        }
     }
-    if(std::abs(fInPDG) == 111 ||| 211){
+    if(std::abs(fInPDG) == 111 || 211){
       totalInKE = fInE;
     }
     else{
@@ -1735,8 +1735,11 @@ namespace
     double deltaKE = totalInKE - totalOutKE;
     if(fInPDG == 13 && deltaKE > 0.01 && deltaKE < 105.7){
       std::cout << "Muon interaction delta KE: " << deltaKE << " MeV" << std::endl;
+      std::cout << "Incoming muon energy: " << fInE << " MeV" << std::endl;
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " MeV" << std::endl;
+      }
     }
-    if{std::abs(fInPDG == 13) && }
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
     }
