@@ -1733,7 +1733,7 @@ namespace
       totalInKE = fInE - fInMass;
     }
     double deltaKE = totalInKE - totalOutKE;
-    if(fInPDG == 13 && deltaKE > 0.01 && deltaKE < 105.7){
+    if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
       std::cout << "Muon interaction delta KE: " << deltaKE << " MeV" << std::endl;
       std::cout << "Incoming muon energy: " << fInE << " MeV" << std::endl;
       for(size_t j = 0; j < fOutE.size(); j++){
