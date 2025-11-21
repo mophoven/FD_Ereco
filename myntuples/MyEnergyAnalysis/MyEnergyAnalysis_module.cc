@@ -1018,118 +1018,118 @@ namespace lar
       fSim_nParticles = SimParticles.size();
 
       // Store info for leading E sim numu GEANT 4 level
-      for (int i = 0; i < fSim_nParticles; i++)
-      {
+    //   for (int i = 0; i < fSim_nParticles; i++)
+    //   {
         
 
-        // const int last = Ntrajpoints - 1;
-        // const TLorentzVector& positionStart = particleVec.Position(0);
-        // const TLorentzVector& positionEnd = particleVec.Position(last);
-        // const TLorentzVector& momentumStart = particleVec.Momentum(0);
-        // const TLorentzVector& momentumEnd = particleVec.Momentum(last);
-        //  New stuff
-        // double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
-        // auto const &geom = *fGeometryService;
-        // fXmin = -geom.DetLength();
-        // fXmax = geom.DetLength();
-        // fYmin = -geom.DetHalfWidth()*2;
-        // fYmax = geom.DetHalfWidth()*2;
-        // fZmin = -geom.DetHalfHeight()*2;
-        // fZmax = geom.DetHalfHeight()*2;
-        // std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
+    //     // const int last = Ntrajpoints - 1;
+    //     // const TLorentzVector& positionStart = particleVec.Position(0);
+    //     // const TLorentzVector& positionEnd = particleVec.Position(last);
+    //     // const TLorentzVector& momentumStart = particleVec.Momentum(0);
+    //     // const TLorentzVector& momentumEnd = particleVec.Momentum(last);
+    //     //  New stuff
+    //     // double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
+    //     // auto const &geom = *fGeometryService;
+    //     // fXmin = -geom.DetLength();
+    //     // fXmax = geom.DetLength();
+    //     // fYmin = -geom.DetHalfWidth()*2;
+    //     // fYmax = geom.DetHalfWidth()*2;
+    //     // fZmin = -geom.DetHalfHeight()*2;
+    //     // fZmax = geom.DetHalfHeight()*2;
+    //     // std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
 
-        // 2) Loop over each particle
-        // for (int l=0; l<fSim_nParticles; l++) {
+    //     // 2) Loop over each particle
+    //     // for (int l=0; l<fSim_nParticles; l++) {
 
-        /*fSim_start_4position.push_back(positionStart.X());
-    fSim_start_4position.push_back(positionStart.Y());
-    fSim_start_4position.push_back(positionStart.Z());
-    fSim_start_4position.push_back(positionStart.T());
-        fSim_end_4position.push_back(positionEnd.X());
-    fSim_end_4position.push_back(positionEnd.Y());
-    fSim_end_4position.push_back(positionEnd.Z());
-    fSim_end_4position.push_back(positionEnd.T());
-        fSim_start_4mommenta.push_back(momentumStart.Px());
-    fSim_start_4mommenta.push_back(momentumStart.Py());
-    fSim_start_4mommenta.push_back(momentumStart.Pz());
-    fSim_start_4mommenta.push_back(momentumStart.E());
-        fSim_end_4mommenta.push_back(momentumEnd.Px());
-    fSim_end_4mommenta.push_back(momentumEnd.Py());
-    fSim_end_4mommenta.push_back(momentumEnd.Pz());
-    fSim_end_4mommenta.push_back(momentumEnd.E());
-    }*/
-        // loop over every trajectory point, compare to geometry,
-        simb::MCParticle const &particleVec = *(SimParticles[i]);
-        size_t Ntraj = particleVec.NumberTrajectoryPoints();
-        art::ServiceHandle<geo::Geometry const> geom;
-        bool hasEntered = false;
+    //     /*fSim_start_4position.push_back(positionStart.X());
+    // fSim_start_4position.push_back(positionStart.Y());
+    // fSim_start_4position.push_back(positionStart.Z());
+    // fSim_start_4position.push_back(positionStart.T());
+    //     fSim_end_4position.push_back(positionEnd.X());
+    // fSim_end_4position.push_back(positionEnd.Y());
+    // fSim_end_4position.push_back(positionEnd.Z());
+    // fSim_end_4position.push_back(positionEnd.T());
+    //     fSim_start_4mommenta.push_back(momentumStart.Px());
+    // fSim_start_4mommenta.push_back(momentumStart.Py());
+    // fSim_start_4mommenta.push_back(momentumStart.Pz());
+    // fSim_start_4mommenta.push_back(momentumStart.E());
+    //     fSim_end_4mommenta.push_back(momentumEnd.Px());
+    // fSim_end_4mommenta.push_back(momentumEnd.Py());
+    // fSim_end_4mommenta.push_back(momentumEnd.Pz());
+    // fSim_end_4mommenta.push_back(momentumEnd.E());
+    // }*/
+    //     // loop over every trajectory point, compare to geometry,
+    //     simb::MCParticle const &particleVec = *(SimParticles[i]);
+    //     size_t Ntraj = particleVec.NumberTrajectoryPoints();
+    //     art::ServiceHandle<geo::Geometry const> geom;
+    //     bool hasEntered = false;
 
-        for (size_t ipt = 0; ipt < Ntraj; ++ipt)
-        {
-          // std::cout<<Ntraj<<std::endl;
+    //     for (size_t ipt = 0; ipt < Ntraj; ++ipt)
+    //     {
+    //       // std::cout<<Ntraj<<std::endl;
 
-          const TLorentzVector &pos = particleVec.Position(ipt);
-          double localX = pos.X();
-          double localY = pos.Y();
-          double localZ = pos.Z();
-          double X_MIN = -400.0, X_MAX = 400.0;
-          double Y_MIN = -600.0, Y_MAX = 600.0;
-          double Z_MIN = 0.0, Z_MAX = 1300.0;
+    //       const TLorentzVector &pos = particleVec.Position(ipt);
+    //       double localX = pos.X();
+    //       double localY = pos.Y();
+    //       double localZ = pos.Z();
+    //       double X_MIN = -400.0, X_MAX = 400.0;
+    //       double Y_MIN = -600.0, Y_MAX = 600.0;
+    //       double Z_MIN = 0.0, Z_MAX = 1300.0;
 
-          // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-          // std::cout << localX << " ," << localY << "," << localZ << std::endl;
-          // std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
-          bool inside =
-              localX >= X_MIN && localX <= X_MAX &&
-              localY >= Y_MIN && localY <= Y_MAX &&
-              localZ >= Z_MIN && localZ <= Z_MAX;
-          // std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
+    //       // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
+    //       // std::cout << localX << " ," << localY << "," << localZ << std::endl;
+    //       // std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
+    //       bool inside =
+    //           localX >= X_MIN && localX <= X_MAX &&
+    //           localY >= Y_MIN && localY <= Y_MAX &&
+    //           localZ >= Z_MIN && localZ <= Z_MAX;
+    //       // std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
 
-          if (!hasEntered)
-          {
-            if (inside)
-            {
-              hasEntered = true;
-              auto const &mom = particleVec.Momentum(ipt);
-              double stepKE = (mom.E() - particleVec.Mass()); // in GeV
-              //std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
-                       // << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE << " GeV" << std ::endl;
-              // for (size_t i = 0; i + 1 < Ntraj; ++i)
-              // {
-              //   auto const &a = particleVec.Position(i);
-              //   auto const &b = particleVec.Position(i + 1);
-              //   double dx = b.X() - a.X(), dy = b.Y() - a.Y(), dz = b.Z() - a.Z();
-              //   double ds = std::sqrt(dx * dx + dy * dy + dz * dz);
-              //   std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
-              // }
-              // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
-              // go back to my branch
-            }
-            // else
-            // {
-            //   std::cout << " ! Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
-            //             << ", Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << ") " << std ::endl;
-            // }
-          }
-          else
-          {
-            if (!inside)
-            {
-              // compute KE as before
-              auto const &mom = particleVec.Momentum(ipt);
-              double KE = mom.E() - particleVec.Mass();
-              //std::cout << "Particle " << particleVec.TrackId()
-                //        << " EXITED at pt " << ipt
-                  //      << " with KE=" << KE << " GeV\n";
-              break;
-              // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-              // std::cout << localX << " ," << localY << "," << localZ << std::endl;
-              // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
-            }
-          }
-        }
-      }
-      // End four-vector collection
+    //       if (!hasEntered)
+    //       {
+    //         if (inside)
+    //         {
+    //           hasEntered = true;
+    //           auto const &mom = particleVec.Momentum(ipt);
+    //           //double stepKE = (mom.E() - particleVec.Mass()); // in GeV
+    //           //std::cout << "Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
+    //                    // << ", ENTERED at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << "), Step Energy: " << stepKE << " GeV" << std ::endl;
+    //           // for (size_t i = 0; i + 1 < Ntraj; ++i)
+    //           // {
+    //           //   auto const &a = particleVec.Position(i);
+    //           //   auto const &b = particleVec.Position(i + 1);
+    //           //   double dx = b.X() - a.X(), dy = b.Y() - a.Y(), dz = b.Z() - a.Z();
+    //           //   double ds = std::sqrt(dx * dx + dy * dy + dz * dz);
+    //           //   std::cout << "seg " << i << "->" << (i + 1) << "  ds=" << ds << " cm\n";
+    //           // }
+    //           // fill out Energy(stepKE) histograms for protons, neutrons, electrons, muons, pions
+    //           // go back to my branch
+    //         }
+    //         // else
+    //         // {
+    //         //   std::cout << " ! Particle TRKID " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode()
+    //         //             << ", Not ENTERED yet at pt " << ipt << ", Position (" << pos.X() << "," << pos.Y() << "," << pos.Z() << ") " << std ::endl;
+    //         // }
+    //       }
+    //       else
+    //       {
+    //         if (!inside)
+    //         {
+    //           // compute KE as before
+    //           auto const &mom = particleVec.Momentum(ipt);
+    //           double KE = mom.E() - particleVec.Mass();
+    //           //std::cout << "Particle " << particleVec.TrackId()
+    //             //        << " EXITED at pt " << ipt
+    //               //      << " with KE=" << KE << " GeV\n";
+    //           break;
+    //           // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
+    //           // std::cout << localX << " ," << localY << "," << localZ << std::endl;
+    //           // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
+    //         }
+    //       }
+    //     }
+    //   }
+    //   // End four-vector collection
 
       // Collecting all Daughters of Each primary
 
@@ -1147,7 +1147,7 @@ namespace lar
         // std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
         for (const Vertex &vtx : interactionVertices)
         {
-          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInMass fInPDG, fInProcess, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutMass, fOutPDG, fOutProcess);
+          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInMass, fInPDG, fInProcess, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutMass, fOutPDG, fOutProcess);
         }
         if (currentMom == 0)
         {
@@ -1567,12 +1567,12 @@ namespace
     const std::map<int, const simb::MCParticle*>& particleMap,
     TTree* fInteractionTree,
     float& fInX, float& fInY, float& fInZ, float& fInT,
-    float& fInPx, float& fInPy, float& fInPz, float& fInE, int& fInPDG,
+    float& fInPx, float& fInPy, float& fInPz, float& fInE, float& fInMass, int& fInPDG,
     std::string& fInProcess,
     std::vector<float>& fOutX, std::vector<float>& fOutY,
     std::vector<float>& fOutZ, std::vector<float>& fOutT,
     std::vector<float>& fOutPx, std::vector<float>& fOutPy,
-    std::vector<float>& fOutPz, std::vector<float>& fOutE,
+    std::vector<float>& fOutPz, std::vector<float>& fOutE, std::vector<float>& fOutMass,
     std::vector<int>& fOutPDG, std::vector<std::string>& fOutProcess) {
 
   // Clear outgoing particle containers
