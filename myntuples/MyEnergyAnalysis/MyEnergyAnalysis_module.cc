@@ -1048,35 +1048,35 @@ namespace lar
         for (size_t ipt = 0; ipt < Ntraj; ++ipt)
         {
           // std::cout<<Ntraj<<std::endl;
-          //const geo::TPCGeo &tpc = geom->TPC(0);
+          // const geo::TPCGeo &tpc = geom->TPC(0);
           // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << std::endl;
-          //double centerX = tpc.GetCenter().X();
-          //double centerY = tpc.GetCenter().Y();
-          //double centerZ = tpc.GetCenter().Z();
+          // double centerX = tpc.GetCenter().X();
+          // double centerY = tpc.GetCenter().Y();
+          // double centerZ = tpc.GetCenter().Z();
           const TLorentzVector &pos = particleVec.Position(ipt);
           double localX = pos.X(); //- std::abs(centerX);
           double localY = pos.Y(); //- std::abs(centerY);
           double localZ = pos.Z(); //- std::abs(centerZ);
-          double X_MIN = -400.0, X_MAX =  400.0;
-          double Y_MIN = -600.0, Y_MAX =  600.0;
-          double Z_MIN =    0.0, Z_MAX = 1300.0;
+          double X_MIN = -400.0, X_MAX = 400.0;
+          double Y_MIN = -600.0, Y_MAX = 600.0;
+          double Z_MIN = 0.0, Z_MAX = 1300.0;
 
           // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-          //std::cout << localX << " ," << localY << "," << localZ << std::endl;
+          // std::cout << localX << " ," << localY << "," << localZ << std::endl;
           // std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
           bool inside =
               localX >= X_MIN && localX <= X_MAX &&
               localY >= Y_MIN && localY <= Y_MAX &&
               localZ >= Z_MIN && localZ <= Z_MAX;
-              //std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
+          // std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
 
           if (!hasEntered)
           {
             if (inside)
             {
               hasEntered = true;
-              //std::cout << "Particle " << particleVec.TrackId()
-                        //<< " ENTERED at pt " << ipt << "\n";
+              // std::cout << "Particle " << particleVec.TrackId()
+              //<< " ENTERED at pt " << ipt << "\n";
             }
           }
           else
@@ -1092,9 +1092,9 @@ namespace lar
                         << ", MotherID=" << motherId
                         << " with KE=" << KE << " GeV\n";
               break;
-            // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-            // std::cout << localX << " ," << localY << "," << localZ << std::endl;
-            // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
+              // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
+              // std::cout << localX << " ," << localY << "," << localZ << std::endl;
+              // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
             }
           }
         }
@@ -1897,4 +1897,67 @@ namespace
     }
   }
 
+  void getAncestors(const simb::MCParticle *currentpart, std::vector<int> &Mothers, const std::map<int, const simb::MCParticle *> &particleMap)
+  {
+    int currentmother = currentpart.mother();
+    auto nextmom = particleMap.find(currentmother);
+    Mothers.push_back(currentmother);
+    getAncestors(nextmom, Mothers, particleMap);
+  }
+  // check with Milo
+  void getAncestors(const simb::MCParticle *currentpart, std::vector<int> &Mothers, const std::map<int, const simb::MCParticle *> &particleMap)
+  {
+    int currentmother = currentpart->Mother();
+    if (currentmother == 0)
+      return;
+    auto nextmom = particleMap.find(currentmother);
+    if (nextmom != particleMap.end())
+    {
+      Mothers.push_back(currentmother);
+      getAncestors((*nextmom).second, Mothers, particleMap);
+    }
+  }
+  void getEnergyofLeavingparticles()
+  {
+  }
+
 } // local namespace
+
+/*
+
+
+ void getDescendant(int daughterID, const std::vector<int> &momVec, const std::vector<int> &TrkIDvec, const std::map<int, const simb::MCParticle *> &particleMap, std::vector<const simb::MCParticle *> &primaryDaughters)
+  {
+    for (size_t j = 0; j < TrkIDvec.size(); j++)
+    {
+      if (momVec[j] == motherID)
+      {
+        int daughterID = TrkIDvec[j];
+        auto it = particleMap.find(daughterID);
+        if (it != particleMap.end())
+        {
+          primaryDaughters.push_back(it->second);
+          getDescendants(daughterID, momVec, TrkIDvec, particleMap, primaryDaughters);
+        }
+      }
+    }
+  }
+
+
+
+
+
+
+
+
+*/
+// crate new vector and pushback particles trak ids that leave
+// Std::vector<int> leftParticles
+// if(left){
+// leftParticles.push_back(current part)
+//}
+// primary particles have mother 0
+// get a leaving track ID of particles
+// min particle loops
+// make the part of my code to a function that takes in a particle and returns  if it leaves
+// On Windows Shift + Alt + F
