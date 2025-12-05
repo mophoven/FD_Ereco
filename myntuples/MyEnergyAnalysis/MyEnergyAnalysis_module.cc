@@ -309,6 +309,7 @@ namespace lar
       double fSim_pim_Edep_b2;   // [MeV] Energy Deposity of Pion-
       double fSim_pi0_Edep_b2;   // [MeV] Energy Deposity of Pion0
       double fSim_Other_Edep_b2; // [MeV] Energy Deposity of eOther ; includes kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
+      double fSim_nuclei_Edep_b2; // [MeV] Energy Deposit of nuclei recoil
 
       // Two ways (a, b) to access collection plane +
       // Two ways (1, 2) of get E deposit for sim::IDE
@@ -512,6 +513,7 @@ namespace lar
       fNtuple->Branch("Sim_pim_Edep_b2", &fSim_pim_Edep_b2, "Sim_pim_Edep_b2/D");
       fNtuple->Branch("Sim_pi0_Edep_b2", &fSim_pi0_Edep_b2, "Sim_pi0_Edep_b2/D");
       fNtuple->Branch("Sim_Other_Edep_b2", &fSim_Other_Edep_b2, "Sim_Other_Edep_b2/D");
+      fNtuple->Branch("Sim_nuclei_Edep_b2", &fSim_nuclei_Edep_b2, "Sim_nuclei_Edep_b2/D");
 
       fNtuple->Branch("Sim_hadronic_Edep_b2", &fSim_hadronic_Edep_b2, "Sim_hadronic_Edep_b2/D");
       fNtuple->Branch("Sim_n_hadronic_Edep_b", &fSim_n_hadronic_Edep_b, "Sim_n_hadronic_Edep_b/I");
@@ -635,6 +637,7 @@ namespace lar
       fSim_pip_Edep_b2 = 0.;
       fSim_pim_Edep_b2 = 0.;
       fSim_pi0_Edep_b2 = 0.;
+      fSim_Other_Edep_b2 = 0.;
       fSim_Other_Edep_b2 = 0.;
       fSim_hadronic_Edep_b2 = 0.;
 
@@ -1259,6 +1262,10 @@ namespace lar
                   fSim_Other_Edep_b2 += energyDeposit.energy;
                   // std::cout << "fire Other! " << std::endl;
                 }
+                else if (particle.PdgCode() == 1000180400)
+                {
+                  fSim_nuclei_Edep_b2 += energyDeposit.energy;
+                }
               } // end found match
 
               // if it's not, count as hadronic
@@ -1602,10 +1609,10 @@ namespace
     if (dist < minDist) {
       minDist = dist;
       bestMom = incoming->Momentum(i);
-      if (i == incoming->NumberTrajectoryPoints()) {
-      dies = true;
+      if (i == incoming->NumberTrajectoryPoints() - 1) {
+        dies = true;
       }
-      if (i != incoming-> NumberTrajectoryPoints()){
+      if (i < incoming->NumberTrajectoryPoints() - 1){
         dies = false;
       nextpos = incoming->Position(i+1);
       nextmom = incoming->Momentum(i+1);
@@ -1716,46 +1723,46 @@ namespace
       }
     }
     // Only fill if we have outgoing particles for this time group
-    double totalOutKE = 0.0;
-    double totalInKE = 0.0;
-    for (size_t i = 0; i < fOutE.size(); i++) {
-       if(std::abs(fOutPDG[i]) == 111 || 211){
-        totalOutKE += fOutE[i];
-       }
-       else{
-        totalOutKE += (fOutE[i] - fOutMass[i]);
-       }
-    }
-    if(std::abs(fInPDG) == 111 || 211){
-      totalInKE = fInE;
-    }
-    else{
-      totalInKE = fInE - fInMass;
-    }
-    double deltaKE = totalInKE - totalOutKE;
-    if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
-      std::cout << "Muon interaction delta KE: " << deltaKE << " MeV" << std::endl;
-      std::cout << "Incoming muon energy: " << fInE << " MeV" << std::endl;
-      for(size_t j = 0; j < fOutE.size(); j++){
-        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " MeV" << std::endl;
-      }
-    }
-    if(deltaKE > 0.8){
-      std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " MeV" << std::endl;
-      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " MeV" << std::endl;
-      for(size_t j = 0; j < fOutE.size(); j++){
-        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " MeV" << std::endl;
-      }
-      std::cout << "------------------------------------------------" << std::endl;
-    }
-    if(deltaKE < 0.0){
-      std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " MeV" << std::endl;
-      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " MeV" << std::endl;
-      for(size_t j = 0; j < fOutE.size(); j++){
-        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " MeV" << std::endl;
-      }
-      std::cout << "------------------------------------------------" << std::endl;
-    }
+    // double totalOutKE = 0.0;
+    // double totalInKE = 0.0;
+    // for (size_t i = 0; i < fOutE.size(); i++) {
+    //    if(std::abs(fOutPDG[i]) == 111 || fOutPDG[i] == 211){
+    //     totalOutKE += fOutE[i];
+    //    }
+    //    else{
+    //     totalOutKE += fOutE[i] - fOutMass[i];
+    //    }
+    // }
+    // if(std::abs(fInPDG) == 111 || fInPDG == 211){
+    //   totalInKE = fInE;
+    // }
+    // else{
+    //   totalInKE = fInE - fInMass;
+    // }
+    // double deltaKE = totalInKE - totalOutKE;
+    // if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
+    //   std::cout << "Muon interaction delta KE: " << deltaKE << " GeV" << std::endl;
+    //   std::cout << "Incoming muon energy: " << fInE << " GeV" << std::endl;
+    //   for(size_t j = 0; j < fOutE.size(); j++){
+    //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
+    //   }
+    // }
+    // if(deltaKE > 0.8){
+    //   std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
+    //   std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
+    //   for(size_t j = 0; j < fOutE.size(); j++){
+    //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
+    //   }
+    //   std::cout << "------------------------------------------------" << std::endl;
+    // }
+    // if(deltaKE < 0.0){
+    //   std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
+    //   std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
+    //   for(size_t j = 0; j < fOutE.size(); j++){
+    //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
+    //   }
+    //   std::cout << "------------------------------------------------" << std::endl;
+    // }
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
     }
