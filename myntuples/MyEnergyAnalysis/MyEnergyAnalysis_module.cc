@@ -1755,6 +1755,7 @@ namespace
         std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " MeV" << std::endl;
       }
       std::cout << "------------------------------------------------" << std::endl;
+    }
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
     }
