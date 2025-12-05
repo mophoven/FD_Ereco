@@ -1577,7 +1577,7 @@ namespace
 
   // Clear outgoing particle containers
   fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
-  fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear();
+  fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear(); fOutMass.clear();
   fOutPDG.clear(); fOutProcess.clear();
 
   // Basic incoming particle info
@@ -1740,6 +1740,21 @@ namespace
         std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " MeV" << std::endl;
       }
     }
+    if(deltaKE > 0.8){
+      std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " MeV" << std::endl;
+      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " MeV" << std::endl;
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " MeV" << std::endl;
+      }
+      std::cout << "------------------------------------------------" << std::endl;
+    }
+    if(deltaKE < 0.0){
+      std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " MeV" << std::endl;
+      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " MeV" << std::endl;
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " MeV" << std::endl;
+      }
+      std::cout << "------------------------------------------------" << std::endl;
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
     }
