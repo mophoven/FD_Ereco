@@ -1086,8 +1086,10 @@ namespace lar
               // compute KE as before
               auto const &mom = particleVec.Momentum(ipt);
               double KE = mom.E() - particleVec.Mass();
+              int motherId = particleVec.Mother();
               std::cout << "Particle " << particleVec.TrackId()
                         << " EXITED at pt " << ipt
+                        << ", MotherID=" << motherId
                         << " with KE=" << KE << " GeV\n";
               break;
             // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
