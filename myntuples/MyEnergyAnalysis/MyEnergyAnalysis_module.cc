@@ -1061,14 +1061,10 @@ namespace lar
           double Y_MIN = -600.0, Y_MAX = 600.0;
           double Z_MIN = 0.0, Z_MAX = 1300.0;
 
-          // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-          // std::cout << localX << " ," << localY << "," << localZ << std::endl;
-          // std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
           bool inside =
               localX >= X_MIN && localX <= X_MAX &&
               localY >= Y_MIN && localY <= Y_MAX &&
               localZ >= Z_MIN && localZ <= Z_MAX;
-          // std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
 
           if (!hasEntered)
           {
@@ -1092,9 +1088,6 @@ namespace lar
                         << ", MotherID=" << motherId
                         << " with KE=" << KE << " GeV\n";
               break;
-              // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-              // std::cout << localX << " ," << localY << "," << localZ << std::endl;
-              // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
             }
           }
         }
@@ -1897,28 +1890,86 @@ namespace
     }
   }
 
-  void getAncestors(const simb::MCParticle *currentpart, std::vector<int> &Mothers, const std::map<int, const simb::MCParticle *> &particleMap)
+  /*void getAncestors(const simb::MCParticle *currentpart, std::vector<int> &Mothers, const std::map<int, const simb::MCParticle *> &particleMap)
   {
     int currentmother = currentpart.mother();
     auto nextmom = particleMap.find(currentmother);
     Mothers.push_back(currentmother);
     getAncestors(nextmom, Mothers, particleMap);
-  }
+  }*/
   // check with Milo
-  void getAncestors(const simb::MCParticle *currentpart, std::vector<int> &Mothers, const std::map<int, const simb::MCParticle *> &particleMap)
+  void getAncestors(const simb::MCParticle *currentpart,
+                    std::vector<int> &Mothers,
+                    const std::map<int, const simb::MCParticle *> &particleMap,
+                    int depth = 0)
   {
-    int currentmother = currentpart->Mother();
-    if (currentmother == 0)
+    if (!currentpart)
       return;
-    auto nextmom = particleMap.find(currentmother);
-    if (nextmom != particleMap.end())
-    {
-      Mothers.push_back(currentmother);
-      getAncestors((*nextmom).second, Mothers, particleMap);
-    }
+    if (depth > 1000)
+      return; // safety guard
+
+    int momId = currentpart->Mother(); // mother TrackId
+    if (momId <= 0)
+      return; // no mother
+
+    Mothers.push_back(momId); // record this mother id
+
+    auto it = particleMap.find(momId); // find mother particle
+    if (it == particleMap.end())
+      return; // mother not stored
+    if (it->second == currentpart)
+      return; // self loop guard
+
+    getAncestors(it->second, Mothers, particleMap, depth + 1);
   }
-  void getEnergyofLeavingparticles()
+  void ReportFirstExitWithMother(const simb::MCParticle &part)
   {
+    // volume bounds (cm)
+    const double X_MIN = -400.0, X_MAX = 400.0;
+    const double Y_MIN = -600.0, Y_MAX = 600.0;
+    const double Z_MIN = 0.0, Z_MAX = 1300.0;
+
+    const auto inside = [&](const TLorentzVector &p)
+    {
+      return (p.X() >= X_MIN && p.X() <= X_MAX) &&
+             (p.Y() >= Y_MIN && p.Y() <= Y_MAX) &&
+             (p.Z() >= Z_MIN && p.Z() <= Z_MAX);
+    };
+
+    const size_t Ntraj = part.NumberTrajectoryPoints();
+    if (Ntraj == 0)
+      return;
+
+    bool hasEntered = false;
+
+    for (size_t ipt = 0; ipt < Ntraj; ++ipt)
+    {
+      const TLorentzVector &pos = part.Position(ipt);
+      const bool in = inside(pos);
+
+      if (!hasEntered)
+      {
+        if (in)
+          hasEntered = true; // first time seen inside
+      }
+      else
+      {
+        if (!in)
+        { // first exit after having entered
+          const TLorentzVector &p4 = part.Momentum(ipt);
+          double KE = p4.E() - part.Mass(); // GeV
+          if (KE < 0)
+            KE = 0; // protect against numerical issues
+          const int motherId = part.Mother();
+
+          std::cout << "Particle " << part.TrackId()
+                    << " EXITED at pt " << ipt
+                    << ", MotherID=" << (motherId > 0 ? motherId : 0)
+                    << " with KE=" << KE << " GeV\n";
+          return; // stop after first exit
+        }
+      }
+    }
   }
 
 } // local namespace
