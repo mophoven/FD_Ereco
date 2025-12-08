@@ -1751,7 +1751,7 @@ namespace
     if(deltaKE > 0.8){
       std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
       std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
-      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl
+      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
       for(size_t j = 0; j < fOutE.size(); j++){
         std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
       }
@@ -1760,7 +1760,7 @@ namespace
     if(deltaKE < 0.0){
       std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
       std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
-      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl
+      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
       for(size_t j = 0; j < fOutE.size(); j++){
         std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
       }
