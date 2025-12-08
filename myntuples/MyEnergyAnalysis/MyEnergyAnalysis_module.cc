@@ -1722,24 +1722,25 @@ namespace
         fInProcess = "artificialAtRest";
       }
     }
-    // Only fill if we have outgoing particles for this time group
-    // double totalOutKE = 0.0;
-    // double totalInKE = 0.0;
-    // for (size_t i = 0; i < fOutE.size(); i++) {
-    //    if(std::abs(fOutPDG[i]) == 111 || fOutPDG[i] == 211){
-    //     totalOutKE += fOutE[i];
-    //    }
-    //    else{
-    //     totalOutKE += fOutE[i] - fOutMass[i];
-    //    }
-    // }
-    // if(std::abs(fInPDG) == 111 || fInPDG == 211){
-    //   totalInKE = fInE;
-    // }
-    // else{
-    //   totalInKE = fInE - fInMass;
-    // }
-    // double deltaKE = totalInKE - totalOutKE;
+    
+    //Only fill if we have outgoing particles for this time group
+    double totalOutKE = 0.0;
+    double totalInKE = 0.0;
+    for (size_t i = 0; i < fOutE.size(); i++) {
+       if(std::abs(fOutPDG[i]) == 111 || fOutPDG[i] == 211){
+        totalOutKE += fOutE[i];
+       }
+       else{
+        totalOutKE += fOutE[i] - fOutMass[i];
+       }
+    }
+    if(std::abs(fInPDG) == 111 || fInPDG == 211){
+      totalInKE = fInE;
+    }
+    else{
+      totalInKE = fInE - fInMass;
+    }
+    double deltaKE = totalInKE - totalOutKE;
     // if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
     //   std::cout << "Muon interaction delta KE: " << deltaKE << " GeV" << std::endl;
     //   std::cout << "Incoming muon energy: " << fInE << " GeV" << std::endl;
@@ -1747,22 +1748,24 @@ namespace
     //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
     //   }
     // }
-    // if(deltaKE > 0.8){
-    //   std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
-    //   std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
-    //   for(size_t j = 0; j < fOutE.size(); j++){
-    //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
-    //   }
-    //   std::cout << "------------------------------------------------" << std::endl;
-    // }
-    // if(deltaKE < 0.0){
-    //   std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
-    //   std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
-    //   for(size_t j = 0; j < fOutE.size(); j++){
-    //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
-    //   }
-    //   std::cout << "------------------------------------------------" << std::endl;
-    // }
+    if(deltaKE > 0.8){
+      std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
+      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
+      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
+      }
+      std::cout << "------------------------------------------------" << std::endl;
+    }
+    if(deltaKE < 0.0){
+      std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
+      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
+      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
+      }
+      std::cout << "------------------------------------------------" << std::endl;
+    }
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
     }
