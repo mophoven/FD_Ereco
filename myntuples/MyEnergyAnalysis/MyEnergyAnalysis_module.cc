@@ -100,7 +100,7 @@ namespace
 
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
-  double getMassFromPdg(int&);
+  double getMassFromPDG(int);
 
   void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
                             float&, float&, float&, float&, float&, float&, float&, float&, float&, int&, std::string&, std::vector<float>&, std::vector<float>&,
@@ -1572,6 +1572,7 @@ namespace
   // }
 
   double getMassFromPDG(int pdg){
+
   double mass;
     switch(pdg) { //big if statement
 
