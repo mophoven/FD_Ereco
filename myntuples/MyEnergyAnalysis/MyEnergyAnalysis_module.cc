@@ -1262,7 +1262,7 @@ namespace lar
                   fSim_Other_Edep_b2 += energyDeposit.energy;
                   // std::cout << "fire Other! " << std::endl;
                 }
-                else if (particle.PdgCode() == 1000180400)
+                else if (particle.PdgCode() == 1000180400 || particle.PdgCode() == 1000180390 || particle.PdgCode() >= 1000000000 && particle.PdgCode() <= 9999999999) // nucleus
                 {
                   fSim_nuclei_Edep_b2 += energyDeposit.energy;
                 }
@@ -1748,23 +1748,23 @@ namespace
     //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
     //   }
     // }
-    if(deltaKE > 0.8){
-      std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
-      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
-      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
-      for(size_t j = 0; j < fOutE.size(); j++){
-        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
-      }
-      std::cout << "------------------------------------------------" << std::endl;
-    }
-    if(deltaKE < 0.0){
-      std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
-      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
-      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
-      for(size_t j = 0; j < fOutE.size(); j++){
-        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
-      }
-      std::cout << "------------------------------------------------" << std::endl;
+    // if(deltaKE > 0.8){
+    //   std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
+    //   std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
+    //   std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
+    //   for(size_t j = 0; j < fOutE.size(); j++){
+    //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
+    //   }
+    //   std::cout << "------------------------------------------------" << std::endl;
+    // }
+    // if(deltaKE < 0.0){
+    //   std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
+    //   std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
+    //   std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
+    //   for(size_t j = 0; j < fOutE.size(); j++){
+    //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
+    //   }
+    //   std::cout << "------------------------------------------------" << std::endl;
     }
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
@@ -1823,6 +1823,12 @@ namespace
   }
   return vertices;
 }
+
+// double getMassFromPDG(int pdg){
+//   int absP = std::abs(pdg);
+//   TParticlePDG* p = TDatabasePDG::Instance->GetParticle(absP);
+//   if(p && p->Mass()>0)
+// }
 
 double getPrimaryKE(const simb::MCParticle* primary, double x, double y, double z){
   double minDist = 1e10;
