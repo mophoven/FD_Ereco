@@ -1586,13 +1586,15 @@ namespace
   fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
   fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear(); fOutMass.clear();
   fOutPDG.clear(); fOutProcess.clear();
-
+  
+  double inMass = getMassFromPDG(incoming->PdgCode());
+  
   // Basic incoming particle info
   fInX = vertex.x; 
   fInY = vertex.y; 
   fInZ = vertex.z;
   fInT = vertex.t;
-  fInMass = incoming->Mass();
+  fInMass = inMass;
   fInPDG = incoming->PdgCode();
   fInProcess = incoming->EndProcess();
 
@@ -1669,6 +1671,8 @@ namespace
       const TLorentzVector& pos = daughter->Position(0);
       const TLorentzVector& mom = daughter->Momentum(0);
 
+      double outMass = getMassFromPDG(daughter->PdgCode());
+
       fOutX.push_back(pos.X());
       fOutY.push_back(pos.Y());
       fOutZ.push_back(pos.Z());
@@ -1678,7 +1682,7 @@ namespace
       fOutPy.push_back(mom.Py());
       fOutPz.push_back(mom.Pz());
       fOutE.push_back(mom.E());
-      fOutMass.push_back(daughter->Mass());
+      fOutMass.push_back(outMass);
       fOutPDG.push_back(daughter->PdgCode());
       fOutProcess.push_back(daughter->EndProcess());
     }
@@ -1694,7 +1698,7 @@ namespace
         fOutPy.push_back(nextmom.Py());
         fOutPz.push_back(nextmom.Pz());
         fOutE.push_back(nextmom.E());
-        fOutMass.push_back(incoming->Mass());
+        fOutMass.push_back(inMass);
         fOutPDG.push_back(incoming->PdgCode());
         fOutProcess.push_back("nucleonScat");
       }
@@ -1713,59 +1717,59 @@ namespace
       //  fOutPDG.push_back(incoming->PdgCode());
       //  fOutProcess.push_back("artificialAtRest");
       // }
-      if(dies && fInProcess == "Decay" && std::abs(fInT - fOutT.back()) > 3){
-        std::cout << "Incoming particle decayed at rest with time delay, setting incoming momentum to 0 to preserve energy/momentum conservation" << std::endl;
-        fInPx = 0.0;
-        fInPy = 0.0;
-        fInPz = 0.0;
-        fInE = incoming->Mass();
-        fInProcess = "artificialAtRest";
-      }
+      // if(dies && fInProcess == "Decay" && std::abs(fInT - fOutT.back()) > 3){
+      //   std::cout << "Incoming particle decayed at rest with time delay, setting incoming momentum to 0 to preserve energy/momentum conservation" << std::endl;
+      //   fInPx = 0.0;
+      //   fInPy = 0.0;
+      //   fInPz = 0.0;
+      //   fInE = incoming->Mass();
+      //   fInProcess = "artificialAtRest";
+      // }
     }
     
     //Only fill if we have outgoing particles for this time group
-    // double totalOutKE = 0.0;
-    // double totalInKE = 0.0;
-    // for (size_t i = 0; i < fOutE.size(); i++) {
-    //    if(std::abs(fOutPDG[i]) == 111 || fOutPDG[i] == 211){
-    //     totalOutKE += fOutE[i];
-    //    }
-    //    else{
-    //     totalOutKE += fOutE[i] - fOutMass[i];
-    //    }
-    // }
-    // if(std::abs(fInPDG) == 111 || fInPDG == 211){
-    //   totalInKE = fInE;
-    // }
-    // else{
-    //   totalInKE = fInE - fInMass;
-    // }
-    // double deltaKE = totalInKE - totalOutKE;
-    // if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
-    //   std::cout << "Muon interaction delta KE: " << deltaKE << " GeV" << std::endl;
-    //   std::cout << "Incoming muon energy: " << fInE << " GeV" << std::endl;
-    //   for(size_t j = 0; j < fOutE.size(); j++){
-    //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
-    //   }
-    // }
-    // if(deltaKE > 0.8){
-    //   std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
-    //   std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
-    //   std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
-    //   for(size_t j = 0; j < fOutE.size(); j++){
-    //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
-    //   }
-    //   std::cout << "------------------------------------------------" << std::endl;
-    // }
-    // if(deltaKE < 0.0){
-    //   std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
-    //   std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
-    //   std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
-    //   for(size_t j = 0; j < fOutE.size(); j++){
-    //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
-    //   }
-    //   std::cout << "------------------------------------------------" << std::endl;
-    //}
+    double totalOutKE = 0.0;
+    double totalInKE = 0.0;
+    for (size_t i = 0; i < fOutE.size(); i++) {
+       if(std::abs(fOutPDG[i]) == 111 || fOutPDG[i] == 211){
+        totalOutKE += fOutE[i];
+       }
+       else{
+        totalOutKE += fOutE[i] - fOutMass[i];
+       }
+    }
+    if(std::abs(fInPDG) == 111 || fInPDG == 211){
+      totalInKE = fInE;
+    }
+    else{
+      totalInKE = fInE - fInMass;
+    }
+    double deltaKE = totalInKE - totalOutKE;
+    if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
+      std::cout << "Muon interaction delta KE: " << deltaKE << " GeV" << std::endl;
+      std::cout << "Incoming muon energy: " << fInE << " GeV" << std::endl;
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
+      }
+    }
+    if(deltaKE > 0.8){
+      std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
+      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
+      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
+      }
+      std::cout << "------------------------------------------------" << std::endl;
+    }
+    if(deltaKE < 0.0){
+      std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
+      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
+      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
+      }
+      std::cout << "------------------------------------------------" << std::endl;
+    }
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
     }
@@ -1824,11 +1828,446 @@ namespace
   return vertices;
 }
 
-// double getMassFromPDG(int pdg){
-//   int absP = std::abs(pdg);
-//   TParticlePDG* p = TDatabasePDG::Instance->GetParticle(absP);
-//   if(p && p->Mass()>0)
-// }
+double getMassFromPDG(int pdg){
+  double mass;
+    switch(pdg) { //big if statement
+
+        case 11: //electron or positron
+            mass = 0.00511
+        case -11:
+            mass = 0.000511;
+        
+        case 12: //elecctron neutrino
+            mass = 0.0;
+        case -12:
+            mass = 0.0;
+            
+        case 13: //muon
+            mass = 0.105658;
+
+        case -13:
+            mass = 0.105658;
+
+
+        case 14: //muon neutrino
+            mass = 0.0;
+
+        case -14:
+            mass = 0.0;=
+
+        case 22: //photon
+            mass = 0.0;
+        
+        case 111: //uncharged pion (own antiptcl)
+            mass = 0.134977;
+        
+        case 211: //charged pion
+            mass = 0.139570;
+
+        case -211: // pi minus
+            mass = 0.139570;
+
+        case 221: //eta light meson
+          mass = 0.547862;
+        case -221: 
+          mass = 0.547862;
+
+        case 331: //eta prime light meson //2 in data
+            mass = 0.95778;
+        case -331: // 1 in data
+            mass = 0.95778
+
+        case 321: //charged kaons //5 in data
+          mass = 0.493677;
+
+        case -321: //3 in data
+          mass = 0.493677;
+        
+        case 130: //long neutral kaon
+        //case -130: 
+           mass = 0.497677;
+
+        case 310: //short neutral kaon
+          mass = 0.497677;
+
+        case 311: //K_0 //no k_0's
+          mass = 0.497677;
+
+        case -311: 
+          mass = 0.493677;
+
+        case 2112: //neutron
+            mass = 0.939565;
+
+        case -2112:  //antineutron
+            mass = 0.939565;
+
+        case 2212: //proton
+            mass = 0.938272; //7 sigfigs?
+
+        case -2212: //antiproton, account for mass of pair
+            mass = 0.938272;
+
+        case 3122: //Lambda strange baryon
+            mass = 1.11568;
+
+        case -3122: 
+            mass = 1.11568;
+
+        case 3212: //Sigma 0 strange baryon
+            mass = 1.31486;
+
+        case -3212: 
+            mass = 0.939565; //neutron mass
+
+        case 3222: //sigma+ strange baryon
+            mass = 1.18937;
+        case -3222: // ??
+            mass = 1.18937;
+
+        case 3112: //sigma- strange baryon
+            mass = 1.19745;
+        case -3112: 
+            mass = 1.19745;
+
+        case 1000010020: //deuterium
+            mass = 1.87561;
+
+        case 1000010030: //tritium
+            mass = 2.80892;
+
+        case 1000020030: //helium 3
+            mass = 2.80839;
+
+        case 1000020040: //helium 4
+            mass = 3.72738;
+
+        case 1000040080: //beryllium 8
+            mass = 7.45486;
+
+        case 1000040090: //beryllium 9
+            mass = 8.39276;
+
+        case 1000050100: //boron 10
+            mass = 9.32444;
+
+        case 1000050110: //boron 11
+            mass = 10.2526;
+
+        case 1000050120: //boron 12
+            mass = 11.1888;
+
+        case 1000060110: //carbon 11
+            mass = 10.2540;
+
+        case 1000060120: //carbon 12
+            mass = 11.1749;
+
+        case 1000060130: //carbon 13
+            mass = 13.0001;
+
+        case 1000060140: //carbon 14
+            mass = 13.99995; //sigfigs???
+
+        case 1000070130: //nitrogen 13
+            mass = 12.1112;
+
+        case 1000070140: //nitrogen 14
+            mass = 13.0402;
+
+        case 1000070150: //nitrogen 15
+            mass = 13.9690;
+
+        case 1000070160: //nitrogen 16
+            mass = 14.9060;
+
+        case 1000080150: //oxygen 15
+            mass = 13.9712;
+
+        case 1000080160: //oxygen 16
+            mass = 14.8951;
+
+        case 1000080180: //oxygen 18
+            mass = 16.7620;
+
+        case 1000090180: //fluorine 18
+            mass = 16.7632;
+
+        case 1000090190: //fluorine 19
+            mass = 17.6923;
+
+        case 1000100200: //neon 20
+            mass = 18.6178;
+
+        case 1000100210: //neon 21
+            mass = 19.5506;
+
+        case 1000100220: //neon 22
+            mass = 20.4798;
+
+        case 1000110220: //sodium 22
+            mass = 20.4821;
+
+        case 1000110230: //sodium 23
+            mass = 21.4092;
+
+        case 1000110240: //sodium 24
+            mass = 22.3418;
+
+        case 1000110250: //sodium 25
+            mass = 23.2724;
+
+        case 1000120220: //magnesium 22
+            mass = 20.4864;
+
+        case 1000120230: //magnesium 23
+            mass = 21.4128;
+
+        case 1000120240: //magnesium 24
+            mass = 22.3358;
+
+        case 1000120250: //magnesium 25
+            mass = 23.2680;
+
+        case 1000120260: //magnesium 26
+            mass = 24.1965;
+
+        case 1000120270: //magnesium 27
+            mass = 25.1297;
+
+        case 1000130260: //aluminum 26
+            mass = 24.2000;
+
+        case 1000130270: //aluminum 27
+            mass = 25.1265;
+
+        case 1000130280: //aluminum 28
+            mass = 26.0584;
+
+        case 1000130290: //aluminum 29
+            mass = 26.9885;
+
+        case 1000130300: //aluminum 30
+            mass = 27.9223;
+
+        case 1000130310: //aluminum 31
+            mass = 28.8548;
+
+        case 1000130320: //aluminum 32
+            mass = 29.7901;
+
+        case 1000140270: //silicon 27
+            mass = 25.1308;
+
+        case 1000140280: //silicon 28
+            mass = 26.0532;
+
+        case 1000140290: //silicon 29
+            mass = 26.9843;
+
+        case 1000140300: //silicon 30
+            mass = 27.9133;
+
+        case 1000140310: //silicon 31
+            mass = 28.8462;
+
+        case 1000140320: //silicon 32
+            mass = 29.7766;
+
+        case 1000140330: //silicon 33
+            mass = 30.7117;
+
+        case 1000150300: //phosphorus 30
+            mass = 27.9170;
+
+        case 1000150310: //phosphorus 31
+            mass = 28.8442;
+
+        case 1000150320: //phosphorus 32
+            mass = 29.7759;
+
+        case 1000150330: //phosphorus 33
+            mass = 30.7053;
+
+        case 1000150340: //phosphorus 34
+            mass = 31.6386;
+
+        case 1000150350: //phosphorus 35
+            mass = 32.5698;
+
+        case 1000150360: //phosphorus 36
+            mass = 33.5059;
+
+        case 1000150370: //phosphorus 37
+            mass = 34.4387;
+
+        case 1000150380: //phosphorus 38
+            mass = 35.3745;
+
+        case 1000160320: //sulfur 32
+            mass = 29.7736;
+
+        case 1000160330: //sulfur 33
+            mass = 30.7046;
+
+        case 1000160340: //sulfur 34
+            mass = 31.6327;
+
+        case 1000160350: //sulfur 35
+            mass = 32.5653;
+
+        case 1000160360: //sulfur 36
+            mass = 33.4950;
+  
+
+        case 1000160370: //sulfur 37
+            mass = 34.4302;
+
+        case 1000160380: //sulfur 38
+            mass = 35.3618;
+
+        case 1000170340: //chlorine 34
+            mass = 31.6377;
+
+        case 1000170350: //chlorine 35
+            mass = 32.5646;
+
+        case 1000170360: //chlorine 36
+            mass = 33.4956;
+        
+        case 1000170370: //chlorine 37
+            mass = 34.4252;
+
+        case 1000170380: //chlorine 38
+            mass = 35.3583;
+
+        case 1000170390: //chlorine 39
+            mass = 36.2898;
+
+        case 1000170400: //chlorine 40
+            mass = 37.2236;
+
+        case 1000180360: //argon 36
+            mass = 33.4944;
+
+        case 1000180370: //argon 37
+            mass = 34.4252;
+
+        case 1000180380: //argon 38 
+            mass = 35.3529;
+
+        case 1000180390: //argon 39
+            mass = 36.2859;
+        
+        case 1000180400: //argon 40
+            mass = 37.2156; //was previously 37.21556
+
+        case 1000190380: //potassium 38
+            mass = 35.3583;
+
+        case 1000190390: //potassium 39
+            mass = 36.2848;
+
+        case 1000190400: //potassium 40
+            mass = 37.2166;
+
+        case 1000190410: //potassium 41
+            mass = 40.9514;
+
+        case 1000200400: //calcium 40
+            mass = 37.2147;
+
+        case 1000220480: //titanium 48
+            mass = 44.6520;
+
+        case 1000220490: //titanium 49
+            mass = 45.5835;
+
+        case 1000230490: //vanadium 49
+            mass = 45.5835;
+
+        case 1000230500: //vanadium 50
+            mass = 46.518;
+
+        case 1000230510: //vanadium 51
+            mass = 47.4423;
+
+        case 1000240490: //chromium 49
+            mass = 45.5857;
+
+        case 1000240500: //chromium 50
+            mass = 46.5122;
+
+        case 1000240510: //chromium 51
+            mass = 47.4425;
+
+        case 1000240520: //chromium 52
+            mass = 48.3701;
+
+        case 1000240530: //chromium 53
+            mass = 49.3017;
+
+        case 1000240540: //chromium 54
+            mass = 50.2315;
+
+        case 1000250530: //manganese 53
+            mass = 49.3018;
+
+        case 1000250540: //manganese 54
+            mass = 50.2324;
+
+        case 1000250550: //manganese 55
+            mass = 51.1617;
+
+        case 1000250560: //manganese 56
+            mass = 52.0940;
+
+        case 1000260520: //iron 52
+            mass = 48.3761;
+
+        case 1000260530: //iron 53
+            mass = 49.3050;
+
+        case 1000260540: //iron 54
+            mass = 50.2312;
+
+        case 1000260550: //iron 55
+            mass = 51.1615;
+
+        case 1000260560: //iron 56
+            mass = 52.0898;
+
+        case 1000260570: //iron 57
+            mass = 53.0217;
+
+        case 1000260580: //iron 58
+            mass = 53.9513;
+            
+        case 1000270570: //cobalt 57
+            mass = 53.0221;
+
+        case 1000270600: //cobalt 60
+            mass = 55.8142;
+
+        case 1000280580: //nickel 58
+            mass = 53.9522;
+
+        case 1000280590: //nickel 59
+            mass = 54.8827;
+
+        case 1000280600: //nickel 60
+            mass = 55.8109;
+
+        case 1000280610: //nickel 61
+            mass = 56.7427;
+
+        default:
+            std::cerr <<"Error in PDG code " << pdgcode << std::endl;
+            return -1.0; //return error value
+
+    }
+    return mass;
+}
 
 double getPrimaryKE(const simb::MCParticle* primary, double x, double y, double z){
   double minDist = 1e10;
