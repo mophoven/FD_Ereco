@@ -1262,7 +1262,7 @@ namespace lar
                   fSim_Other_Edep_b2 += energyDeposit.energy;
                   // std::cout << "fire Other! " << std::endl;
                 }
-                else if (particle.PdgCode() == 1000180400 || particle.PdgCode() == 1000180390 || particle.PdgCode() >= 1000000000 && particle.PdgCode() <= 9999999999) // nucleus
+                else if (particle.PdgCode() >= 1000000000 && particle.PdgCode() <= 9999999999) // nucleus
                 {
                   fSim_nuclei_Edep_b2 += energyDeposit.energy;
                 }
@@ -1724,23 +1724,23 @@ namespace
     }
     
     //Only fill if we have outgoing particles for this time group
-    double totalOutKE = 0.0;
-    double totalInKE = 0.0;
-    for (size_t i = 0; i < fOutE.size(); i++) {
-       if(std::abs(fOutPDG[i]) == 111 || fOutPDG[i] == 211){
-        totalOutKE += fOutE[i];
-       }
-       else{
-        totalOutKE += fOutE[i] - fOutMass[i];
-       }
-    }
-    if(std::abs(fInPDG) == 111 || fInPDG == 211){
-      totalInKE = fInE;
-    }
-    else{
-      totalInKE = fInE - fInMass;
-    }
-    double deltaKE = totalInKE - totalOutKE;
+    // double totalOutKE = 0.0;
+    // double totalInKE = 0.0;
+    // for (size_t i = 0; i < fOutE.size(); i++) {
+    //    if(std::abs(fOutPDG[i]) == 111 || fOutPDG[i] == 211){
+    //     totalOutKE += fOutE[i];
+    //    }
+    //    else{
+    //     totalOutKE += fOutE[i] - fOutMass[i];
+    //    }
+    // }
+    // if(std::abs(fInPDG) == 111 || fInPDG == 211){
+    //   totalInKE = fInE;
+    // }
+    // else{
+    //   totalInKE = fInE - fInMass;
+    // }
+    // double deltaKE = totalInKE - totalOutKE;
     // if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
     //   std::cout << "Muon interaction delta KE: " << deltaKE << " GeV" << std::endl;
     //   std::cout << "Incoming muon energy: " << fInE << " GeV" << std::endl;
@@ -1765,7 +1765,7 @@ namespace
     //     std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
     //   }
     //   std::cout << "------------------------------------------------" << std::endl;
-    }
+    //}
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
     }
