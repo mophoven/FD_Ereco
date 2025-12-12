@@ -100,7 +100,7 @@ namespace
 
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
-  double getMassFromPdg(int);
+  double getMassFromPdg(int&);
 
   void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
                             float&, float&, float&, float&, float&, float&, float&, float&, float&, int&, std::string&, std::vector<float>&, std::vector<float>&,
@@ -2005,7 +2005,7 @@ namespace
             mass = 56.7427;
 
         default:
-            std::cerr <<"Error in PDG code " << pdgcode << std::endl;
+            std::cerr <<"Error in PDG code " << pdg << std::endl;
             return -1.0; //return error value
 
     }
