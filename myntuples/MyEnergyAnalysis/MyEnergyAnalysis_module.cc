@@ -100,6 +100,8 @@ namespace
 
   //void getHadronicInformation(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&, int, double);
 
+  double getMassFromPdg(int);
+
   void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
                             float&, float&, float&, float&, float&, float&, float&, float&, float&, int&, std::string&, std::vector<float>&, std::vector<float>&,
                             std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>& , std::vector<int>&, std::vector<std::string>&);
@@ -1569,271 +1571,12 @@ namespace
   //   }
   // }
 
-  void fillInteractionTree(const simb::MCParticle* incoming,
-    const Vertex& vertex,
-    const std::map<int, const simb::MCParticle*>& particleMap,
-    TTree* fInteractionTree,
-    float& fInX, float& fInY, float& fInZ, float& fInT,
-    float& fInPx, float& fInPy, float& fInPz, float& fInE, float& fInMass, int& fInPDG,
-    std::string& fInProcess,
-    std::vector<float>& fOutX, std::vector<float>& fOutY,
-    std::vector<float>& fOutZ, std::vector<float>& fOutT,
-    std::vector<float>& fOutPx, std::vector<float>& fOutPy,
-    std::vector<float>& fOutPz, std::vector<float>& fOutE, std::vector<float>& fOutMass,
-    std::vector<int>& fOutPDG, std::vector<std::string>& fOutProcess) {
-
-  // Clear outgoing particle containers
-  fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
-  fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear(); fOutMass.clear();
-  fOutPDG.clear(); fOutProcess.clear();
-  
-  double inMass = getMassFromPDG(incoming->PdgCode());
-  
-  // Basic incoming particle info
-  fInX = vertex.x; 
-  fInY = vertex.y; 
-  fInZ = vertex.z;
-  fInT = vertex.t;
-  fInMass = inMass;
-  fInPDG = incoming->PdgCode();
-  fInProcess = incoming->EndProcess();
-
-  int incomingID = incoming->TrackId();
-  double minDist = 1e10;
-  TLorentzVector bestMom;
-  bool dies = false;
-  TLorentzVector nextpos;
-  TLorentzVector nextmom;
-
-  for (unsigned int i = 0; i <= incoming->NumberTrajectoryPoints(); i++) {
-    TLorentzVector pos = incoming->Position(i);
-    double dist = std::hypot(pos.X() - vertex.x, pos.Y() - vertex.y, pos.Z() - vertex.z);
-    if (dist < minDist) {
-      minDist = dist;
-      bestMom = incoming->Momentum(i);
-      if (i == incoming->NumberTrajectoryPoints() - 1) {
-        dies = true;
-      }
-      if (i < incoming->NumberTrajectoryPoints() - 1){
-        dies = false;
-      nextpos = incoming->Position(i+1);
-      nextmom = incoming->Momentum(i+1);
-      }
-    }
-  }
-  
-
-
-  // --- Group daughters by production time ---
-  const double timeEpsilon = 1e-3; // ns, small tolerance for clustering
-  std::map<double, std::vector<const simb::MCParticle*>> timeGroups;
-
-  for (const simb::MCParticle* daughter : vertex.daughters) {
-    if (daughter->TrackId() == incomingID) continue;        // skip self
-    if (daughter->Mother() != incoming->TrackId()) continue; // skip indirect descendants
-
-    double t = daughter->Position(0).T();
-    bool added = false;
-
-    // Look for an existing time bin within tolerance
-    for (auto& kv : timeGroups) {
-      if (std::fabs(kv.first - t) < timeEpsilon) {
-        kv.second.push_back(daughter);
-        added = true;
-        break;
-      }
-    }
-
-    // If none exists, create a new time bin
-    if (!added) {
-      timeGroups[t].push_back(daughter);
-    }
-  }
-
-  fInPx = bestMom.Px();
-  fInPy = bestMom.Py();
-  fInPz = bestMom.Pz();
-  fInE  = bestMom.E();
-
-  // if(!dies){
-  //   std::cout << "Dies false" << std::endl;
-  // }
-
-
-  // --- Fill one TTree entry per time group ---
-  for (const auto& kv : timeGroups) {
-    // Clear outgoing vectors for this time cluster
-    fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
-    fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear();
-    fOutPDG.clear(); fOutProcess.clear();
-
-    for (const simb::MCParticle* daughter : kv.second) {
-      const TLorentzVector& pos = daughter->Position(0);
-      const TLorentzVector& mom = daughter->Momentum(0);
-
-      double outMass = getMassFromPDG(daughter->PdgCode());
-
-      fOutX.push_back(pos.X());
-      fOutY.push_back(pos.Y());
-      fOutZ.push_back(pos.Z());
-      fOutT.push_back(pos.T());
-
-      fOutPx.push_back(mom.Px());
-      fOutPy.push_back(mom.Py());
-      fOutPz.push_back(mom.Pz());
-      fOutE.push_back(mom.E());
-      fOutMass.push_back(outMass);
-      fOutPDG.push_back(daughter->PdgCode());
-      fOutProcess.push_back(daughter->EndProcess());
-    }
-    //std::cout << "Incoming particle process: " << fInProcess << std::endl;
-    if(!fOutT.empty()){
-      if(!dies){
-       // std::cout << "Incoming scattered, adding incoming particle to outgoing list to preserve energy/momentum conservation" << std::endl;
-        fOutX.push_back(nextpos.X());
-        fOutY.push_back(nextpos.Y());
-        fOutZ.push_back(nextpos.Z());
-        fOutT.push_back(nextpos.T());
-        fOutPx.push_back(nextmom.Px());
-        fOutPy.push_back(nextmom.Py());
-        fOutPz.push_back(nextmom.Pz());
-        fOutE.push_back(nextmom.E());
-        fOutMass.push_back(inMass);
-        fOutPDG.push_back(incoming->PdgCode());
-        fOutProcess.push_back("nucleonScat");
-      }
-
-      // if(dies && fInProcess == "Decay" && std::abs(fOutT.back() - fInT) < timeEpsilon){
-      //   std::cout << "Incoming particle decayed at rest, adding artificial daughter to preserve energy/momentum conservation" << std::endl;
-      //  fOutX.push_back(fOutX.back());
-      //  fOutY.push_back(fOutY.back());
-      //  fOutZ.push_back(fOutZ.back());
-      //  fOutT.push_back(fOutT.back());
-
-      //  fOutPx.push_back(0.0);
-      //  fOutPy.push_back(0.0);
-      //  fOutPz.push_back(0.0);
-      //  fOutE.push_back(incoming->Mass());
-      //  fOutPDG.push_back(incoming->PdgCode());
-      //  fOutProcess.push_back("artificialAtRest");
-      // }
-      // if(dies && fInProcess == "Decay" && std::abs(fInT - fOutT.back()) > 3){
-      //   std::cout << "Incoming particle decayed at rest with time delay, setting incoming momentum to 0 to preserve energy/momentum conservation" << std::endl;
-      //   fInPx = 0.0;
-      //   fInPy = 0.0;
-      //   fInPz = 0.0;
-      //   fInE = incoming->Mass();
-      //   fInProcess = "artificialAtRest";
-      // }
-    }
-    
-    //Only fill if we have outgoing particles for this time group
-    double totalOutKE = 0.0;
-    double totalInKE = 0.0;
-    for (size_t i = 0; i < fOutE.size(); i++) {
-       if(std::abs(fOutPDG[i]) == 111 || fOutPDG[i] == 211){
-        totalOutKE += fOutE[i];
-       }
-       else{
-        totalOutKE += fOutE[i] - fOutMass[i];
-       }
-    }
-    if(std::abs(fInPDG) == 111 || fInPDG == 211){
-      totalInKE = fInE;
-    }
-    else{
-      totalInKE = fInE - fInMass;
-    }
-    double deltaKE = totalInKE - totalOutKE;
-    if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
-      std::cout << "Muon interaction delta KE: " << deltaKE << " GeV" << std::endl;
-      std::cout << "Incoming muon energy: " << fInE << " GeV" << std::endl;
-      for(size_t j = 0; j < fOutE.size(); j++){
-        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
-      }
-    }
-    if(deltaKE > 0.8){
-      std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
-      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
-      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
-      for(size_t j = 0; j < fOutE.size(); j++){
-        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
-      }
-      std::cout << "------------------------------------------------" << std::endl;
-    }
-    if(deltaKE < 0.0){
-      std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
-      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
-      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
-      for(size_t j = 0; j < fOutE.size(); j++){
-        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
-      }
-      std::cout << "------------------------------------------------" << std::endl;
-    }
-    if (!fOutX.empty()) {
-      fInteractionTree->Fill();
-    }
-  }
-}
-
-
-  // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle* incoming, const std::vector<const simb::MCParticle*>& daughters){
-  //   float epsilon = 0.01;
-  //   float tepsilon = 1e-3;
-  //   std::vector<primaryVertex> vtxs;
-
-  //   for (const simb::MCParticle* d : daughters){
-  //     const TLorentzVector& pos = d->Position(0);
-  //     float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
-  //     bool found = false;
-
-  //     for (primaryVertex& v : vtxs) {
-  //       if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon) {
-  //         v.daughters.push_back(d);
-  //         found = true;
-  //         break;
-  //       }
-  //     }
-
-  //     if (!found) {
-  //       primaryVertex vtx = {x, y, z, t, incoming, {d}};
-  //       vtxs.push_back(vtx);
-  //     }
-  //   }
-  //     return vtxs;
-  // }
-
-  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters){
-    std::vector<Vertex> vertices;
-
-    float epsilon = 0.01; 
-    //float tepsilon = 1e-3;
-    
-    for (const simb::MCParticle* d : daughters){
-      const TLorentzVector& pos = d->Position(0);
-      float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
-      bool found = false;
-      for (Vertex& v : vertices) {
-        if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon) {
-          v.daughters.push_back(d);
-          found = true;
-          break;
-        }
-      }
-      if (!found){
-        Vertex vert = {x, y, z, t, {d}};
-        vertices.push_back(vert);
-      }
-  }
-  return vertices;
-}
-
-double getMassFromPDG(int pdg){
+  double getMassFromPDG(int pdg){
   double mass;
     switch(pdg) { //big if statement
 
         case 11: //electron or positron
-            mass = 0.00511
+            mass = 0.00511;
         case -11:
             mass = 0.000511;
         
@@ -1853,7 +1596,7 @@ double getMassFromPDG(int pdg){
             mass = 0.0;
 
         case -14:
-            mass = 0.0;=
+            mass = 0.0;
 
         case 22: //photon
             mass = 0.0;
@@ -1875,7 +1618,7 @@ double getMassFromPDG(int pdg){
         case 331: //eta prime light meson //2 in data
             mass = 0.95778;
         case -331: // 1 in data
-            mass = 0.95778
+            mass = 0.95778;
 
         case 321: //charged kaons //5 in data
           mass = 0.493677;
@@ -2268,6 +2011,266 @@ double getMassFromPDG(int pdg){
     }
     return mass;
 }
+
+  void fillInteractionTree(const simb::MCParticle* incoming,
+    const Vertex& vertex,
+    const std::map<int, const simb::MCParticle*>& particleMap,
+    TTree* fInteractionTree,
+    float& fInX, float& fInY, float& fInZ, float& fInT,
+    float& fInPx, float& fInPy, float& fInPz, float& fInE, float& fInMass, int& fInPDG,
+    std::string& fInProcess,
+    std::vector<float>& fOutX, std::vector<float>& fOutY,
+    std::vector<float>& fOutZ, std::vector<float>& fOutT,
+    std::vector<float>& fOutPx, std::vector<float>& fOutPy,
+    std::vector<float>& fOutPz, std::vector<float>& fOutE, std::vector<float>& fOutMass,
+    std::vector<int>& fOutPDG, std::vector<std::string>& fOutProcess) {
+
+  // Clear outgoing particle containers
+  fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
+  fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear(); fOutMass.clear();
+  fOutPDG.clear(); fOutProcess.clear();
+  
+  double inMass = getMassFromPDG(incoming->PdgCode());
+  
+  // Basic incoming particle info
+  fInX = vertex.x; 
+  fInY = vertex.y; 
+  fInZ = vertex.z;
+  fInT = vertex.t;
+  fInMass = inMass;
+  fInPDG = incoming->PdgCode();
+  fInProcess = incoming->EndProcess();
+
+  int incomingID = incoming->TrackId();
+  double minDist = 1e10;
+  TLorentzVector bestMom;
+  bool dies = false;
+  TLorentzVector nextpos;
+  TLorentzVector nextmom;
+
+  for (unsigned int i = 0; i <= incoming->NumberTrajectoryPoints(); i++) {
+    TLorentzVector pos = incoming->Position(i);
+    double dist = std::hypot(pos.X() - vertex.x, pos.Y() - vertex.y, pos.Z() - vertex.z);
+    if (dist < minDist) {
+      minDist = dist;
+      bestMom = incoming->Momentum(i);
+      if (i == incoming->NumberTrajectoryPoints() - 1) {
+        dies = true;
+      }
+      if (i < incoming->NumberTrajectoryPoints() - 1){
+        dies = false;
+      nextpos = incoming->Position(i+1);
+      nextmom = incoming->Momentum(i+1);
+      }
+    }
+  }
+  
+
+
+  // --- Group daughters by production time ---
+  const double timeEpsilon = 1e-3; // ns, small tolerance for clustering
+  std::map<double, std::vector<const simb::MCParticle*>> timeGroups;
+
+  for (const simb::MCParticle* daughter : vertex.daughters) {
+    if (daughter->TrackId() == incomingID) continue;        // skip self
+    if (daughter->Mother() != incoming->TrackId()) continue; // skip indirect descendants
+
+    double t = daughter->Position(0).T();
+    bool added = false;
+
+    // Look for an existing time bin within tolerance
+    for (auto& kv : timeGroups) {
+      if (std::fabs(kv.first - t) < timeEpsilon) {
+        kv.second.push_back(daughter);
+        added = true;
+        break;
+      }
+    }
+
+    // If none exists, create a new time bin
+    if (!added) {
+      timeGroups[t].push_back(daughter);
+    }
+  }
+
+  fInPx = bestMom.Px();
+  fInPy = bestMom.Py();
+  fInPz = bestMom.Pz();
+  fInE  = bestMom.E();
+
+  // if(!dies){
+  //   std::cout << "Dies false" << std::endl;
+  // }
+
+
+  // --- Fill one TTree entry per time group ---
+  for (const auto& kv : timeGroups) {
+    // Clear outgoing vectors for this time cluster
+    fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
+    fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear();
+    fOutPDG.clear(); fOutProcess.clear();
+
+    for (const simb::MCParticle* daughter : kv.second) {
+      const TLorentzVector& pos = daughter->Position(0);
+      const TLorentzVector& mom = daughter->Momentum(0);
+
+      double outMass = getMassFromPDG(daughter->PdgCode());
+
+      fOutX.push_back(pos.X());
+      fOutY.push_back(pos.Y());
+      fOutZ.push_back(pos.Z());
+      fOutT.push_back(pos.T());
+
+      fOutPx.push_back(mom.Px());
+      fOutPy.push_back(mom.Py());
+      fOutPz.push_back(mom.Pz());
+      fOutE.push_back(mom.E());
+      fOutMass.push_back(outMass);
+      fOutPDG.push_back(daughter->PdgCode());
+      fOutProcess.push_back(daughter->EndProcess());
+    }
+    //std::cout << "Incoming particle process: " << fInProcess << std::endl;
+    if(!fOutT.empty()){
+      if(!dies){
+       // std::cout << "Incoming scattered, adding incoming particle to outgoing list to preserve energy/momentum conservation" << std::endl;
+        fOutX.push_back(nextpos.X());
+        fOutY.push_back(nextpos.Y());
+        fOutZ.push_back(nextpos.Z());
+        fOutT.push_back(nextpos.T());
+        fOutPx.push_back(nextmom.Px());
+        fOutPy.push_back(nextmom.Py());
+        fOutPz.push_back(nextmom.Pz());
+        fOutE.push_back(nextmom.E());
+        fOutMass.push_back(inMass);
+        fOutPDG.push_back(incoming->PdgCode());
+        fOutProcess.push_back("nucleonScat");
+      }
+
+      // if(dies && fInProcess == "Decay" && std::abs(fOutT.back() - fInT) < timeEpsilon){
+      //   std::cout << "Incoming particle decayed at rest, adding artificial daughter to preserve energy/momentum conservation" << std::endl;
+      //  fOutX.push_back(fOutX.back());
+      //  fOutY.push_back(fOutY.back());
+      //  fOutZ.push_back(fOutZ.back());
+      //  fOutT.push_back(fOutT.back());
+
+      //  fOutPx.push_back(0.0);
+      //  fOutPy.push_back(0.0);
+      //  fOutPz.push_back(0.0);
+      //  fOutE.push_back(incoming->Mass());
+      //  fOutPDG.push_back(incoming->PdgCode());
+      //  fOutProcess.push_back("artificialAtRest");
+      // }
+      // if(dies && fInProcess == "Decay" && std::abs(fInT - fOutT.back()) > 3){
+      //   std::cout << "Incoming particle decayed at rest with time delay, setting incoming momentum to 0 to preserve energy/momentum conservation" << std::endl;
+      //   fInPx = 0.0;
+      //   fInPy = 0.0;
+      //   fInPz = 0.0;
+      //   fInE = incoming->Mass();
+      //   fInProcess = "artificialAtRest";
+      // }
+    }
+    
+    //Only fill if we have outgoing particles for this time group
+    double totalOutKE = 0.0;
+    double totalInKE = 0.0;
+    for (size_t i = 0; i < fOutE.size(); i++) {
+       if(std::abs(fOutPDG[i]) == 111 || fOutPDG[i] == 211){
+        totalOutKE += fOutE[i];
+       }
+       else{
+        totalOutKE += fOutE[i] - fOutMass[i];
+       }
+    }
+    if(std::abs(fInPDG) == 111 || fInPDG == 211){
+      totalInKE = fInE;
+    }
+    else{
+      totalInKE = fInE - fInMass;
+    }
+    double deltaKE = totalInKE - totalOutKE;
+    if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
+      std::cout << "Muon interaction delta KE: " << deltaKE << " GeV" << std::endl;
+      std::cout << "Incoming muon energy: " << fInE << " GeV" << std::endl;
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << std::endl;
+      }
+    }
+    if(deltaKE > 0.8){
+      std::cout << "High delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
+      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
+      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
+      }
+      std::cout << "------------------------------------------------" << std::endl;
+    }
+    if(deltaKE < 0.0){
+      std::cout << "Negative delta KE interaction detected! Delta KE: " << deltaKE << " GeV" << std::endl;
+      std::cout << "Incoming particle PDG: " << fInPDG << ", E: " << fInE << " GeV" << std::endl;
+      std::cout << "TrackId: " << incoming->TrackId() << ", Mass: " << fInMass << std::endl;
+      for(size_t j = 0; j < fOutE.size(); j++){
+        std::cout << "Outgoing particle " << j << " PDG: " << fOutPDG[j] << ", E: " << fOutE[j] << " GeV" << ", Mass: " << fOutMass[j] << std::endl;
+      }
+      std::cout << "------------------------------------------------" << std::endl;
+    }
+    if (!fOutX.empty()) {
+      fInteractionTree->Fill();
+    }
+  }
+}
+
+
+  // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle* incoming, const std::vector<const simb::MCParticle*>& daughters){
+  //   float epsilon = 0.01;
+  //   float tepsilon = 1e-3;
+  //   std::vector<primaryVertex> vtxs;
+
+  //   for (const simb::MCParticle* d : daughters){
+  //     const TLorentzVector& pos = d->Position(0);
+  //     float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
+  //     bool found = false;
+
+  //     for (primaryVertex& v : vtxs) {
+  //       if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon) {
+  //         v.daughters.push_back(d);
+  //         found = true;
+  //         break;
+  //       }
+  //     }
+
+  //     if (!found) {
+  //       primaryVertex vtx = {x, y, z, t, incoming, {d}};
+  //       vtxs.push_back(vtx);
+  //     }
+  //   }
+  //     return vtxs;
+  // }
+
+  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>& daughters){
+    std::vector<Vertex> vertices;
+
+    float epsilon = 0.01; 
+    //float tepsilon = 1e-3;
+    
+    for (const simb::MCParticle* d : daughters){
+      const TLorentzVector& pos = d->Position(0);
+      float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
+      bool found = false;
+      for (Vertex& v : vertices) {
+        if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon) {
+          v.daughters.push_back(d);
+          found = true;
+          break;
+        }
+      }
+      if (!found){
+        Vertex vert = {x, y, z, t, {d}};
+        vertices.push_back(vert);
+      }
+  }
+  return vertices;
+}
+
 
 double getPrimaryKE(const simb::MCParticle* primary, double x, double y, double z){
   double minDist = 1e10;
