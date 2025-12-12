@@ -1875,7 +1875,7 @@ namespace
         case 1000160380: //sulfur 38
             mass = 35.3618;
             break;
-        case 10001 70340: //chlorine 34
+        case 1000170340: //chlorine 34
             mass = 31.6377;
             break;
         case 1000170350: //chlorine 35
