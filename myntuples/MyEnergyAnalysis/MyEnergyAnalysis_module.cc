@@ -104,7 +104,7 @@ namespace
 
   void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
                             float&, float&, float&, float&, float&, float&, float&, float&, float&, int&, std::string&, std::vector<float>&, std::vector<float>&,
-                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>& , std::vector<int>&, std::vector<std::string>&);
+                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>& , std::vector<int>&, std::vector<std::string>&, float&);
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
 
@@ -208,6 +208,7 @@ namespace lar
       std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
       std::vector<float> fOutMass;
       std::vector<int> fOutPDG;
+      float fDeltaKE;
       //std::vector<std::char> fOutProcess;
 
       // The n-tuple to create
@@ -418,6 +419,7 @@ namespace lar
       fInteractionTree->Branch("OutE", &fOutE);
       fInteractionTree->Branch("OutPDG", &fOutPDG);
       fInteractionTree->Branch("OutProcess", &fOutProcess);
+      fInteractionTree->Branch("DeltaKE", &fDeltaKE);
 
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
@@ -1152,7 +1154,7 @@ namespace lar
         // std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
         for (const Vertex &vtx : interactionVertices)
         {
-          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInMass, fInPDG, fInProcess, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutMass, fOutPDG, fOutProcess);
+          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInMass, fInPDG, fInProcess, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutMass, fOutPDG, fOutProcess, fDeltaKE);
         }
         if (currentMom == 0)
         {
@@ -1716,7 +1718,7 @@ namespace
             mass = 13.0001;
             break;
         case 1000060140: //carbon 14
-            mass = 13.99995; //sigfigs???
+            mass = 13.046; //sigfigs???
             break;
         case 1000070130: //nitrogen 13
             mass = 12.1112;
@@ -2029,7 +2031,7 @@ namespace
     std::vector<float>& fOutZ, std::vector<float>& fOutT,
     std::vector<float>& fOutPx, std::vector<float>& fOutPy,
     std::vector<float>& fOutPz, std::vector<float>& fOutE, std::vector<float>& fOutMass,
-    std::vector<int>& fOutPDG, std::vector<std::string>& fOutProcess) {
+    std::vector<int>& fOutPDG, std::vector<std::string>& fOutProcess, float& fDeltaKE) {
 
   // Clear outgoing particle containers
   fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
@@ -2219,6 +2221,7 @@ namespace
       }
       std::cout << "------------------------------------------------" << std::endl;
     }
+    fDeltaKE = deltaKE;
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
     }
@@ -2352,5 +2355,7 @@ void getHadronic02(const simb::MCParticle* particle, const std::vector<const sim
       }
     }
   }
+
+} // local namespace
 
 } // local namespace
