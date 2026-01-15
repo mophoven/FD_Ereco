@@ -2358,4 +2358,3 @@ void getHadronic02(const simb::MCParticle* particle, const std::vector<const sim
 
 } // local namespace
 
-} // local namespace
