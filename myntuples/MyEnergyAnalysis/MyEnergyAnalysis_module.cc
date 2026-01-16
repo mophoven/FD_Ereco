@@ -107,10 +107,12 @@ namespace
   void getHadronic02(const simb::MCParticle *, const std::vector<const simb::MCParticle *> &, int &, double &);
 
   void getDescendants(int, const std::vector<int> &, const std::vector<int> &, const std::map<int, const simb::MCParticle *> &, std::vector<const simb::MCParticle *> &);
-  void getAncestors(const simb::MCParticle* currentpart,
-                  std::vector<int>& Mothers,
-                  const std::map<int, const simb::MCParticle*>& particleMap,
-                  int depth = 0);
+  void getAncestors(const simb::MCParticle *currentpart,
+                    std::vector<int> &Mothers,
+                    const std::map<int, const simb::MCParticle *> &particleMap,
+                    int depth = 0);
+  void ReportFirstExitRootOnly(const simb::MCParticle &part,
+                               const std::map<int, const simb::MCParticle *> &particleMap);
   // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
 
 } // local namespace
@@ -1904,40 +1906,48 @@ namespace
   void getAncestors(const simb::MCParticle *currentpart,
                     std::vector<int> &Mothers,
                     const std::map<int, const simb::MCParticle *> &particleMap,
-                    int depth = 0)
+                    int depth)
   {
     if (!currentpart)
       return;
     if (depth > 1000)
-      return; // safety guard
+      return; // safety
 
-    int momId = currentpart->Mother(); // mother TrackId
+    int momId = currentpart->Mother();
     if (momId <= 0)
       return; // no mother
 
     Mothers.push_back(momId); // record this mother id
 
-    auto it = particleMap.find(momId); // find mother particle
+    auto it = particleMap.find(momId); // try to find the mother object
     if (it == particleMap.end())
-      return; // mother not stored
+      return;
     if (it->second == currentpart)
       return; // self loop guard
 
     getAncestors(it->second, Mothers, particleMap, depth + 1);
   }
-  void ReportFirstExitWithMother(const simb::MCParticle &part)
+  void ReportFirstExitRootOnly(const simb::MCParticle &part,
+                               const std::map<int, const simb::MCParticle *> &particleMap)
   {
-    // volume bounds (cm)
+    // FV bounds in cm
     const double X_MIN = -400.0, X_MAX = 400.0;
     const double Y_MIN = -600.0, Y_MAX = 600.0;
     const double Z_MIN = 0.0, Z_MAX = 1300.0;
 
-    const auto inside = [&](const TLorentzVector &p)
+    auto inside = [&](TLorentzVector const &p)
     {
       return (p.X() >= X_MIN && p.X() <= X_MAX) &&
              (p.Y() >= Y_MIN && p.Y() <= Y_MAX) &&
              (p.Z() >= Z_MIN && p.Z() <= Z_MAX);
     };
+
+    // skip if this particle has any ancestor
+    std::vector<int> moms;
+    moms.clear();
+    getAncestors(&part, moms, particleMap);
+    if (!moms.empty())
+      return; // not a root, ignore
 
     const size_t Ntraj = part.NumberTrajectoryPoints();
     if (Ntraj == 0)
@@ -1953,23 +1963,21 @@ namespace
       if (!hasEntered)
       {
         if (in)
-          hasEntered = true; // first time seen inside
+          hasEntered = true; // first time inside
       }
       else
       {
         if (!in)
-        { // first exit after having entered
+        { // first exit after entry
           const TLorentzVector &p4 = part.Momentum(ipt);
-          double KE = p4.E() - part.Mass(); // GeV
+          double KE = p4.E() - part.Mass();
           if (KE < 0)
-            KE = 0; // protect against numerical issues
-          const int motherId = part.Mother();
+            KE = 0;
 
           std::cout << "Particle " << part.TrackId()
                     << " EXITED at pt " << ipt
-                    << ", MotherID=" << (motherId > 0 ? motherId : 0)
-                    << " with KE=" << KE << " GeV\n";
-          return; // stop after first exit
+                    << " with KE=" << KE << " GeV  motherID=0\n";
+          return;
         }
       }
     }
@@ -2005,14 +2013,14 @@ namespace
 
 
 */
-//jj
-// crate new vector and pushback particles trak ids that leave
-// Std::vector<int> leftParticles
-// if(left){
-// leftParticles.push_back(current part)
-//}
-// primary particles have mother 0
-// get a leaving track ID of particles
-// min particle loops
-// make the part of my code to a function that takes in a particle and returns  if it leaves
-// On Windows Shift + Alt + F
+// jj
+//  crate new vector and pushback particles trak ids that leave
+//  Std::vector<int> leftParticles
+//  if(left){
+//  leftParticles.push_back(current part)
+// }
+//  primary particles have mother 0
+//  get a leaving track ID of particles
+//  min particle loops
+//  make the part of my code to a function that takes in a particle and returns  if it leaves
+//  On Windows Shift + Alt + F
