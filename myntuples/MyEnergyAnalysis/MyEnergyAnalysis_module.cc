@@ -107,7 +107,10 @@ namespace
   void getHadronic02(const simb::MCParticle *, const std::vector<const simb::MCParticle *> &, int &, double &);
 
   void getDescendants(int, const std::vector<int> &, const std::vector<int> &, const std::map<int, const simb::MCParticle *> &, std::vector<const simb::MCParticle *> &);
-
+  void getAncestors(const simb::MCParticle* currentpart,
+                  std::vector<int>& Mothers,
+                  const std::map<int, const simb::MCParticle*>& particleMap,
+                  int depth = 0);
   // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
 
 } // local namespace
