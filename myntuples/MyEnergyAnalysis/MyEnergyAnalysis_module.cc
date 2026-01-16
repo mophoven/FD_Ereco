@@ -1047,963 +1047,905 @@ namespace lar
     fSim_end_4mommenta.push_back(momentumEnd.E());
     }*/
         // loop over every trajectory point, compare to geometry,
-        size_t Ntraj = particleVec.NumberTrajectoryPoints();
-        art::ServiceHandle<geo::Geometry const> geom;
-        bool hasEntered = false;
-        for (size_t ipt = 0; ipt < Ntraj; ++ipt)
+        ReportFirstExitRootOnly(particleVec, particleMap);
+        // End four-vector collection
+
+        // Collecting all Daughters of Each primary
+
+        std::vector<std::vector<const simb::MCParticle *>> DaughterpartVec;
+        std::vector<const simb::MCParticle *> primary_vec;
+
+        for (size_t i = 0; i < fSimP_TrackID_vec.size(); i++)
         {
-          // std::cout<<Ntraj<<std::endl;
-          // const geo::TPCGeo &tpc = geom->TPC(0);
-          // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << std::endl;
-          // double centerX = tpc.GetCenter().X();
-          // double centerY = tpc.GetCenter().Y();
-          // double centerZ = tpc.GetCenter().Z();
-          const TLorentzVector &pos = particleVec.Position(ipt);
-          double localX = pos.X(); //- std::abs(centerX);
-          double localY = pos.Y(); //- std::abs(centerY);
-          double localZ = pos.Z(); //- std::abs(centerZ);
-          double X_MIN = -400.0, X_MAX = 400.0;
-          double Y_MIN = -600.0, Y_MAX = 600.0;
-          double Z_MIN = 0.0, Z_MAX = 1300.0;
-
-          bool inside =
-              localX >= X_MIN && localX <= X_MAX &&
-              localY >= Y_MIN && localY <= Y_MAX &&
-              localZ >= Z_MIN && localZ <= Z_MAX;
-
-          if (!hasEntered)
+          int currentMom = fSimP_Mom_vec[i];
+          std::vector<const simb::MCParticle *> CurrentDaughters;
+          CurrentDaughters.clear();
+          const simb::MCParticle *currentpart = SimParticles[i];
+          getDescendants(fSimP_TrackID_vec[i], fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
+          std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
+          // std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
+          for (const Vertex &vtx : interactionVertices)
           {
-            if (inside)
-            {
-              hasEntered = true;
-              // std::cout << "Particle " << particleVec.TrackId()
-              //<< " ENTERED at pt " << ipt << "\n";
-            }
+            fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
           }
-          else
+          if (currentMom == 0)
           {
-            if (!inside)
-            {
-              // compute KE as before
-              auto const &mom = particleVec.Momentum(ipt);
-              double KE = mom.E() - particleVec.Mass();
-              int motherId = particleVec.Mother();
-              std::cout << "Particle " << particleVec.TrackId()
-                        << " EXITED at pt " << ipt
-                        << ", MotherID=" << motherId
-                        << " with KE=" << KE << " GeV\n";
-              break;
-            }
-          }
-        }
-      }
-      // End four-vector collection
-
-      // Collecting all Daughters of Each primary
-
-      std::vector<std::vector<const simb::MCParticle *>> DaughterpartVec;
-      std::vector<const simb::MCParticle *> primary_vec;
-
-      for (size_t i = 0; i < fSimP_TrackID_vec.size(); i++)
-      {
-        int currentMom = fSimP_Mom_vec[i];
-        std::vector<const simb::MCParticle *> CurrentDaughters;
-        CurrentDaughters.clear();
-        const simb::MCParticle *currentpart = SimParticles[i];
-        getDescendants(fSimP_TrackID_vec[i], fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
-        std::vector<Vertex> interactionVertices = clusterVertices(CurrentDaughters);
-        // std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
-        for (const Vertex &vtx : interactionVertices)
-        {
-          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInPDG, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutPDG);
-        }
-        if (currentMom == 0)
-        {
-          int primary = fSimP_TrackID_vec[i];
-          getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
-          DaughterpartVec.push_back(CurrentDaughters);
-          primary_vec.push_back(SimParticles[i]);
-          int NHad = 0;
-          double BindingE = 0.0;
-          getHadronic02(SimParticles[i], SimParticles, NHad, BindingE);
-          // std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
-        }
-      }
-
-      // for(size_t n = 0; n < DaughterpartVec.size(); n++){
-      //   int NHad = 0;
-      //   int HadE = 0;
-      //  getHadronicInformation(primary_vec[n], DaughterpartVec[n], NHad, HadE);
-      //}
-
-      // Begin interaction classification and energy calculation
-
-      std::string combined_string = "";    // Stores the interaction classification code
-      std::string primary_particle = "";   // Primary particle of interaction
-      std::string daughter_particle = "";  // Current daughter particle being processed
-      std::string daughter_particles = ""; // String of daughter particles per primary particle
-      unsigned long long combined_int = 0;
-      double daughter_begin_sum = 0;
-      double primary_end_energy = 0;
-      int trkIDsize = fSimP_TrackID_vec.size() - 1;
-      // Loop through particle list and classify primary particle
-      for (int k = 0; k < trkIDsize; k++)
-      {
-        switch (fSimP_PDG_vec[k])
-        {
-        case 22:
-          primary_particle = "0"; // photon
-          break;
-        case 11:
-          primary_particle = "1"; // electron
-          break;
-        case -11:
-          primary_particle = "2"; // positron
-          break;
-        case 13:
-          primary_particle = "3"; // muon
-          break;
-        case -13:
-          primary_particle = "4"; // mu+
-          break;
-        case 211:
-          primary_particle = "5"; // pi+
-          break;
-        case -211:
-          primary_particle = "6"; // pi-
-          break;
-        case 2212:
-          primary_particle = "7"; // proton
-          break;
-        case 2112:
-          primary_particle = "8"; // neutron
-          break;
-        case 1000180400:
-          primary_particle = "9"; // Argon nucleus
-          break;
-        default:
-          break;
-        }
-        const simb::MCParticle &primaryVec = *(SimParticles[k]);           // Store primary particle's MCParticle information
-        const size_t NPrimaryPoints = primaryVec.NumberTrajectoryPoints(); // Number of trajectory points for the primary particle
-        const int primary_end = NPrimaryPoints - 1;
-        const TLorentzVector &primary_end_4vector = primaryVec.Momentum(primary_end);
-        primary_end_energy = primary_end_4vector.E();
-        if (primary_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9")
-        {
-          primary_end_energy = primary_end_energy - primaryVec.Mass();
-        }
-        combined_string += primary_particle;
-        if (primary_particle != "8")
-        { // Exclude neutron interactions for now
-          for (int j = 0; j < trkIDsize; j++)
-          {
-            if (fSimP_Mom_vec[j] == fSimP_TrackID_vec[k])
-            { // Loop through particles again to see which particles are tagged with primary as mom
-              switch (fSimP_PDG_vec[j])
-              {
-              case 22:
-                daughter_particle = "0";
-                break;
-              case 11:
-                daughter_particle = "1";
-                break;
-              case -11:
-                daughter_particle = "2";
-                break;
-              case 13:
-                daughter_particle = "3";
-                break;
-              case -13:
-                daughter_particle = "4";
-                break;
-              case 211:
-                daughter_particle = "5";
-                break;
-              case -211:
-                daughter_particle = "6";
-                break;
-              case 2212:
-                daughter_particle = "7";
-                break;
-              case 2112:
-                daughter_particle = "8";
-                break;
-              case 1000180400:
-                daughter_particle = "9";
-                break;
-              default:
-                break;
-              }
-              const simb::MCParticle &daughterVec = *(SimParticles[j]); // Daughter particle information
-              // for(size_t l = 0; l <= NPrimaryPoints; l++){
-              //	const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
-              //	const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
-              //	const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
-              //	if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
-              //	primary_end_energy = primary_momentum.E();	//Store Primary energy
-
-              daughter_particles += daughter_particle; // Store daughter
-              daughter_particle = "";
-
-              const TLorentzVector &daughter_begin_4vector = daughterVec.Momentum(0);
-              double daughter_begin_energy = daughter_begin_4vector.E();
-              if (daughter_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9")
-              { // Subtract rest mass if not pion
-                daughter_begin_energy = daughter_begin_energy - daughterVec.Mass();
-              }
-              daughter_begin_sum += daughter_begin_energy; // sum daughter particle's energy
-              daughter_begin_energy = 0;
-              //}
-            }
+            int primary = fSimP_TrackID_vec[i];
+            getDescendants(primary, fSimP_Mom_vec, fSimP_TrackID_vec, particleMap, CurrentDaughters);
+            DaughterpartVec.push_back(CurrentDaughters);
+            primary_vec.push_back(SimParticles[i]);
+            int NHad = 0;
+            double BindingE = 0.0;
+            getHadronic02(SimParticles[i], SimParticles, NHad, BindingE);
+            // std::cout << "Number Had interactions per primary: " << NHad << ", BindingE: " << BindingE << std::endl;
           }
         }
 
-        std::sort(daughter_particles.begin(), daughter_particles.end(), [](char a, char b) { // Sort daughter code from low to high mass
-          return std::stoull(std::string(1, a)) < std::stoull(std::string(1, b));
-        });
-        combined_string += daughter_particles;
+        // for(size_t n = 0; n < DaughterpartVec.size(); n++){
+        //   int NHad = 0;
+        //   int HadE = 0;
+        //  getHadronicInformation(primary_vec[n], DaughterpartVec[n], NHad, HadE);
+        //}
 
-        if (combined_string.length() <= 19 && combined_string.length() > 1)
+        // Begin interaction classification and energy calculation
+
+        std::string combined_string = "";    // Stores the interaction classification code
+        std::string primary_particle = "";   // Primary particle of interaction
+        std::string daughter_particle = "";  // Current daughter particle being processed
+        std::string daughter_particles = ""; // String of daughter particles per primary particle
+        unsigned long long combined_int = 0;
+        double daughter_begin_sum = 0;
+        double primary_end_energy = 0;
+        int trkIDsize = fSimP_TrackID_vec.size() - 1;
+        // Loop through particle list and classify primary particle
+        for (int k = 0; k < trkIDsize; k++)
         {
-          fP_int_class_string.push_back(combined_string);
-          combined_int = std::stoull(combined_string);
-          fP_int_class.push_back(combined_int);
-          // std::cout << combined_string << std::endl;
-          fSim_primary_end_energy.push_back(primary_end_energy);
-          fSim_daughter_begin_energy.push_back(daughter_begin_sum);
-        }
-
-        combined_int = 0;
-        daughter_particles = "";
-        primary_particle = "";
-        combined_string = "";
-        daughter_begin_sum = 0;
-        primary_end_energy = 0;
-      }
-
-      // Calculate sim hadronic deposit energy
-      //
-
-      // Loop over the SimChannel objects in the event to look at the energy deposited by particle's track.
-      for (auto const &channel : (*simChannelHandle))
-      {
-
-        // Get the numeric ID associated with this channel.
-        // See methods at https://internal.dunescience.org/doxygen/SimChannel_8h_source.html
-        auto const channelNumber = channel.Channel();
-
-        // Each channel has a map inside it that connects a time slice to energy deposits in the detector.
-        // The full type of this map is std::map<unsigned short, std::vector<sim::IDE>>; we'll use "auto" here
-        auto const &timeSlices = channel.TDCIDEMap();
-        for (auto const &timeSlice : timeSlices)
-        {
-
-          // For the timeSlices map, the 'first' is a time slice number; The 'second' is a vector of IDE objects.
-          auto const &energyDeposits = timeSlice.second;
-
-          for (auto const &energyDeposit : energyDeposits)
+          switch (fSimP_PDG_vec[k])
           {
-
-            // Method b: First check if it's on collection plane
-            std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
-            if (Wires[0].planeID().Plane == 0)
+          case 22:
+            primary_particle = "0"; // photon
+            break;
+          case 11:
+            primary_particle = "1"; // electron
+            break;
+          case -11:
+            primary_particle = "2"; // positron
+            break;
+          case 13:
+            primary_particle = "3"; // muon
+            break;
+          case -13:
+            primary_particle = "4"; // mu+
+            break;
+          case 211:
+            primary_particle = "5"; // pi+
+            break;
+          case -211:
+            primary_particle = "6"; // pi-
+            break;
+          case 2212:
+            primary_particle = "7"; // proton
+            break;
+          case 2112:
+            primary_particle = "8"; // neutron
+            break;
+          case 1000180400:
+            primary_particle = "9"; // Argon nucleus
+            break;
+          default:
+            break;
+          }
+          const simb::MCParticle &primaryVec = *(SimParticles[k]);           // Store primary particle's MCParticle information
+          const size_t NPrimaryPoints = primaryVec.NumberTrajectoryPoints(); // Number of trajectory points for the primary particle
+          const int primary_end = NPrimaryPoints - 1;
+          const TLorentzVector &primary_end_4vector = primaryVec.Momentum(primary_end);
+          primary_end_energy = primary_end_4vector.E();
+          if (primary_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9")
+          {
+            primary_end_energy = primary_end_energy - primaryVec.Mass();
+          }
+          combined_string += primary_particle;
+          if (primary_particle != "8")
+          { // Exclude neutron interactions for now
+            for (int j = 0; j < trkIDsize; j++)
             {
-
-              // All EM shower are treated as secondary interactions, and their particles are not saved in the MC particle list
-              // Still do the search, but now only for primary lepton (particleMap trkID is always positive)
-              // Also search for EM shower particles from primary lepton, these deposits has trkID that's negative of the primary lepton trkID
-              auto search = particleMap.find(abs(energyDeposit.trackID));
-
-              // std::cout << "Time Slice Number: " << timeSlice.first << "Energy Deposit TrackID: " << energyDeposit.trackID << "Energy Deposit Energy: "<< energyDeposit.energy << std::endl;
-
-              if (search != particleMap.end())
-              { // found match in map
-
-                const simb::MCParticle &particle = *((*search).second);
-
-                // std::cout << particle.PdgCode() << std::endl;
-
-                // if the energy deposit is from primary lepton,
-                // or its ancestor mother particle is the primary lepton (e.g., from muon decays)
-                if ((particle.Process() == "primary" && abs(particle.PdgCode()) == 13) || IsAncestorMotherPrimaryLep(particle, primarylep_trkID, particleMap))
+              if (fSimP_Mom_vec[j] == fSimP_TrackID_vec[k])
+              { // Loop through particles again to see which particles are tagged with primary as mom
+                switch (fSimP_PDG_vec[j])
                 {
-                  fSim_mu_Edep_b2 += energyDeposit.energy;
-                  // now continue to the next energy deposit
-                  // continue here to avoid counting into fSim_hadronic_Edep_b2
-                  continue;
-                } // end lepton deposited energy
-
-                // if ( particle.PdgCode() == 22 && particle.Mother() == pi0_trkID ) {
-                // std::cout << "EDep MeV: "<< energyDeposit.energy << " from gamma: Mother trkid: " << pi0_trkID << ", E: " << particle.E() << ", mass: " << particle.Mass() << std::endl;
-                //}
-
-                // if the energy deposit is from neutron
-                // or its ancestor mother particle is the neutron
-                if (particle.PdgCode() == 2112 || IsAncestorMotherNeutron(particle, neutron_trkID, particleMap))
-                {
-                  fSim_n_Edep_b2 += energyDeposit.energy;
-                } // std::cout << "fire n! " << std::endl;  // end neutron deposited energy
-                // if the energy deposit is from proton
-                // or its ancestor mother particle is the proton
-                else if (particle.PdgCode() == 2212 || IsAncestorMotherProton(particle, proton_trkID, particleMap))
-                {
-                  fSim_p_Edep_b2 += energyDeposit.energy;
-                } // std::cout << "fire p! " << std::endl;  // end proton deposited energy
-                // if the energy deposit is from primary pip
-                // or its ancestor mother particle is the pip
-                else if (particle.PdgCode() == 211 || IsAncestorMotherPip(particle, pip_trkID, particleMap))
-                {
-                  fSim_pip_Edep_b2 += energyDeposit.energy;
-                } // std::cout << "fire pip! pdg: "<< particle.PdgCode() << ", pip_trkID: " << pip_trkID << ", IsAncestorMotherPip: " << IsAncestorMotherPip(particle, pip_trkID, particleMap) << std::endl; } // end pip deposited energy
-                // if the energy deposit is from primary pim
-                // or its ancestor mother particle is the pim (pi0 decays into two photons)
-                else if (particle.PdgCode() == -211 || IsAncestorMotherPim(particle, pim_trkID, particleMap))
-                {
-                  fSim_pim_Edep_b2 += energyDeposit.energy;
-                } // std::cout << "fire pim! " << std::endl; } // end pim deposited energy
-                // if the energy deposit is from primary pi0
-                // or its ancestor mother particle is the pi0 (pi0 decays into two photons)
-                else if (particle.PdgCode() == 111 || IsAncestorMotherPi0(particle, pi0_trkID, particleMap))
-                {
-                  fSim_pi0_Edep_b2 += energyDeposit.energy;
-                } // std::cout << "fire pi0! " << std::endl; } // end pi0 deposited energy
-                else if (particle.PdgCode() == 321 || particle.PdgCode() == -321 || particle.PdgCode() == 311 || particle.PdgCode() == -311 || particle.PdgCode() == 130 || particle.PdgCode() == 310 || particle.PdgCode() == 22 || (particle.PdgCode() >= 100 && particle.PdgCode() <= -9999) || (particle.PdgCode() >= -9999 && particle.PdgCode() <= -100)) // eOther which includes: kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
-                {
-                  fSim_Other_Edep_b2 += energyDeposit.energy;
-                  // std::cout << "fire Other! " << std::endl;
+                case 22:
+                  daughter_particle = "0";
+                  break;
+                case 11:
+                  daughter_particle = "1";
+                  break;
+                case -11:
+                  daughter_particle = "2";
+                  break;
+                case 13:
+                  daughter_particle = "3";
+                  break;
+                case -13:
+                  daughter_particle = "4";
+                  break;
+                case 211:
+                  daughter_particle = "5";
+                  break;
+                case -211:
+                  daughter_particle = "6";
+                  break;
+                case 2212:
+                  daughter_particle = "7";
+                  break;
+                case 2112:
+                  daughter_particle = "8";
+                  break;
+                case 1000180400:
+                  daughter_particle = "9";
+                  break;
+                default:
+                  break;
                 }
-              } // end found match
+                const simb::MCParticle &daughterVec = *(SimParticles[j]); // Daughter particle information
+                // for(size_t l = 0; l <= NPrimaryPoints; l++){
+                //	const TLorentzVector& primary_position = primaryVec.Position(l);	//Store particles four-vectors
+                //	const TLorentzVector& primary_momentum = primaryVec.Momentum(l);
+                //	const TLorentzVector& daughter_position_start = daughterVec.Position(0)		//Match final primary position with initial daughter position
+                //	if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
+                //	primary_end_energy = primary_momentum.E();	//Store Primary energy
 
-              // if it's not, count as hadronic
-              // If the energyDeposit made this far, it's counted as hadronic deposits (primary+secondary), do not involve particleMap
-              fSim_hadronic_Edep_b2 += energyDeposit.energy;
-              fSim_hadronic_hit_x_b.push_back(energyDeposit.x);
-              fSim_hadronic_hit_y_b.push_back(energyDeposit.y);
-              fSim_hadronic_hit_z_b.push_back(energyDeposit.z);
-              fSim_hadronic_hit_Edep_b2.push_back(energyDeposit.energy);
+                daughter_particles += daughter_particle; // Store daughter
+                daughter_particle = "";
 
-              // Store trackID for debug
-              EDepTrackID = energyDeposit.trackID;
-              auto exist = EDepMap.find(EDepTrackID);
-              // if can't find, store it and add the edep
-              if (exist == EDepMap.end())
-              {
-                EDep_TrackID_vec.push_back(EDepTrackID); // negative trackID exists
-                EDepMap[EDepTrackID] = energyDeposit.energy;
+                const TLorentzVector &daughter_begin_4vector = daughterVec.Momentum(0);
+                double daughter_begin_energy = daughter_begin_4vector.E();
+                if (daughter_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9")
+                { // Subtract rest mass if not pion
+                  daughter_begin_energy = daughter_begin_energy - daughterVec.Mass();
+                }
+                daughter_begin_sum += daughter_begin_energy; // sum daughter particle's energy
+                daughter_begin_energy = 0;
+                //}
               }
-              else
-              { // find the same track id
-                EDepMap[EDepTrackID] += energyDeposit.energy;
-              }
-
-            } // end plane == 0
-          } // end energy deposit loop
-        } // end For each time slice
-      } // end For each SimChannel
-
-      fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
-
-      // Print out EDepMap
-      // if ( false ) std::cout << "fGen_numu_E: "<< fGen_numu_E << ", fSim_mu_Edep_b2_debug: " << fSim_mu_Edep_b2_debug<< ", fSim_hadronic_Edep_b2_debug: " << fSim_hadronic_Edep_b2_debug << ", Tot had E track id: " << EDep_TrackID_vec.size() << std::endl;
-      if (false)
-      {
-        for (long unsigned int i = 0; i < EDep_TrackID_vec.size(); i++)
-        {
-          std::cout << "Evt track id: " << EDep_TrackID_vec.at(i) << std::endl;
-        }
-        std::map<int, double>::iterator it;
-        std::cout << "TrackID" << " | " << "Tot EDep" << std::endl;
-        for (it = EDepMap.begin(); it != EDepMap.end(); it++)
-          std::cout << "    " << it->first << " | " << it->second << std::endl;
-      }
-
-      // In general, objects in the LArSoft reconstruction chain are linked using the art::Assns class:
-      // <https://cdcvs.fnal.gov/redmine/projects/larsoft/wiki/Using_art_in_LArSoft#artAssns>
-      // The following statement will find the simb::MCTruth associated with the simb::MCParticle
-      const art::FindManyP<simb::MCTruth> findManyTruth(particleHandle, event, fSimulationProducerLabel);
-
-      if (!findManyTruth.isValid())
-      {
-        std::cout << "findManyTruth simb::MCTruth for simb::MCParticle failed!" << std::endl;
-      }
-
-      size_t particle_index = 0; // only look at first particle in particleHandle's vector.
-      auto const &truth = findManyTruth.at(particle_index);
-
-      // Make sure there's no problem.
-      if (truth.empty())
-      {
-        std::cout << "Particle ID=" << particleHandle->at(particle_index).TrackId() << " has no primary!" << std::endl;
-      }
-
-      fNtuple->Fill();
-
-    } // MyEnergyAnalysis::analyze()
-
-    // This macro has to be defined for this module to be invoked from a
-    // .fcl file; see MyEnergyAnalysis.fcl for more information.
-    DEFINE_ART_MODULE(MyEnergyAnalysis)
-
-  } // namespace example
-} // namespace lar
-
-// Back to our local namespace.
-namespace
-{
-
-  double DetectorDiagonal(geo::GeometryCore const &geom)
-  {
-    const double length = geom.DetLength();
-    const double width = 2. * geom.DetHalfWidth();
-    const double height = 2. * geom.DetHalfHeight();
-
-    return std::sqrt(cet::sum_of_squares(length, width, height));
-  }
-
-  // bool MomentumOrderMCParticle(const simb::MCParticle* p1, const simb::MCParticle* p2) {
-  //   return ( p1->P(0) > p2->P(0) );
-  // }
-
-  // If this returns true, then the energy deposit is associated with primary lepton
-  bool IsAncestorMotherPrimaryLep(const simb::MCParticle &p1, int primarylep_trkID, std::map<int, const simb::MCParticle *> particleMap)
-  {
-    int MothertrkID = p1.Mother();
-    // Immediate mother is the primary lep
-    if (MothertrkID == primarylep_trkID)
-      return true;
-    // Immediate mother is not primary lep, but other primary particles from genie
-    else if (MothertrkID == 0)
-      return false;
-    // Keep looking upstream, find it in particleMap
-    else
-    {
-      auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
-      const simb::MCParticle &tmp_mother = *((*tmp_search).second);
-      return IsAncestorMotherPrimaryLep(tmp_mother, primarylep_trkID, particleMap);
-    }
-  } // end GetAncestorMotherLeptonTrkID
-
-  // If this returns true, then the energy deposit is associated with neutron
-  bool IsAncestorMotherNeutron(const simb::MCParticle &p1, std::vector<int> neutron_trkID, std::map<int, const simb::MCParticle *> particleMap)
-  {
-    int MothertrkID = p1.Mother();
-    bool MatchMultipleTrkID = false;
-    // Immediate mother is one of the neutrons in the event
-    for (long unsigned int i = 0; i < neutron_trkID.size(); i++)
-    {
-      if (MothertrkID == neutron_trkID.at(i))
-        MatchMultipleTrkID = true;
-    }
-
-    if (MatchMultipleTrkID == true)
-      return true;
-
-    // Immediate mother is not neutron, but other primary particles from genie
-    else if (MothertrkID == 0)
-      return false;
-    // Keep looking upstream, find it in particleMap
-    else
-    {
-      auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
-      const simb::MCParticle &tmp_mother = *((*tmp_search).second);
-      return IsAncestorMotherNeutron(tmp_mother, neutron_trkID, particleMap);
-    }
-  } // end GetAncestorMotherNeutronTrkID
-
-  // If this returns true, then the energy deposit is associated with proton
-  bool IsAncestorMotherProton(const simb::MCParticle &p1, std::vector<int> proton_trkID, std::map<int, const simb::MCParticle *> particleMap)
-  {
-    int MothertrkID = p1.Mother();
-    bool MatchMultipleTrkID = false;
-    // Immediate mother is one of the protons in the event
-    for (long unsigned int i = 0; i < proton_trkID.size(); i++)
-    {
-      if (MothertrkID == proton_trkID.at(i))
-        MatchMultipleTrkID = true;
-    }
-
-    if (MatchMultipleTrkID == true)
-      return true;
-
-    // Immediate mother is not proton, but other primary particles from genie
-    else if (MothertrkID == 0)
-      return false;
-    // Keep looking upstream, find it in particleMap
-    else
-    {
-      auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
-      const simb::MCParticle &tmp_mother = *((*tmp_search).second);
-      return IsAncestorMotherProton(tmp_mother, proton_trkID, particleMap);
-    }
-  } // end GetAncestorMotherProtonTrkID
-
-  // If this returns true, then the energy deposit is associated with pion+
-  bool IsAncestorMotherPip(const simb::MCParticle &p1, std::vector<int> pip_trkID, std::map<int, const simb::MCParticle *> particleMap)
-  {
-    int MothertrkID = p1.Mother();
-    bool MatchMultipleTrkID = false;
-    // Immediate mother is one of the pips in the event
-    for (long unsigned int i = 0; i < pip_trkID.size(); i++)
-    {
-      if (MothertrkID == pip_trkID.at(i))
-        MatchMultipleTrkID = true;
-    }
-
-    if (MatchMultipleTrkID == true)
-      return true;
-
-    // Immediate mother is not pip, but other primary particles from genie
-    else if (MothertrkID == 0)
-      return false;
-    // Keep looking upstream, find it in particleMap
-    else
-    {
-      auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
-      const simb::MCParticle &tmp_mother = *((*tmp_search).second);
-      return IsAncestorMotherPip(tmp_mother, pip_trkID, particleMap);
-    }
-  } // end GetAncestorMotherPipTrkID
-
-  // If this returns true, then the energy deposit is associated with pion+
-  bool IsAncestorMotherPim(const simb::MCParticle &p1, std::vector<int> pim_trkID, std::map<int, const simb::MCParticle *> particleMap)
-  {
-    int MothertrkID = p1.Mother();
-    bool MatchMultipleTrkID = false;
-    // Immediate mother is one of the pims in the event
-    for (long unsigned int i = 0; i < pim_trkID.size(); i++)
-    {
-      if (MothertrkID == pim_trkID.at(i))
-        MatchMultipleTrkID = true;
-    }
-
-    if (MatchMultipleTrkID == true)
-      return true;
-
-    // Immediate mother is not pim, but other primary particles from genie
-    else if (MothertrkID == 0)
-      return false;
-    // Keep looking upstream, find it in particleMap
-    else
-    {
-      auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
-      const simb::MCParticle &tmp_mother = *((*tmp_search).second);
-      return IsAncestorMotherPim(tmp_mother, pim_trkID, particleMap);
-    }
-  } // end GetAncestorMotherPimTrkID
-
-  // If this returns true, then the energy deposit is associated with pion-
-  bool IsAncestorMotherPi0(const simb::MCParticle &p1, std::vector<int> pi0_trkID, std::map<int, const simb::MCParticle *> particleMap)
-  {
-    int MothertrkID = p1.Mother();
-    bool MatchMultipleTrkID = false;
-    // Immediate mother is one of the pi0s in the event
-    for (long unsigned int i = 0; i < pi0_trkID.size(); i++)
-    {
-      if (MothertrkID == pi0_trkID.at(i))
-        MatchMultipleTrkID = true;
-    }
-
-    if (MatchMultipleTrkID == true)
-      return true;
-
-    // Immediate mother is not pi0, but other primary particles from genie
-    else if (MothertrkID == 0)
-      return false;
-    // Keep looking upstream, find it in particleMap
-    else
-    {
-      auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
-      const simb::MCParticle &tmp_mother = *((*tmp_search).second);
-      return IsAncestorMotherPi0(tmp_mother, pi0_trkID, particleMap);
-    }
-
-  } // end GetAncestorMotherPi0TrkID
-
-  // void getHadronicInformation(const simb::MCParticle* primary, const std::vector<const simb::MCParticle*>& daughters, int& NHad, double& BindingE){
-  //   int pNTP = primary->NumberTrajectoryPoints();
-  //   int pLast = pNTP - 1;
-  //   for(size_t k = 0; k < daughters.size(); k++){
-  //     //int dNTP = daughters[k]->NumberTrajectoryPoints();
-  //     //int dLast = dNTP - 1;
-  //     const TLorentzVector& daughterstart = daughters[k]->Position(0);
-  //     const TLorentzVector& Edaughterstart = daughters[k]->Momentum(0);
-  //     std::vector<float> X;
-  //     std::vector<float> Y;
-  //     std::vector<float> Z;
-  //     std::vector<float> T;
-  //     for(int l = 0; l < pLast; l++){
-  //       const TLorentzVector& pripos = primary->Position(l);
-  //       float epsilon = 0.01;
-  //       double Ein = 0;
-  //       double Eout = 0;
-  //       if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
-  //         if(abs(primary->PdgCode()) == 211){
-  //           Ein = primary->E(l);
-  //         }
-  //         else{
-  //           Ein = primary->E(l) - primary->Mass();
-  //         }
-  //         std::cout << "PDG of primary: " << primary->PdgCode() << std::endl;
-  //         std::cout << "PDG of daughter: " << daughters[k]->PdgCode() << std::endl;
-  //         if(abs(daughters[k]->PdgCode()) == 211){
-  //          Eout = Edaughterstart.E();
-  //         }
-  //         else{
-  //           Eout = Edaughterstart.E() - daughters[k]->Mass();
-  //         }
-  //         std::cout << "Ein: " << Ein << std::endl;
-  //         std::cout << "Eout: " << Eout << std::endl;
-  //         double currentBindingE = Ein - Eout;
-  //         std::cout << "Current Binding Energy: " << currentBindingE << std::endl;
-  //         BindingE += currentBindingE;
-  //         std::cout << "BindingE (inside func) : " << BindingE << std::endl;
-  //         X.push_back(daughterstart.X());
-  //         Y.push_back(daughterstart.Y());
-  //         Z.push_back(daughterstart.Z());
-  //         T.push_back(daughterstart.T());
-  //         int Xsize = X.size();
-  //         int Xlast = Xsize - 1;
-  //         int iterator = 0;
-  //         for(size_t m = 0; m < X.size(); m++){
-  //           if(abs(X[Xlast] - X[m]) < epsilon && abs(Y[Xlast] - Y[m]) < epsilon && abs(Z[Xlast] - Z[m]) < epsilon && abs(T[Xlast] - T[m]) < epsilon) iterator = iterator +1;
-  //           std::cout << "iterator: " << iterator << std::endl;
-  //         }
-  //         if(iterator == 1) NHad = NHad +1;
-  //       }
-  //     }
-  //     std::cout << "NHad (inside): " << NHad << std::endl;
-  //   }
-  // }
-
-  void fillInteractionTree(const simb::MCParticle *incoming, const Vertex &vertex, const std::map<int, const simb::MCParticle *> &particleMap, TTree *fInteractionTree, float &fInX, float &fInY, float &fInZ, float &fInT,
-                           float &fInPx, float &fInPy, float &fInPz, float &fInE, int &fInPDG, std::vector<float> &fOutX, std::vector<float> &fOutY, std::vector<float> &fOutZ, std::vector<float> &fOutT,
-                           std::vector<float> &fOutPx, std::vector<float> &fOutPy, std::vector<float> &fOutPz, std::vector<float> &fOutE, std::vector<int> &fOutPDG)
-  {
-
-    fOutX.clear();
-    fOutY.clear();
-    fOutZ.clear();
-    fOutT.clear();
-    fOutPDG.clear();
-    fOutPx.clear();
-    fOutPy.clear();
-    fOutPz.clear();
-    fOutE.clear();
-
-    fInX = vertex.x;
-    fInY = vertex.y;
-    fInZ = vertex.z;
-    fInT = vertex.t;
-
-    double minDist = 1e10;
-    TLorentzVector bestMom;
-
-    for (unsigned int i = 0; i < incoming->NumberTrajectoryPoints(); ++i)
-    {
-      TLorentzVector pos = incoming->Position(i);
-      double dist = std::sqrt(std::pow(pos.X() - vertex.x, 2) +
-                              std::pow(pos.Y() - vertex.y, 2) +
-                              std::pow(pos.Z() - vertex.z, 2));
-      if (dist < minDist)
-      {
-        minDist = dist;
-        bestMom = incoming->Momentum(i);
-      }
-    }
-
-    fInPx = bestMom.Px();
-    fInPy = bestMom.Py();
-    fInPz = bestMom.Pz();
-    fInE = bestMom.E();
-    fInPDG = incoming->PdgCode();
-
-    for (const simb::MCParticle *daughter : vertex.daughters)
-    {
-      int dTrackID = daughter->TrackId();
-
-      bool interacts = false;
-      for (const auto &entry : particleMap)
-      {
-        const simb::MCParticle *p = entry.second;
-        if (p->Mother() == dTrackID)
-        {
-          interacts = true;
-          break;
-        }
-      }
-
-      if (!interacts)
-        continue;
-      const TLorentzVector &pos = daughter->Position(0);
-      const TLorentzVector &mom = daughter->Momentum(0);
-      fOutX.push_back(pos.X());
-      fOutY.push_back(pos.Y());
-      fOutZ.push_back(pos.Z());
-      fOutT.push_back(pos.T());
-
-      fOutPx.push_back(mom.Px());
-      fOutPy.push_back(mom.Py());
-      fOutPz.push_back(mom.Pz());
-      fOutE.push_back(mom.E());
-      fOutPDG.push_back(daughter->PdgCode());
-    }
-
-    if (!fOutX.empty())
-    {
-      fInteractionTree->Fill();
-    }
-  }
-
-  // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle* incoming, const std::vector<const simb::MCParticle*>& daughters){
-  //   float epsilon = 0.01;
-  //   float tepsilon = 1e-3;
-  //   std::vector<primaryVertex> vtxs;
-
-  //   for (const simb::MCParticle* d : daughters){
-  //     const TLorentzVector& pos = d->Position(0);
-  //     float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
-  //     bool found = false;
-
-  //     for (primaryVertex& v : vtxs) {
-  //       if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon) {
-  //         v.daughters.push_back(d);
-  //         found = true;
-  //         break;
-  //       }
-  //     }
-
-  //     if (!found) {
-  //       primaryVertex vtx = {x, y, z, t, incoming, {d}};
-  //       vtxs.push_back(vtx);
-  //     }
-  //   }
-  //     return vtxs;
-  // }
-
-  std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle *> &daughters)
-  {
-    std::vector<Vertex> vertices;
-
-    float epsilon = 0.01;
-    float tepsilon = 1e-3;
-
-    for (const simb::MCParticle *d : daughters)
-    {
-      const TLorentzVector &pos = d->Position(0);
-      float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
-      bool found = false;
-      for (Vertex &v : vertices)
-      {
-        if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon)
-        {
-          v.daughters.push_back(d);
-          found = true;
-          break;
-        }
-      }
-      if (!found)
-      {
-        Vertex vert = {x, y, z, t, {d}};
-        vertices.push_back(vert);
-      }
-    }
-    return vertices;
-  }
-
-  double getPrimaryKE(const simb::MCParticle *primary, double x, double y, double z)
-  {
-    double minDist = 1e10;
-    int closestDist = 0;
-
-    for (unsigned int n = 0; n < primary->NumberTrajectoryPoints(); ++n)
-    {
-      const TLorentzVector &position = primary->Position(n);
-      double dist = std::sqrt(std::pow(position.X() - x, 2) + std::pow(position.Y() - y, 2) + std::pow(position.Z() - z, 2));
-      if (dist < minDist)
-      {
-        minDist = dist;
-        closestDist = n;
-      }
-    }
-    const TLorentzVector &ClosestMom = primary->Momentum(closestDist);
-    return ClosestMom.E() - primary->Mass();
-  }
-
-  void getHadronic02(const simb::MCParticle *particle, const std::vector<const simb::MCParticle *> &allPart, int &NHad, double &totalBindingE)
-  {
-    std::vector<const simb::MCParticle *> daughters;
-    TLorentzVector currentPos = particle->Position(0);
-
-    for (const simb::MCParticle *p : allPart)
-    {
-      if (p->Mother() == particle->TrackId())
-      {
-        daughters.push_back(p);
-      }
-    }
-
-    if (!daughters.empty())
-    {
-      std::vector<Vertex> vertices = clusterVertices(daughters);
-
-      for (const auto &vertex : vertices)
-      {
-        double Ein = getPrimaryKE(particle, vertex.x, vertex.y, vertex.z);
-        double Eout = 0.0;
-
-        for (const simb::MCParticle *daughter : vertex.daughters)
-        {
-          if (daughter->PdgCode() == 211)
-          { // Check if daughter is a pion
-            Eout += daughter->Momentum(0).E();
+            }
           }
-          else
+
+          std::sort(daughter_particles.begin(), daughter_particles.end(), [](char a, char b) { // Sort daughter code from low to high mass
+            return std::stoull(std::string(1, a)) < std::stoull(std::string(1, b));
+          });
+          combined_string += daughter_particles;
+
+          if (combined_string.length() <= 19 && combined_string.length() > 1)
           {
-            Eout += daughter->Momentum(0).E() - daughter->Mass(); // For other particles, subtract mass
+            fP_int_class_string.push_back(combined_string);
+            combined_int = std::stoull(combined_string);
+            fP_int_class.push_back(combined_int);
+            // std::cout << combined_string << std::endl;
+            fSim_primary_end_energy.push_back(primary_end_energy);
+            fSim_daughter_begin_energy.push_back(daughter_begin_sum);
           }
+
+          combined_int = 0;
+          daughter_particles = "";
+          primary_particle = "";
+          combined_string = "";
+          daughter_begin_sum = 0;
+          primary_end_energy = 0;
         }
-        if (Ein > Eout)
+
+        // Calculate sim hadronic deposit energy
+        //
+
+        // Loop over the SimChannel objects in the event to look at the energy deposited by particle's track.
+        for (auto const &channel : (*simChannelHandle))
         {
-          totalBindingE += (Ein - Eout);
-          NHad++;
-        }
-      }
-    }
-    for (const simb::MCParticle *daughter : daughters)
-    {
-      getHadronic02(daughter, allPart, NHad, totalBindingE);
-    }
-  }
 
-  void getDescendants(int motherID, const std::vector<int> &momVec, const std::vector<int> &TrkIDvec, const std::map<int, const simb::MCParticle *> &particleMap, std::vector<const simb::MCParticle *> &primaryDaughters)
-  {
-    for (size_t j = 0; j < TrkIDvec.size(); j++)
-    {
-      if (momVec[j] == motherID)
-      {
-        int daughterID = TrkIDvec[j];
+          // Get the numeric ID associated with this channel.
+          // See methods at https://internal.dunescience.org/doxygen/SimChannel_8h_source.html
+          auto const channelNumber = channel.Channel();
 
-        auto it = particleMap.find(daughterID);
-        if (it != particleMap.end())
+          // Each channel has a map inside it that connects a time slice to energy deposits in the detector.
+          // The full type of this map is std::map<unsigned short, std::vector<sim::IDE>>; we'll use "auto" here
+          auto const &timeSlices = channel.TDCIDEMap();
+          for (auto const &timeSlice : timeSlices)
+          {
+
+            // For the timeSlices map, the 'first' is a time slice number; The 'second' is a vector of IDE objects.
+            auto const &energyDeposits = timeSlice.second;
+
+            for (auto const &energyDeposit : energyDeposits)
+            {
+
+              // Method b: First check if it's on collection plane
+              std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
+              if (Wires[0].planeID().Plane == 0)
+              {
+
+                // All EM shower are treated as secondary interactions, and their particles are not saved in the MC particle list
+                // Still do the search, but now only for primary lepton (particleMap trkID is always positive)
+                // Also search for EM shower particles from primary lepton, these deposits has trkID that's negative of the primary lepton trkID
+                auto search = particleMap.find(abs(energyDeposit.trackID));
+
+                // std::cout << "Time Slice Number: " << timeSlice.first << "Energy Deposit TrackID: " << energyDeposit.trackID << "Energy Deposit Energy: "<< energyDeposit.energy << std::endl;
+
+                if (search != particleMap.end())
+                { // found match in map
+
+                  const simb::MCParticle &particle = *((*search).second);
+
+                  // std::cout << particle.PdgCode() << std::endl;
+
+                  // if the energy deposit is from primary lepton,
+                  // or its ancestor mother particle is the primary lepton (e.g., from muon decays)
+                  if ((particle.Process() == "primary" && abs(particle.PdgCode()) == 13) || IsAncestorMotherPrimaryLep(particle, primarylep_trkID, particleMap))
+                  {
+                    fSim_mu_Edep_b2 += energyDeposit.energy;
+                    // now continue to the next energy deposit
+                    // continue here to avoid counting into fSim_hadronic_Edep_b2
+                    continue;
+                  } // end lepton deposited energy
+
+                  // if ( particle.PdgCode() == 22 && particle.Mother() == pi0_trkID ) {
+                  // std::cout << "EDep MeV: "<< energyDeposit.energy << " from gamma: Mother trkid: " << pi0_trkID << ", E: " << particle.E() << ", mass: " << particle.Mass() << std::endl;
+                  //}
+
+                  // if the energy deposit is from neutron
+                  // or its ancestor mother particle is the neutron
+                  if (particle.PdgCode() == 2112 || IsAncestorMotherNeutron(particle, neutron_trkID, particleMap))
+                  {
+                    fSim_n_Edep_b2 += energyDeposit.energy;
+                  } // std::cout << "fire n! " << std::endl;  // end neutron deposited energy
+                  // if the energy deposit is from proton
+                  // or its ancestor mother particle is the proton
+                  else if (particle.PdgCode() == 2212 || IsAncestorMotherProton(particle, proton_trkID, particleMap))
+                  {
+                    fSim_p_Edep_b2 += energyDeposit.energy;
+                  } // std::cout << "fire p! " << std::endl;  // end proton deposited energy
+                  // if the energy deposit is from primary pip
+                  // or its ancestor mother particle is the pip
+                  else if (particle.PdgCode() == 211 || IsAncestorMotherPip(particle, pip_trkID, particleMap))
+                  {
+                    fSim_pip_Edep_b2 += energyDeposit.energy;
+                  } // std::cout << "fire pip! pdg: "<< particle.PdgCode() << ", pip_trkID: " << pip_trkID << ", IsAncestorMotherPip: " << IsAncestorMotherPip(particle, pip_trkID, particleMap) << std::endl; } // end pip deposited energy
+                  // if the energy deposit is from primary pim
+                  // or its ancestor mother particle is the pim (pi0 decays into two photons)
+                  else if (particle.PdgCode() == -211 || IsAncestorMotherPim(particle, pim_trkID, particleMap))
+                  {
+                    fSim_pim_Edep_b2 += energyDeposit.energy;
+                  } // std::cout << "fire pim! " << std::endl; } // end pim deposited energy
+                  // if the energy deposit is from primary pi0
+                  // or its ancestor mother particle is the pi0 (pi0 decays into two photons)
+                  else if (particle.PdgCode() == 111 || IsAncestorMotherPi0(particle, pi0_trkID, particleMap))
+                  {
+                    fSim_pi0_Edep_b2 += energyDeposit.energy;
+                  } // std::cout << "fire pi0! " << std::endl; } // end pi0 deposited energy
+                  else if (particle.PdgCode() == 321 || particle.PdgCode() == -321 || particle.PdgCode() == 311 || particle.PdgCode() == -311 || particle.PdgCode() == 130 || particle.PdgCode() == 310 || particle.PdgCode() == 22 || (particle.PdgCode() >= 100 && particle.PdgCode() <= -9999) || (particle.PdgCode() >= -9999 && particle.PdgCode() <= -100)) // eOther which includes: kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
+                  {
+                    fSim_Other_Edep_b2 += energyDeposit.energy;
+                    // std::cout << "fire Other! " << std::endl;
+                  }
+                } // end found match
+
+                // if it's not, count as hadronic
+                // If the energyDeposit made this far, it's counted as hadronic deposits (primary+secondary), do not involve particleMap
+                fSim_hadronic_Edep_b2 += energyDeposit.energy;
+                fSim_hadronic_hit_x_b.push_back(energyDeposit.x);
+                fSim_hadronic_hit_y_b.push_back(energyDeposit.y);
+                fSim_hadronic_hit_z_b.push_back(energyDeposit.z);
+                fSim_hadronic_hit_Edep_b2.push_back(energyDeposit.energy);
+
+                // Store trackID for debug
+                EDepTrackID = energyDeposit.trackID;
+                auto exist = EDepMap.find(EDepTrackID);
+                // if can't find, store it and add the edep
+                if (exist == EDepMap.end())
+                {
+                  EDep_TrackID_vec.push_back(EDepTrackID); // negative trackID exists
+                  EDepMap[EDepTrackID] = energyDeposit.energy;
+                }
+                else
+                { // find the same track id
+                  EDepMap[EDepTrackID] += energyDeposit.energy;
+                }
+
+              } // end plane == 0
+            } // end energy deposit loop
+          } // end For each time slice
+        } // end For each SimChannel
+
+        fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
+
+        // Print out EDepMap
+        // if ( false ) std::cout << "fGen_numu_E: "<< fGen_numu_E << ", fSim_mu_Edep_b2_debug: " << fSim_mu_Edep_b2_debug<< ", fSim_hadronic_Edep_b2_debug: " << fSim_hadronic_Edep_b2_debug << ", Tot had E track id: " << EDep_TrackID_vec.size() << std::endl;
+        if (false)
         {
-          primaryDaughters.push_back(it->second);
-
-          getDescendants(daughterID, momVec, TrkIDvec, particleMap, primaryDaughters);
+          for (long unsigned int i = 0; i < EDep_TrackID_vec.size(); i++)
+          {
+            std::cout << "Evt track id: " << EDep_TrackID_vec.at(i) << std::endl;
+          }
+          std::map<int, double>::iterator it;
+          std::cout << "TrackID" << " | " << "Tot EDep" << std::endl;
+          for (it = EDepMap.begin(); it != EDepMap.end(); it++)
+            std::cout << "    " << it->first << " | " << it->second << std::endl;
         }
-      }
+
+        // In general, objects in the LArSoft reconstruction chain are linked using the art::Assns class:
+        // <https://cdcvs.fnal.gov/redmine/projects/larsoft/wiki/Using_art_in_LArSoft#artAssns>
+        // The following statement will find the simb::MCTruth associated with the simb::MCParticle
+        const art::FindManyP<simb::MCTruth> findManyTruth(particleHandle, event, fSimulationProducerLabel);
+
+        if (!findManyTruth.isValid())
+        {
+          std::cout << "findManyTruth simb::MCTruth for simb::MCParticle failed!" << std::endl;
+        }
+
+        size_t particle_index = 0; // only look at first particle in particleHandle's vector.
+        auto const &truth = findManyTruth.at(particle_index);
+
+        // Make sure there's no problem.
+        if (truth.empty())
+        {
+          std::cout << "Particle ID=" << particleHandle->at(particle_index).TrackId() << " has no primary!" << std::endl;
+        }
+
+        fNtuple->Fill();
+
+      } // MyEnergyAnalysis::analyze()
+
+      // This macro has to be defined for this module to be invoked from a
+      // .fcl file; see MyEnergyAnalysis.fcl for more information.
+      DEFINE_ART_MODULE(MyEnergyAnalysis)
+
+    } // namespace example
+  } // namespace lar
+
+  // Back to our local namespace.
+  namespace
+  {
+
+    double DetectorDiagonal(geo::GeometryCore const &geom)
+    {
+      const double length = geom.DetLength();
+      const double width = 2. * geom.DetHalfWidth();
+      const double height = 2. * geom.DetHalfHeight();
+
+      return std::sqrt(cet::sum_of_squares(length, width, height));
     }
-  }
 
-  /*void getAncestors(const simb::MCParticle *currentpart, std::vector<int> &Mothers, const std::map<int, const simb::MCParticle *> &particleMap)
-  {
-    int currentmother = currentpart.mother();
-    auto nextmom = particleMap.find(currentmother);
-    Mothers.push_back(currentmother);
-    getAncestors(nextmom, Mothers, particleMap);
-  }*/
-  // check with Milo
-  void getAncestors(const simb::MCParticle *currentpart,
-                    std::vector<int> &Mothers,
-                    const std::map<int, const simb::MCParticle *> &particleMap,
-                    int depth)
-  {
-    if (!currentpart)
-      return;
-    if (depth > 1000)
-      return; // safety
+    // bool MomentumOrderMCParticle(const simb::MCParticle* p1, const simb::MCParticle* p2) {
+    //   return ( p1->P(0) > p2->P(0) );
+    // }
 
-    int momId = currentpart->Mother();
-    if (momId <= 0)
-      return; // no mother
-
-    Mothers.push_back(momId); // record this mother id
-
-    auto it = particleMap.find(momId); // try to find the mother object
-    if (it == particleMap.end())
-      return;
-    if (it->second == currentpart)
-      return; // self loop guard
-
-    getAncestors(it->second, Mothers, particleMap, depth + 1);
-  }
-  void ReportFirstExitRootOnly(const simb::MCParticle &part,
-                               const std::map<int, const simb::MCParticle *> &particleMap)
-  {
-    // FV bounds in cm
-    const double X_MIN = -400.0, X_MAX = 400.0;
-    const double Y_MIN = -600.0, Y_MAX = 600.0;
-    const double Z_MIN = 0.0, Z_MAX = 1300.0;
-
-    auto inside = [&](TLorentzVector const &p)
+    // If this returns true, then the energy deposit is associated with primary lepton
+    bool IsAncestorMotherPrimaryLep(const simb::MCParticle &p1, int primarylep_trkID, std::map<int, const simb::MCParticle *> particleMap)
     {
-      return (p.X() >= X_MIN && p.X() <= X_MAX) &&
-             (p.Y() >= Y_MIN && p.Y() <= Y_MAX) &&
-             (p.Z() >= Z_MIN && p.Z() <= Z_MAX);
-    };
-
-    // skip if this particle has any ancestor
-    std::vector<int> moms;
-    moms.clear();
-    getAncestors(&part, moms, particleMap);
-    if (!moms.empty())
-      return; // not a root, ignore
-
-    const size_t Ntraj = part.NumberTrajectoryPoints();
-    if (Ntraj == 0)
-      return;
-
-    bool hasEntered = false;
-
-    for (size_t ipt = 0; ipt < Ntraj; ++ipt)
-    {
-      const TLorentzVector &pos = part.Position(ipt);
-      const bool in = inside(pos);
-
-      if (!hasEntered)
-      {
-        if (in)
-          hasEntered = true; // first time inside
-      }
+      int MothertrkID = p1.Mother();
+      // Immediate mother is the primary lep
+      if (MothertrkID == primarylep_trkID)
+        return true;
+      // Immediate mother is not primary lep, but other primary particles from genie
+      else if (MothertrkID == 0)
+        return false;
+      // Keep looking upstream, find it in particleMap
       else
       {
-        if (!in)
-        { // first exit after entry
-          const TLorentzVector &p4 = part.Momentum(ipt);
-          double KE = p4.E() - part.Mass();
-          if (KE < 0)
-            KE = 0;
-
-          std::cout << "Particle " << part.TrackId()
-                    << " EXITED at pt " << ipt
-                    << " with KE=" << KE << " GeV  motherID=0\n";
-          return;
-        }
+        auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
+        const simb::MCParticle &tmp_mother = *((*tmp_search).second);
+        return IsAncestorMotherPrimaryLep(tmp_mother, primarylep_trkID, particleMap);
       }
-    }
-  }
+    } // end GetAncestorMotherLeptonTrkID
 
-} // local namespace
-
-/*
-
-
- void getDescendant(int daughterID, const std::vector<int> &momVec, const std::vector<int> &TrkIDvec, const std::map<int, const simb::MCParticle *> &particleMap, std::vector<const simb::MCParticle *> &primaryDaughters)
-  {
-    for (size_t j = 0; j < TrkIDvec.size(); j++)
+    // If this returns true, then the energy deposit is associated with neutron
+    bool IsAncestorMotherNeutron(const simb::MCParticle &p1, std::vector<int> neutron_trkID, std::map<int, const simb::MCParticle *> particleMap)
     {
-      if (momVec[j] == motherID)
+      int MothertrkID = p1.Mother();
+      bool MatchMultipleTrkID = false;
+      // Immediate mother is one of the neutrons in the event
+      for (long unsigned int i = 0; i < neutron_trkID.size(); i++)
       {
-        int daughterID = TrkIDvec[j];
-        auto it = particleMap.find(daughterID);
-        if (it != particleMap.end())
+        if (MothertrkID == neutron_trkID.at(i))
+          MatchMultipleTrkID = true;
+      }
+
+      if (MatchMultipleTrkID == true)
+        return true;
+
+      // Immediate mother is not neutron, but other primary particles from genie
+      else if (MothertrkID == 0)
+        return false;
+      // Keep looking upstream, find it in particleMap
+      else
+      {
+        auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
+        const simb::MCParticle &tmp_mother = *((*tmp_search).second);
+        return IsAncestorMotherNeutron(tmp_mother, neutron_trkID, particleMap);
+      }
+    } // end GetAncestorMotherNeutronTrkID
+
+    // If this returns true, then the energy deposit is associated with proton
+    bool IsAncestorMotherProton(const simb::MCParticle &p1, std::vector<int> proton_trkID, std::map<int, const simb::MCParticle *> particleMap)
+    {
+      int MothertrkID = p1.Mother();
+      bool MatchMultipleTrkID = false;
+      // Immediate mother is one of the protons in the event
+      for (long unsigned int i = 0; i < proton_trkID.size(); i++)
+      {
+        if (MothertrkID == proton_trkID.at(i))
+          MatchMultipleTrkID = true;
+      }
+
+      if (MatchMultipleTrkID == true)
+        return true;
+
+      // Immediate mother is not proton, but other primary particles from genie
+      else if (MothertrkID == 0)
+        return false;
+      // Keep looking upstream, find it in particleMap
+      else
+      {
+        auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
+        const simb::MCParticle &tmp_mother = *((*tmp_search).second);
+        return IsAncestorMotherProton(tmp_mother, proton_trkID, particleMap);
+      }
+    } // end GetAncestorMotherProtonTrkID
+
+    // If this returns true, then the energy deposit is associated with pion+
+    bool IsAncestorMotherPip(const simb::MCParticle &p1, std::vector<int> pip_trkID, std::map<int, const simb::MCParticle *> particleMap)
+    {
+      int MothertrkID = p1.Mother();
+      bool MatchMultipleTrkID = false;
+      // Immediate mother is one of the pips in the event
+      for (long unsigned int i = 0; i < pip_trkID.size(); i++)
+      {
+        if (MothertrkID == pip_trkID.at(i))
+          MatchMultipleTrkID = true;
+      }
+
+      if (MatchMultipleTrkID == true)
+        return true;
+
+      // Immediate mother is not pip, but other primary particles from genie
+      else if (MothertrkID == 0)
+        return false;
+      // Keep looking upstream, find it in particleMap
+      else
+      {
+        auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
+        const simb::MCParticle &tmp_mother = *((*tmp_search).second);
+        return IsAncestorMotherPip(tmp_mother, pip_trkID, particleMap);
+      }
+    } // end GetAncestorMotherPipTrkID
+
+    // If this returns true, then the energy deposit is associated with pion+
+    bool IsAncestorMotherPim(const simb::MCParticle &p1, std::vector<int> pim_trkID, std::map<int, const simb::MCParticle *> particleMap)
+    {
+      int MothertrkID = p1.Mother();
+      bool MatchMultipleTrkID = false;
+      // Immediate mother is one of the pims in the event
+      for (long unsigned int i = 0; i < pim_trkID.size(); i++)
+      {
+        if (MothertrkID == pim_trkID.at(i))
+          MatchMultipleTrkID = true;
+      }
+
+      if (MatchMultipleTrkID == true)
+        return true;
+
+      // Immediate mother is not pim, but other primary particles from genie
+      else if (MothertrkID == 0)
+        return false;
+      // Keep looking upstream, find it in particleMap
+      else
+      {
+        auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
+        const simb::MCParticle &tmp_mother = *((*tmp_search).second);
+        return IsAncestorMotherPim(tmp_mother, pim_trkID, particleMap);
+      }
+    } // end GetAncestorMotherPimTrkID
+
+    // If this returns true, then the energy deposit is associated with pion-
+    bool IsAncestorMotherPi0(const simb::MCParticle &p1, std::vector<int> pi0_trkID, std::map<int, const simb::MCParticle *> particleMap)
+    {
+      int MothertrkID = p1.Mother();
+      bool MatchMultipleTrkID = false;
+      // Immediate mother is one of the pi0s in the event
+      for (long unsigned int i = 0; i < pi0_trkID.size(); i++)
+      {
+        if (MothertrkID == pi0_trkID.at(i))
+          MatchMultipleTrkID = true;
+      }
+
+      if (MatchMultipleTrkID == true)
+        return true;
+
+      // Immediate mother is not pi0, but other primary particles from genie
+      else if (MothertrkID == 0)
+        return false;
+      // Keep looking upstream, find it in particleMap
+      else
+      {
+        auto tmp_search = particleMap.find(MothertrkID); // this search must be found, can't be null
+        const simb::MCParticle &tmp_mother = *((*tmp_search).second);
+        return IsAncestorMotherPi0(tmp_mother, pi0_trkID, particleMap);
+      }
+
+    } // end GetAncestorMotherPi0TrkID
+
+    // void getHadronicInformation(const simb::MCParticle* primary, const std::vector<const simb::MCParticle*>& daughters, int& NHad, double& BindingE){
+    //   int pNTP = primary->NumberTrajectoryPoints();
+    //   int pLast = pNTP - 1;
+    //   for(size_t k = 0; k < daughters.size(); k++){
+    //     //int dNTP = daughters[k]->NumberTrajectoryPoints();
+    //     //int dLast = dNTP - 1;
+    //     const TLorentzVector& daughterstart = daughters[k]->Position(0);
+    //     const TLorentzVector& Edaughterstart = daughters[k]->Momentum(0);
+    //     std::vector<float> X;
+    //     std::vector<float> Y;
+    //     std::vector<float> Z;
+    //     std::vector<float> T;
+    //     for(int l = 0; l < pLast; l++){
+    //       const TLorentzVector& pripos = primary->Position(l);
+    //       float epsilon = 0.01;
+    //       double Ein = 0;
+    //       double Eout = 0;
+    //       if(abs(pripos.X() - daughterstart.X()) < epsilon && abs(pripos.Y() - daughterstart.Y()) < epsilon && abs(pripos.Z() - daughterstart.Z()) < epsilon){
+    //         if(abs(primary->PdgCode()) == 211){
+    //           Ein = primary->E(l);
+    //         }
+    //         else{
+    //           Ein = primary->E(l) - primary->Mass();
+    //         }
+    //         std::cout << "PDG of primary: " << primary->PdgCode() << std::endl;
+    //         std::cout << "PDG of daughter: " << daughters[k]->PdgCode() << std::endl;
+    //         if(abs(daughters[k]->PdgCode()) == 211){
+    //          Eout = Edaughterstart.E();
+    //         }
+    //         else{
+    //           Eout = Edaughterstart.E() - daughters[k]->Mass();
+    //         }
+    //         std::cout << "Ein: " << Ein << std::endl;
+    //         std::cout << "Eout: " << Eout << std::endl;
+    //         double currentBindingE = Ein - Eout;
+    //         std::cout << "Current Binding Energy: " << currentBindingE << std::endl;
+    //         BindingE += currentBindingE;
+    //         std::cout << "BindingE (inside func) : " << BindingE << std::endl;
+    //         X.push_back(daughterstart.X());
+    //         Y.push_back(daughterstart.Y());
+    //         Z.push_back(daughterstart.Z());
+    //         T.push_back(daughterstart.T());
+    //         int Xsize = X.size();
+    //         int Xlast = Xsize - 1;
+    //         int iterator = 0;
+    //         for(size_t m = 0; m < X.size(); m++){
+    //           if(abs(X[Xlast] - X[m]) < epsilon && abs(Y[Xlast] - Y[m]) < epsilon && abs(Z[Xlast] - Z[m]) < epsilon && abs(T[Xlast] - T[m]) < epsilon) iterator = iterator +1;
+    //           std::cout << "iterator: " << iterator << std::endl;
+    //         }
+    //         if(iterator == 1) NHad = NHad +1;
+    //       }
+    //     }
+    //     std::cout << "NHad (inside): " << NHad << std::endl;
+    //   }
+    // }
+
+    void fillInteractionTree(const simb::MCParticle *incoming, const Vertex &vertex, const std::map<int, const simb::MCParticle *> &particleMap, TTree *fInteractionTree, float &fInX, float &fInY, float &fInZ, float &fInT,
+                             float &fInPx, float &fInPy, float &fInPz, float &fInE, int &fInPDG, std::vector<float> &fOutX, std::vector<float> &fOutY, std::vector<float> &fOutZ, std::vector<float> &fOutT,
+                             std::vector<float> &fOutPx, std::vector<float> &fOutPy, std::vector<float> &fOutPz, std::vector<float> &fOutE, std::vector<int> &fOutPDG)
+    {
+
+      fOutX.clear();
+      fOutY.clear();
+      fOutZ.clear();
+      fOutT.clear();
+      fOutPDG.clear();
+      fOutPx.clear();
+      fOutPy.clear();
+      fOutPz.clear();
+      fOutE.clear();
+
+      fInX = vertex.x;
+      fInY = vertex.y;
+      fInZ = vertex.z;
+      fInT = vertex.t;
+
+      double minDist = 1e10;
+      TLorentzVector bestMom;
+
+      for (unsigned int i = 0; i < incoming->NumberTrajectoryPoints(); ++i)
+      {
+        TLorentzVector pos = incoming->Position(i);
+        double dist = std::sqrt(std::pow(pos.X() - vertex.x, 2) +
+                                std::pow(pos.Y() - vertex.y, 2) +
+                                std::pow(pos.Z() - vertex.z, 2));
+        if (dist < minDist)
         {
-          primaryDaughters.push_back(it->second);
-          getDescendants(daughterID, momVec, TrkIDvec, particleMap, primaryDaughters);
+          minDist = dist;
+          bestMom = incoming->Momentum(i);
+        }
+      }
+
+      fInPx = bestMom.Px();
+      fInPy = bestMom.Py();
+      fInPz = bestMom.Pz();
+      fInE = bestMom.E();
+      fInPDG = incoming->PdgCode();
+
+      for (const simb::MCParticle *daughter : vertex.daughters)
+      {
+        int dTrackID = daughter->TrackId();
+
+        bool interacts = false;
+        for (const auto &entry : particleMap)
+        {
+          const simb::MCParticle *p = entry.second;
+          if (p->Mother() == dTrackID)
+          {
+            interacts = true;
+            break;
+          }
+        }
+
+        if (!interacts)
+          continue;
+        const TLorentzVector &pos = daughter->Position(0);
+        const TLorentzVector &mom = daughter->Momentum(0);
+        fOutX.push_back(pos.X());
+        fOutY.push_back(pos.Y());
+        fOutZ.push_back(pos.Z());
+        fOutT.push_back(pos.T());
+
+        fOutPx.push_back(mom.Px());
+        fOutPy.push_back(mom.Py());
+        fOutPz.push_back(mom.Pz());
+        fOutE.push_back(mom.E());
+        fOutPDG.push_back(daughter->PdgCode());
+      }
+
+      if (!fOutX.empty())
+      {
+        fInteractionTree->Fill();
+      }
+    }
+
+    // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle* incoming, const std::vector<const simb::MCParticle*>& daughters){
+    //   float epsilon = 0.01;
+    //   float tepsilon = 1e-3;
+    //   std::vector<primaryVertex> vtxs;
+
+    //   for (const simb::MCParticle* d : daughters){
+    //     const TLorentzVector& pos = d->Position(0);
+    //     float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
+    //     bool found = false;
+
+    //     for (primaryVertex& v : vtxs) {
+    //       if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon) {
+    //         v.daughters.push_back(d);
+    //         found = true;
+    //         break;
+    //       }
+    //     }
+
+    //     if (!found) {
+    //       primaryVertex vtx = {x, y, z, t, incoming, {d}};
+    //       vtxs.push_back(vtx);
+    //     }
+    //   }
+    //     return vtxs;
+    // }
+
+    std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle *> &daughters)
+    {
+      std::vector<Vertex> vertices;
+
+      float epsilon = 0.01;
+      float tepsilon = 1e-3;
+
+      for (const simb::MCParticle *d : daughters)
+      {
+        const TLorentzVector &pos = d->Position(0);
+        float x = pos.X(), y = pos.Y(), z = pos.Z(), t = pos.T();
+        bool found = false;
+        for (Vertex &v : vertices)
+        {
+          if (std::abs(v.x - x) < epsilon && std::abs(v.y - y) < epsilon && std::abs(v.z - z) < epsilon && std::abs(v.t - t) < tepsilon)
+          {
+            v.daughters.push_back(d);
+            found = true;
+            break;
+          }
+        }
+        if (!found)
+        {
+          Vertex vert = {x, y, z, t, {d}};
+          vertices.push_back(vert);
+        }
+      }
+      return vertices;
+    }
+
+    double getPrimaryKE(const simb::MCParticle *primary, double x, double y, double z)
+    {
+      double minDist = 1e10;
+      int closestDist = 0;
+
+      for (unsigned int n = 0; n < primary->NumberTrajectoryPoints(); ++n)
+      {
+        const TLorentzVector &position = primary->Position(n);
+        double dist = std::sqrt(std::pow(position.X() - x, 2) + std::pow(position.Y() - y, 2) + std::pow(position.Z() - z, 2));
+        if (dist < minDist)
+        {
+          minDist = dist;
+          closestDist = n;
+        }
+      }
+      const TLorentzVector &ClosestMom = primary->Momentum(closestDist);
+      return ClosestMom.E() - primary->Mass();
+    }
+
+    void getHadronic02(const simb::MCParticle *particle, const std::vector<const simb::MCParticle *> &allPart, int &NHad, double &totalBindingE)
+    {
+      std::vector<const simb::MCParticle *> daughters;
+      TLorentzVector currentPos = particle->Position(0);
+
+      for (const simb::MCParticle *p : allPart)
+      {
+        if (p->Mother() == particle->TrackId())
+        {
+          daughters.push_back(p);
+        }
+      }
+
+      if (!daughters.empty())
+      {
+        std::vector<Vertex> vertices = clusterVertices(daughters);
+
+        for (const auto &vertex : vertices)
+        {
+          double Ein = getPrimaryKE(particle, vertex.x, vertex.y, vertex.z);
+          double Eout = 0.0;
+
+          for (const simb::MCParticle *daughter : vertex.daughters)
+          {
+            if (daughter->PdgCode() == 211)
+            { // Check if daughter is a pion
+              Eout += daughter->Momentum(0).E();
+            }
+            else
+            {
+              Eout += daughter->Momentum(0).E() - daughter->Mass(); // For other particles, subtract mass
+            }
+          }
+          if (Ein > Eout)
+          {
+            totalBindingE += (Ein - Eout);
+            NHad++;
+          }
+        }
+      }
+      for (const simb::MCParticle *daughter : daughters)
+      {
+        getHadronic02(daughter, allPart, NHad, totalBindingE);
+      }
+    }
+
+    void getDescendants(int motherID, const std::vector<int> &momVec, const std::vector<int> &TrkIDvec, const std::map<int, const simb::MCParticle *> &particleMap, std::vector<const simb::MCParticle *> &primaryDaughters)
+    {
+      for (size_t j = 0; j < TrkIDvec.size(); j++)
+      {
+        if (momVec[j] == motherID)
+        {
+          int daughterID = TrkIDvec[j];
+
+          auto it = particleMap.find(daughterID);
+          if (it != particleMap.end())
+          {
+            primaryDaughters.push_back(it->second);
+
+            getDescendants(daughterID, momVec, TrkIDvec, particleMap, primaryDaughters);
+          }
         }
       }
     }
-  }
+
+    /*void getAncestors(const simb::MCParticle *currentpart, std::vector<int> &Mothers, const std::map<int, const simb::MCParticle *> &particleMap)
+    {
+      int currentmother = currentpart.mother();
+      auto nextmom = particleMap.find(currentmother);
+      Mothers.push_back(currentmother);
+      getAncestors(nextmom, Mothers, particleMap);
+    }*/
+    // check with Milo
+    void getAncestors(const simb::MCParticle *currentpart,
+                      std::vector<int> &Mothers,
+                      const std::map<int, const simb::MCParticle *> &particleMap,
+                      int depth)
+    {
+      if (!currentpart)
+        return;
+      if (depth > 1000)
+        return;
+      int momId = currentpart->Mother();
+      if (momId <= 0)
+        return;
+      Mothers.push_back(momId);
+      auto it = particleMap.find(momId);
+      if (it == particleMap.end())
+        return;
+      if (it->second == currentpart)
+        return;
+      getAncestors(it->second, Mothers, particleMap, depth + 1);
+    }
+
+    void ReportFirstExitRootOnly(const simb::MCParticle &part,
+                                 const std::map<int, const simb::MCParticle *> &particleMap)
+    {
+      const double X_MIN = -400.0, X_MAX = 400.0;
+      const double Y_MIN = -600.0, Y_MAX = 600.0;
+      const double Z_MIN = 0.0, Z_MAX = 1300.0;
+
+      auto inside = [&](TLorentzVector const &p)
+      {
+        return (p.X() >= X_MIN && p.X() <= X_MAX) &&
+               (p.Y() >= Y_MIN && p.Y() <= Y_MAX) &&
+               (p.Z() >= Z_MIN && p.Z() <= Z_MAX);
+      };
+
+      std::vector<int> moms;
+      getAncestors(&part, moms, particleMap);
+      if (!moms.empty())
+        return; // not a root
+
+      const size_t Ntraj = part.NumberTrajectoryPoints();
+      if (Ntraj == 0)
+        return;
+
+      bool hasEntered = false;
+      for (size_t ipt = 0; ipt < Ntraj; ++ipt)
+      {
+        const TLorentzVector &pos = part.Position(ipt);
+        bool in = inside(pos);
+        if (!hasEntered)
+        {
+          if (in)
+            hasEntered = true;
+        }
+        else
+        {
+          if (!in)
+          {
+            const TLorentzVector &p4 = part.Momentum(ipt);
+            double KE = p4.E() - part.Mass();
+            if (KE < 0)
+              KE = 0;
+            std::cout << "Particle " << part.TrackId()
+                      << " EXITED at pt " << ipt
+                      << " with KE=" << KE << " GeV  motherID=0\n";
+            return;
+          }
+        }
+      }
+    }
+
+  } // local namespace
+
+  /*
+
+
+   void getDescendant(int daughterID, const std::vector<int> &momVec, const std::vector<int> &TrkIDvec, const std::map<int, const simb::MCParticle *> &particleMap, std::vector<const simb::MCParticle *> &primaryDaughters)
+    {
+      for (size_t j = 0; j < TrkIDvec.size(); j++)
+      {
+        if (momVec[j] == motherID)
+        {
+          int daughterID = TrkIDvec[j];
+          auto it = particleMap.find(daughterID);
+          if (it != particleMap.end())
+          {
+            primaryDaughters.push_back(it->second);
+            getDescendants(daughterID, momVec, TrkIDvec, particleMap, primaryDaughters);
+          }
+        }
+      }
+    }
 
 
 
@@ -2012,15 +1954,15 @@ namespace
 
 
 
-*/
-// jj
-//  crate new vector and pushback particles trak ids that leave
-//  Std::vector<int> leftParticles
-//  if(left){
-//  leftParticles.push_back(current part)
-// }
-//  primary particles have mother 0
-//  get a leaving track ID of particles
-//  min particle loops
-//  make the part of my code to a function that takes in a particle and returns  if it leaves
-//  On Windows Shift + Alt + F
+  */
+  // jj
+  //  crate new vector and pushback particles trak ids that leave
+  //  Std::vector<int> leftParticles
+  //  if(left){
+  //  leftParticles.push_back(current part)
+  // }
+  //  primary particles have mother 0
+  //  get a leaving track ID of particles
+  //  min particle loops
+  //  make the part of my code to a function that takes in a particle and returns  if it leaves
+  //  On Windows Shift + Alt + F
