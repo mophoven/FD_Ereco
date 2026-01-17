@@ -1861,7 +1861,7 @@ namespace lar
     {
       if (!currentpart)
         return;
-      if (depth > 1000)
+      if (depth > 1000)//do we need a depth limit?
         return;
       int momId = currentpart->Mother();
       if (momId <= 0)
@@ -1892,7 +1892,7 @@ namespace lar
       std::vector<int> moms;
       getAncestors(&part, moms, particleMap);
       if (!moms.empty())
-        return; // not a root
+        return;   
 
       const size_t Ntraj = part.NumberTrajectoryPoints();
       if (Ntraj == 0)
@@ -1924,6 +1924,7 @@ namespace lar
         }
       }
     }
+  }
 
   } // local namespace
 
