@@ -1870,7 +1870,7 @@ namespace lar
         return;
       if (it->second == currentpart)
         return;
-      getAncestors(it->second, Mothers, particleMap, depth + 1);
+      getAncestors(it->second, Mothers, particleMap);
     }
 
     void ReportFirstExitRootOnly(const simb::MCParticle &part,
