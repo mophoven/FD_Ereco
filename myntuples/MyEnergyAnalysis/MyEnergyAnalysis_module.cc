@@ -1924,7 +1924,7 @@ namespace lar
     }
   
   
-
+  }
   } // local namespace
 
   /*
