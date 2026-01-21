@@ -1579,7 +1579,7 @@ namespace
     switch(pdg) { //big if statement
 
         case 11: //electron or positron
-            mass = 0.00511;
+            mass = 0.000511;
             break;
         case -11:
             mass = 0.000511;
@@ -2072,8 +2072,6 @@ namespace
       }
     }
   }
-  
-
 
   // --- Group daughters by production time ---
   const double timeEpsilon = 1e-3; // ns, small tolerance for clustering
@@ -2115,7 +2113,7 @@ namespace
   for (const auto& kv : timeGroups) {
     // Clear outgoing vectors for this time cluster
     fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
-    fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear();
+    fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear(); fOutMass.clear();
     fOutPDG.clear(); fOutProcess.clear();
 
     for (const simb::MCParticle* daughter : kv.second) {
@@ -2138,6 +2136,7 @@ namespace
       fOutProcess.push_back(daughter->EndProcess());
     }
     //std::cout << "Incoming particle process: " << fInProcess << std::endl;
+
     if(!fOutT.empty()){
       if(!dies){
        // std::cout << "Incoming scattered, adding incoming particle to outgoing list to preserve energy/momentum conservation" << std::endl;
@@ -2196,6 +2195,7 @@ namespace
       totalInKE = fInE - fInMass;
     }
     double deltaKE = totalInKE - totalOutKE;
+
     if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
       std::cout << "Muon interaction delta KE: " << deltaKE << " GeV" << std::endl;
       std::cout << "Incoming muon energy: " << fInE << " GeV" << std::endl;
@@ -2221,6 +2221,7 @@ namespace
       }
       std::cout << "------------------------------------------------" << std::endl;
     }
+   
     fDeltaKE = deltaKE;
     if (!fOutX.empty()) {
       fInteractionTree->Fill();
