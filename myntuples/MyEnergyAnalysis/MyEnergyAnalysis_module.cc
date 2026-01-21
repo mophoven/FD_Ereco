@@ -1856,13 +1856,12 @@ namespace lar
     // check with Milo
     void getAncestors(const simb::MCParticle *currentpart,
                       std::vector<int> &Mothers,
-                      const std::map<int, const simb::MCParticle *> &particleMap,
-                      int depth)
+                      const std::map<int, const simb::MCParticle *> &particleMap)
     {
       if (!currentpart)
         return;
-      if (depth > 1000)//do we need a depth limit?
-        return;
+      //if (depth > 1000)//do we need a depth limit?
+        //return;
       int momId = currentpart->Mother();
       if (momId <= 0)
         return;
@@ -1924,7 +1923,8 @@ namespace lar
         }
       }
     }
-  }
+  
+  
 
   } // local namespace
 
@@ -1967,3 +1967,5 @@ namespace lar
   //  min particle loops
   //  make the part of my code to a function that takes in a particle and returns  if it leaves
   //  On Windows Shift + Alt + F
+  //using the data making plots of one each different kind of particles with exited energy and one with ploting neutrino energy vs exited energy
+  
