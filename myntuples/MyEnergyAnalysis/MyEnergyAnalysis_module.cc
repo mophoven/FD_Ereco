@@ -1889,3 +1889,45 @@ namespace
   }
 
 } // local namespace
+
+
+/*
+
+
+   void getDescendant(int daughterID, const std::vector<int> &momVec, const std::vector<int> &TrkIDvec, const std::map<int, const simb::MCParticle *> &particleMap, std::vector<const simb::MCParticle *> &primaryDaughters)
+    {
+      for (size_t j = 0; j < TrkIDvec.size(); j++)
+      {
+        if (momVec[j] == motherID)
+        {
+          int daughterID = TrkIDvec[j];
+          auto it = particleMap.find(daughterID);
+          if (it != particleMap.end())
+          {
+            primaryDaughters.push_back(it->second);
+            getDescendants(daughterID, momVec, TrkIDvec, particleMap, primaryDaughters);
+          }
+        }
+      }
+    }
+
+
+
+
+
+
+
+
+  */
+  // jj
+  //  crate new vector and pushback particles trak ids that leave
+  //  Std::vector<int> leftParticles
+  //  if(left){
+  //  leftParticles.push_back(current part)
+  // }
+  //  primary particles have mother 0
+  //  get a leaving track ID of particles
+  //  min particle loops
+  //  make the part of my code to a function that takes in a particle and returns  if it leaves
+  //  On Windows Shift + Alt + F
+  //using the data making plots of one each different kind of particles with exited energy and one with ploting neutrino energy vs exited energy
