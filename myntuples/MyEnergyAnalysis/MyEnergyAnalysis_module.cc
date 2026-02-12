@@ -43,6 +43,8 @@
 #include "TLorentzVector.h"
 #include "TTree.h"
 #include "TVector3.h"
+#include "TCanvas.h"
+#include "TROOT.h"
 
 // C++ includes
 #include <cmath>
@@ -110,8 +112,10 @@ namespace
   void getAncestors(const simb::MCParticle *currentpart,
                     std::vector<int> &Mothers,
                     const std::map<int, const simb::MCParticle *> &particleMap);
-  void ReportFirstExitRootOnly(const simb::MCParticle &part,
-                               const std::map<int, const simb::MCParticle *> &particleMap);
+  void ReportFirstExitRootOnly(const simb::MCParticle& part,
+  const std::map<int, const simb::MCParticle*>& particleMap,
+  TH2F* hNuE_vs_ExitKE,
+  double nuE);
 
   // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
 
@@ -189,7 +193,8 @@ namespace lar
       // The parameters we will read from the .fcl file.
       art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
-
+      TH2F *hNuE_vs_ExitKE = nullptr;
+      virtual void endJob() override; // declaration
       // The n-tuple to create
       TTree *fNtuple;
 
@@ -380,6 +385,13 @@ namespace lar
       // Access art's TFileService, which will handle creating and writing
       // histograms and n-tuples for us.
       art::ServiceHandle<art::TFileService const> tfs;
+
+      gROOT->SetBatch(kTRUE);
+      hNuE_vs_ExitKE = tfs->make<TH2F>(
+          "hNuE_vs_ExitKE",
+          "Neutrino E vs Exited KE;Neutrino E [GeV];Exited KE [GeV]",
+          60, 0.0, 12.0,
+          60, 0.0, 6.0);
 
       // Define n-tuples
       fInteractionTree = tfs->make<TTree>("HadronicTree", "Handronic Interaction Information");
