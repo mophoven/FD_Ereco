@@ -112,10 +112,10 @@ namespace
   void getAncestors(const simb::MCParticle *currentpart,
                     std::vector<int> &Mothers,
                     const std::map<int, const simb::MCParticle *> &particleMap);
-  void ReportFirstExitRootOnly(const simb::MCParticle& part,
-  const std::map<int, const simb::MCParticle*>& particleMap,
-  TH2F* hNuE_vs_ExitKE,
-  double nuE);
+  void ReportFirstExitRootOnly(const simb::MCParticle &part,
+                               const std::map<int, const simb::MCParticle *> &particleMap,
+                               TH2F *hNuE_vs_ExitKE,
+                               double nuE);
 
   // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
 
@@ -1060,7 +1060,7 @@ namespace lar
     }*/
         // loop over every trajectory point, compare to geometry,
         if (particleVec.Process() == "primary")
-          ReportFirstExitRootOnly(particleVec, particleMap);
+          ReportFirstExitRootOnly(particleVec, particleMap, hNuE_vs_ExitKE, fGen_numu_E);
       }
       // End four-vector collection
 
