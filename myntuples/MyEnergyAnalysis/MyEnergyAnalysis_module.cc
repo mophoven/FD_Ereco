@@ -107,7 +107,7 @@ namespace
   void getHadronic02(const simb::MCParticle *, const std::vector<const simb::MCParticle *> &, int &, double &);
 
   void getDescendants(int, const std::vector<int> &, const std::vector<int> &, const std::map<int, const simb::MCParticle *> &, std::vector<const simb::MCParticle *> &);
-   void getAncestors(const simb::MCParticle *currentpart,
+  void getAncestors(const simb::MCParticle *currentpart,
                     std::vector<int> &Mothers,
                     const std::map<int, const simb::MCParticle *> &particleMap);
   void ReportFirstExitRootOnly(const simb::MCParticle &part,
@@ -1047,53 +1047,8 @@ namespace lar
     fSim_end_4mommenta.push_back(momentumEnd.E());
     }*/
         // loop over every trajectory point, compare to geometry,
-        size_t Ntraj = particleVec.NumberTrajectoryPoints();
-        art::ServiceHandle<geo::Geometry const> geom;
-        bool hasEntered = false;
-        for (size_t ipt = 0; ipt < Ntraj; ++ipt)
-        {
-          // std::cout<<Ntraj<<std::endl;
-          const geo::TPCGeo &tpc = geom->TPC(0);
-          // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << std::endl;
-          double centerX = tpc.GetCenter().X();
-          double centerY = tpc.GetCenter().Y();
-          double centerZ = tpc.GetCenter().Z();
-          const TLorentzVector &pos = particleVec.Position(ipt);
-          double localX = pos.X() - std::abs(centerX);
-          double localY = pos.Y() - std::abs(centerY);
-          double localZ = pos.Z() - std::abs(centerZ);
-          // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-          std::cout << localX << " ," << localY << "," << localZ << std::endl;
-          // std::cout << std::abs(centerX) << " ," << std::abs(centerY) << "," << std::abs(centerZ) << std::endl;
-          bool inside =
-              std::abs(localX) <= tpc.HalfWidth() * 2 && std::abs(localY) <= tpc.HalfHeight() * 2 && std::abs(localZ) <= tpc.HalfLength() * 2;
-
-          if (!hasEntered)
-          {
-            if (inside)
-            {
-              hasEntered = true;
-              std::cout << "Particle " << particleVec.TrackId()
-                        << " ENTERED at pt " << ipt << "\n";
-            }
-          }
-          else
-          {
-            if (!inside)
-            {
-              // compute KE as before
-              auto const &mom = particleVec.Momentum(ipt);
-              double KE = mom.E() - particleVec.Mass();
-              std::cout << "Particle " << particleVec.TrackId()
-                        << " EXITED at pt " << ipt
-                        << " with KE=" << KE << " GeV\n";
-              break;
-            // std::cout << pos.X() << " ," << pos.Y() << "," << pos.Z() << std::endl;
-            // std::cout << localX << " ," << localY << "," << localZ << std::endl;
-            // std::cout << "Particle: " << particleVec.TrackId() << ", PDG: " << particleVec.PdgCode() << ", Trajectory point: " << ipt << " Ntraj:" << Ntraj << std::endl;
-            }
-          }
-        }
+        if (particleVec.Process() == "primary")
+          ReportFirstExitRootOnly(particleVec, particleMap);
       }
       // End four-vector collection
 
@@ -1893,77 +1848,76 @@ namespace
     }
   }
   void getAncestors(const simb::MCParticle *currentpart,
-                      std::vector<int> &Mothers,
-                      const std::map<int, const simb::MCParticle *> &particleMap)
+                    std::vector<int> &Mothers,
+                    const std::map<int, const simb::MCParticle *> &particleMap)
+  {
+    if (!currentpart)
+      return;
+    // if (depth > 1000)//do we need a depth limit?
+    // return;
+    int momId = currentpart->Mother();
+    if (momId <= 0)
+      return;
+    Mothers.push_back(momId);
+    auto it = particleMap.find(momId);
+    if (it == particleMap.end())
+      return;
+    if (it->second == currentpart)
+      return;
+    getAncestors(it->second, Mothers, particleMap);
+  }
+
+  void ReportFirstExitRootOnly(const simb::MCParticle &part,
+                               const std::map<int, const simb::MCParticle *> &particleMap)
+  {
+    const double X_MIN = -400.0, X_MAX = 400.0;
+    const double Y_MIN = -600.0, Y_MAX = 600.0;
+    const double Z_MIN = 0.0, Z_MAX = 1300.0;
+
+    auto inside = [&](TLorentzVector const &p)
     {
-      if (!currentpart)
-        return;
-      //if (depth > 1000)//do we need a depth limit?
-        //return;
-      int momId = currentpart->Mother();
-      if (momId <= 0)
-        return;
-      Mothers.push_back(momId);
-      auto it = particleMap.find(momId);
-      if (it == particleMap.end())
-        return;
-      if (it->second == currentpart)
-        return;
-      getAncestors(it->second, Mothers, particleMap);
-    }
+      return (p.X() >= X_MIN && p.X() <= X_MAX) &&
+             (p.Y() >= Y_MIN && p.Y() <= Y_MAX) &&
+             (p.Z() >= Z_MIN && p.Z() <= Z_MAX);
+    };
 
-    void ReportFirstExitRootOnly(const simb::MCParticle &part,
-                                 const std::map<int, const simb::MCParticle *> &particleMap)
+    std::vector<int> moms;
+    getAncestors(&part, moms, particleMap);
+    if (!moms.empty())
+      return;
+
+    const size_t Ntraj = part.NumberTrajectoryPoints();
+    if (Ntraj == 0)
+      return;
+
+    bool hasEntered = false;
+    for (size_t ipt = 0; ipt < Ntraj; ++ipt)
     {
-      const double X_MIN = -400.0, X_MAX = 400.0;
-      const double Y_MIN = -600.0, Y_MAX = 600.0;
-      const double Z_MIN = 0.0, Z_MAX = 1300.0;
-
-      auto inside = [&](TLorentzVector const &p)
+      const TLorentzVector &pos = part.Position(ipt);
+      bool in = inside(pos);
+      if (!hasEntered)
       {
-        return (p.X() >= X_MIN && p.X() <= X_MAX) &&
-               (p.Y() >= Y_MIN && p.Y() <= Y_MAX) &&
-               (p.Z() >= Z_MIN && p.Z() <= Z_MAX);
-      };
-
-      std::vector<int> moms;
-      getAncestors(&part, moms, particleMap);
-      if (!moms.empty())
-        return;   
-
-      const size_t Ntraj = part.NumberTrajectoryPoints();
-      if (Ntraj == 0)
-        return;
-
-      bool hasEntered = false;
-      for (size_t ipt = 0; ipt < Ntraj; ++ipt)
+        if (in)
+          hasEntered = true;
+      }
+      else
       {
-        const TLorentzVector &pos = part.Position(ipt);
-        bool in = inside(pos);
-        if (!hasEntered)
+        if (!in)
         {
-          if (in)
-            hasEntered = true;
-        }
-        else
-        {
-          if (!in)
-          {
-            const TLorentzVector &p4 = part.Momentum(ipt);
-            double KE = p4.E() - part.Mass();
-            if (KE < 0)
-              KE = 0;
-            std::cout << "Particle " << part.TrackId()
-                      << " EXITED at pt " << ipt
-                      << " with KE=" << KE << " GeV  motherID=0\n";
-            return;
-          }
+          const TLorentzVector &p4 = part.Momentum(ipt);
+          double KE = p4.E() - part.Mass();
+          if (KE < 0)
+            KE = 0;
+          std::cout << "Particle " << part.TrackId()
+                    << " EXITED at pt " << ipt
+                    << " with KE=" << KE << " GeV  motherID=0\n";
+          return;
         }
       }
     }
+  }
 
 } // local namespace
-
 
 /*
 
@@ -1993,15 +1947,15 @@ namespace
 
 
   */
-  // jj
-  //  crate new vector and pushback particles trak ids that leave
-  //  Std::vector<int> leftParticles
-  //  if(left){
-  //  leftParticles.push_back(current part)
-  // }
-  //  primary particles have mother 0
-  //  get a leaving track ID of particles
-  //  min particle loops
-  //  make the part of my code to a function that takes in a particle and returns  if it leaves
-  //  On Windows Shift + Alt + F
-  //using the data making plots of one each different kind of particles with exited energy and one with ploting neutrino energy vs exited energy
+// jj
+//  crate new vector and pushback particles trak ids that leave
+//  Std::vector<int> leftParticles
+//  if(left){
+//  leftParticles.push_back(current part)
+// }
+//  primary particles have mother 0
+//  get a leaving track ID of particles
+//  min particle loops
+//  make the part of my code to a function that takes in a particle and returns  if it leaves
+//  On Windows Shift + Alt + F
+// using the data making plots of one each different kind of particles with exited energy and one with ploting neutrino energy vs exited energy
