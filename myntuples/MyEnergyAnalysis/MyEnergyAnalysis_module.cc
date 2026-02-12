@@ -45,6 +45,7 @@
 #include "TVector3.h"
 #include "TCanvas.h"
 #include "TROOT.h"
+#include "TH2F.h"
 
 // C++ includes
 #include <cmath>
@@ -1879,14 +1880,17 @@ namespace
     getAncestors(it->second, Mothers, particleMap);
   }
 
-  void ReportFirstExitRootOnly(const simb::MCParticle &part,
-                               const std::map<int, const simb::MCParticle *> &particleMap)
+  void ReportFirstExitRootOnly(
+      const simb::MCParticle &part,
+      const std::map<int, const simb::MCParticle *> &particleMap,
+      TH2F *hNuE_vs_ExitKE,
+      double nuE)
   {
     const double X_MIN = -400.0, X_MAX = 400.0;
     const double Y_MIN = -600.0, Y_MAX = 600.0;
     const double Z_MIN = 0.0, Z_MAX = 1300.0;
 
-    auto inside = [&](TLorentzVector const &p)
+    auto inside = [&](const TLorentzVector &p)
     {
       return (p.X() >= X_MIN && p.X() <= X_MAX) &&
              (p.Y() >= Y_MIN && p.Y() <= Y_MAX) &&
@@ -1920,6 +1924,8 @@ namespace
           double KE = p4.E() - part.Mass();
           if (KE < 0)
             KE = 0;
+          if (hNuE_vs_ExitKE)
+            hNuE_vs_ExitKE->Fill(nuE, KE);
           std::cout << "Particle " << part.TrackId()
                     << " EXITED at pt " << ipt
                     << " with KE=" << KE << " GeV  motherID=0\n";
