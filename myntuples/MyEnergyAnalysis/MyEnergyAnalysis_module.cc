@@ -1584,7 +1584,7 @@ namespace
         case -11:
             mass = 0.000511;
             break;
-        case 12: //elecctron neutrino
+        case 12: //electron neutrino
             mass = 0.0;
             break;
         case -12:
@@ -1658,28 +1658,28 @@ namespace
             mass = 0.938272;
             break;
         case 3122: //Lambda strange baryon
-            mass = 1.11568;
+            mass = 0.939565; //neutron (or proton) mass to account for creation
             break;
         case -3122: 
-            mass = 1.11568;
+            mass = 0.939565;
             break;
         case 3212: //Sigma 0 strange baryon
-            mass = 1.31486;
+            mass = 0.939565; 
             break;
         case -3212: 
             mass = 0.939565; //neutron mass
             break;
         case 3222: //sigma+ strange baryon
-            mass = 1.18937;
+            mass = 0.939565;
             break;
         case -3222 : // ??
-            mass = 1.18937;
+            mass = 0.939565;
             break;
         case 3112: //sigma- strange baryon
-            mass = 1.19745;
+            mass = 0.939565;
             break;
         case -3112: 
-            mass = 1.19745;
+            mass = 0.939565;
             break;
         case 1000010020: //deuterium
             mass = 1.87561;
@@ -2180,23 +2180,41 @@ namespace
     //Only fill if we have outgoing particles for this time group
     double totalOutKE = 0.0;
     double totalInKE = 0.0;
-    for (size_t i = 0; i < fOutE.size(); i++) {
-       if(std::abs(fOutPDG[i]) == 111 || fOutPDG[i] == 211){
+    for (size_t i = 0; i < fOutE.size(); i++) { //don't subtract rest mass for mesons and leptons
+       if(std::abs(fOutPDG[i]) == 111 || std::abs(fOutPDG[i]) == 211 
+       || std::abs(fOutPDG[i]) == 11 || std::abs(fOutPDG[i]) == 13 
+       || std::abs(fOutPDG[i]) == 221 || std::abs(fOutPDG[i]) == 331 
+       || std::abs(fOutPDG[i]) == 321 || std::abs(fOutPDG[i]) == 311 
+       || fOutPDG[i] == 130 || fOutPDG[i] == 310){
         totalOutKE += fOutE[i];
        }
+
+       else if(fOutPDG[i] == -2112 || fOutPDG[i] == -2212){
+        totalOutKE += fOutE[i] + fOutMass[i]; //accounts for baryon/antibaryon pair creation
+       }
+
        else{
         totalOutKE += fOutE[i] - fOutMass[i];
        }
     }
-    if(std::abs(fInPDG) == 111 || fInPDG == 211){
-      totalInKE = fInE;
-    }
+    if(std::abs(fInPDG) == 111 || std::abs(fInPDG) == 211 
+       || std::abs(fInPDG) == 11 || std::abs(fInPDG) == 13 
+       || std::abs(fInPDG) == 221 || std::abs(fInPDG) == 331 
+       || std::abs(fInPDG) == 321 || std::abs(fInPDG) == 311 
+       || fInPDG == 130 || fInPDG == 310){
+        totalInKE = fInE;
+       }
+
+    else if(fInPDG == -2112 || fInPDG == -2212){
+        totalInKE = fInE + fInMass; //accounts for baryon/antibaryon pair creation
+       }
+
     else{
       totalInKE = fInE - fInMass;
     }
     double deltaKE = totalInKE - totalOutKE;
 
-    if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){
+    if(fInPDG == 13 && deltaKE > .0001 && deltaKE < .1056){ //monitoring spike at + muon rest mass?
       std::cout << "Muon interaction delta KE: " << deltaKE << " GeV" << std::endl;
       std::cout << "Incoming muon energy: " << fInE << " GeV" << std::endl;
       for(size_t j = 0; j < fOutE.size(); j++){
