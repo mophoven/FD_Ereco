@@ -103,8 +103,8 @@ namespace
   double getMassFromPDG(int);
 
   void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
-                            float&, float&, float&, float&, float&, float&, float&, float&, float&, int&, std::string&, std::vector<float>&, std::vector<float>&,
-                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>& , std::vector<int>&, std::vector<std::string>&, float&);
+                            float&, float&, float&, float&, float&, float&, float&, float&, float&, int&, std::string&, int&, std::vector<float>&, std::vector<float>&,
+                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>& , std::vector<int>&, std::vector<std::string>&, std::vector<int>&, float&, int&);
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
 
@@ -200,14 +200,14 @@ namespace lar
       float fInX, fInY, fInZ, fInT;
       float fInPx, fInPy, fInPz, fInE;
       float fInMass;
-      int fInPDG;
+      int fInPDG, fInId;
       std::string fInProcess;
       std::vector<std::string> fOutProcess;
 
       std::vector<float> fOutX, fOutY, fOutZ, fOutT;
       std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
       std::vector<float> fOutMass;
-      std::vector<int> fOutPDG;
+      std::vector<int> fOutPDG, fOutId;
       float fDeltaKE;
       //std::vector<std::char> fOutProcess;
 
@@ -408,7 +408,9 @@ namespace lar
       fInteractionTree->Branch("InPz", &fInPz, "InPz/F");
       fInteractionTree->Branch("InE", &fInE, "InE/F");
       fInteractionTree->Branch("InPDG", &fInPDG, "InPDG/I");
+      fInteractionTree->Branch("InTrackID", &fInId);
       fInteractionTree->Branch("InProcess", &fInProcess, "InProcess/C");
+
       fInteractionTree->Branch("OutX", &fOutX);
       fInteractionTree->Branch("OutY", &fOutY);
       fInteractionTree->Branch("OutZ", &fOutZ);
@@ -419,7 +421,9 @@ namespace lar
       fInteractionTree->Branch("OutE", &fOutE);
       fInteractionTree->Branch("OutPDG", &fOutPDG);
       fInteractionTree->Branch("OutProcess", &fOutProcess);
+      fInteractionTree->Branch("OutTrackID", &fOutId);
       fInteractionTree->Branch("DeltaKE", &fDeltaKE);
+      fInteractionTree->Branch("Event", &fEvent);
 
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
@@ -1154,7 +1158,7 @@ namespace lar
         // std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
         for (const Vertex &vtx : interactionVertices)
         {
-          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInMass, fInPDG, fInProcess, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutMass, fOutPDG, fOutProcess, fDeltaKE);
+          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInMass, fInPDG, fInProcess, fInId, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutMass, fOutPDG, fOutProcess, fOutId, fDeltaKE, fEvent);
         }
         if (currentMom == 0)
         {
@@ -2026,12 +2030,13 @@ namespace
     TTree* fInteractionTree,
     float& fInX, float& fInY, float& fInZ, float& fInT,
     float& fInPx, float& fInPy, float& fInPz, float& fInE, float& fInMass, int& fInPDG,
-    std::string& fInProcess,
+    std::string& fInProcess, int& fInId,
     std::vector<float>& fOutX, std::vector<float>& fOutY,
     std::vector<float>& fOutZ, std::vector<float>& fOutT,
     std::vector<float>& fOutPx, std::vector<float>& fOutPy,
     std::vector<float>& fOutPz, std::vector<float>& fOutE, std::vector<float>& fOutMass,
-    std::vector<int>& fOutPDG, std::vector<std::string>& fOutProcess, float& fDeltaKE) {
+    std::vector<int>& fOutPDG, std::vector<std::string>& fOutProcess, std::vector<int>& fOutId,
+    float& fDeltaKE, int& fEvent) {
 
   // Clear outgoing particle containers
   fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
@@ -2048,6 +2053,7 @@ namespace
   fInMass = inMass;
   fInPDG = incoming->PdgCode();
   fInProcess = incoming->EndProcess();
+  fInId = incoming->TrackId();
 
   int incomingID = incoming->TrackId();
   double minDist = 1e10;
@@ -2114,7 +2120,7 @@ namespace
     // Clear outgoing vectors for this time cluster
     fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
     fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear(); fOutMass.clear();
-    fOutPDG.clear(); fOutProcess.clear();
+    fOutPDG.clear(); fOutProcess.clear(); fOutId.clear();
 
     for (const simb::MCParticle* daughter : kv.second) {
       const TLorentzVector& pos = daughter->Position(0);
@@ -2134,6 +2140,7 @@ namespace
       fOutMass.push_back(outMass);
       fOutPDG.push_back(daughter->PdgCode());
       fOutProcess.push_back(daughter->EndProcess());
+      fOutId.push_back(daughter->TrackId());
     }
     //std::cout << "Incoming particle process: " << fInProcess << std::endl;
 
@@ -2151,6 +2158,7 @@ namespace
         fOutMass.push_back(inMass);
         fOutPDG.push_back(incoming->PdgCode());
         fOutProcess.push_back("nucleonScat");
+        fOutId.push_back(incoming->TrackId());
       }
 
       // if(dies && fInProcess == "Decay" && std::abs(fOutT.back() - fInT) < timeEpsilon){
