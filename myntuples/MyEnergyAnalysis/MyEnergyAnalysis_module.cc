@@ -1853,7 +1853,8 @@ namespace
   {
     if (!currentpart)
       return;
-
+    // if (depth > 1000)//do we need a depth limit?
+    // return;
     int momId = currentpart->Mother();
     if (momId <= 0)
       return;
