@@ -196,6 +196,12 @@ namespace lar
       double fExitKE_sum;                     // sum of first-exit KE over primary particles (GeV)
       double fExitKE_max;                     // max first-exit KE among primaries (GeV)
       TH2D *hEnuVsExit = nullptr;
+      TH1D *hExit_mu = nullptr;
+      TH1D *hExit_p = nullptr;
+      TH1D *hExit_n = nullptr;
+      TH1D *hExit_pip = nullptr;
+      TH1D *hExit_pim = nullptr;
+      TH1D *hExit_other = nullptr;
       // The n-tuple to create
       TTree *fNtuple;
 
@@ -390,11 +396,13 @@ namespace lar
       fInteractionTree = tfs->make<TTree>("HadronicTree", "Hadronic Interaction Information");
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
-      hEnuVsExit = tfs->make<TH2D>(
-          "hEnuVsExit",
-          "Neutrino energy vs exited energy;E_{#nu} [GeV];E_{exit} [GeV]",
-          200, 0, 10,
-          200, 0, 10);
+      hEnuVsExit = tfs->make<TH2D>("hEnuVsExit", "Neutrino energy vs exited energy;E_{#nu} [GeV];E_{exit} [GeV]", 200, 0, 10, 200, 0, 10);
+      hExit_mu = tfs->make<TH1D>("hExit_mu", "Exited KE (primary mu);KE_{exit} [GeV];Entries", 200, 0, 10);
+      hExit_p = tfs->make<TH1D>("hExit_p", "Exited KE (primary p);KE_{exit} [GeV];Entries", 200, 0, 10);
+      hExit_n = tfs->make<TH1D>("hExit_n", "Exited KE (primary n);KE_{exit} [GeV];Entries", 200, 0, 10);
+      hExit_pip = tfs->make<TH1D>("hExit_pip", "Exited KE (primary #pi^{+});KE_{exit} [GeV];Entries", 200, 0, 10);
+      hExit_pim = tfs->make<TH1D>("hExit_pim", "Exited KE (primary #pi^{-});KE_{exit} [GeV];Entries", 200, 0, 10);
+      hExit_other = tfs->make<TH1D>("hExit_other", "Exited KE (other primaries);KE_{exit} [GeV];Entries", 200, 0, 10);
 
       // Now define branches (after trees exist)
       fNtuple->Branch("ExitKE_sum", &fExitKE_sum, "ExitKE_sum/D");
@@ -903,12 +911,11 @@ namespace lar
 
       for (int i = 0; i < fSim_nParticles; i++)
       {
-        const simb::MCParticle &particleVec = *(SimParticles[i]);
+        onst simb::MCParticle &particleVec = *(SimParticles[i]);
 
         if (particleVec.Process() != "primary")
           continue;
 
-        // skip neutrinos
         int pdg = particleVec.PdgCode();
         if (std::abs(pdg) == 12 || std::abs(pdg) == 14 || std::abs(pdg) == 16)
           continue;
@@ -918,9 +925,22 @@ namespace lar
         if (ke_exit > 0)
         {
           fExitKE_sum += ke_exit;
-
           if (fExitKE_max < 0 || ke_exit > fExitKE_max)
             fExitKE_max = ke_exit;
+
+          // NEW: fill per-particle histograms
+          if (std::abs(pdg) == 13 && hExit_mu)
+            hExit_mu->Fill(ke_exit);
+          else if (pdg == 2212 && hExit_p)
+            hExit_p->Fill(ke_exit);
+          else if (pdg == 2112 && hExit_n)
+            hExit_n->Fill(ke_exit);
+          else if (pdg == 211 && hExit_pip)
+            hExit_pip->Fill(ke_exit);
+          else if (pdg == -211 && hExit_pim)
+            hExit_pim->Fill(ke_exit);
+          else if (hExit_other)
+            hExit_other->Fill(ke_exit);
         }
       }
 
@@ -1020,11 +1040,11 @@ namespace lar
         const TLorentzVector &primary_end_4vector = primaryVec.Momentum(primary_end);
         primary_end_energy = primary_end_4vector.E();
         if (primary_particle == "1" || primary_particle == "2" || primary_particle == "3" ||
-    primary_particle == "4" || primary_particle == "7" || primary_particle == "8" ||
-    primary_particle == "9")
-{
-  primary_end_energy -= primaryVec.Mass();
-}
+            primary_particle == "4" || primary_particle == "7" || primary_particle == "8" ||
+            primary_particle == "9")
+        {
+          primary_end_energy -= primaryVec.Mass();
+        }
         combined_string += primary_particle;
         if (primary_particle != "8")
         { // Exclude neutron interactions for now
@@ -1287,9 +1307,20 @@ namespace lar
       hEnuVsExit->Draw("colz");
       c.SaveAs("Enu_vs_Eexit.png");
       c.SaveAs("Enu_vs_Eexit.pdf");
-    }
-    DEFINE_ART_MODULE(MyEnergyAnalysis)
-  } // namespace example
+      h->Draw("hist");
+      c.SaveAs((std::string(base) + ".png").c_str());
+      c.SaveAs((std::string(base) + ".pdf").c_str());
+    };
+
+    save1(hExit_mu, "ExitKE_mu");
+    save1(hExit_p, "ExitKE_p");
+    save1(hExit_n, "ExitKE_n");
+    save1(hExit_pip, "ExitKE_pip");
+    save1(hExit_pim, "ExitKE_pim");
+    save1(hExit_other, "ExitKE_other");
+  }
+  DEFINE_ART_MODULE(MyEnergyAnalysis)
+} // namespace example
 } // namespace lar
 
 // Back to our local namespace.
