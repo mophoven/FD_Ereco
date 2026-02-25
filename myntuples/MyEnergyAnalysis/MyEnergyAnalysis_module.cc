@@ -43,6 +43,9 @@
 #include "TLorentzVector.h"
 #include "TTree.h"
 #include "TVector3.h"
+#include "TH2.h"
+#include "TCanvas.h"
+#include "TROOT.h"
 
 // C++ includes
 #include <cmath>
@@ -110,8 +113,8 @@ namespace
   void getAncestors(const simb::MCParticle *currentpart,
                     std::vector<int> &Mothers,
                     const std::map<int, const simb::MCParticle *> &particleMap);
-  void ReportFirstExitRootOnly(const simb::MCParticle &part,
-                               const std::map<int, const simb::MCParticle *> &particleMap);
+  double ReportFirstExitRootOnly(const simb::MCParticle &part,
+                                 const std::map<int, const simb::MCParticle *> &particleMap);
 
   // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
 
@@ -184,12 +187,15 @@ namespace lar
 
       // The analysis routine, called once per event.
       virtual void analyze(const art::Event &event) override;
+      virtual void beginJob() override;
 
     private:
       // The parameters we will read from the .fcl file.
       art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
-
+      double fExitKE_sum;                     // sum of first-exit KE over primary particles (GeV)
+      double fExitKE_max;                     // max first-exit KE among primaries (GeV)
+      TH2D *hEnuVsExit = nullptr;
       // The n-tuple to create
       TTree *fNtuple;
 
@@ -376,6 +382,14 @@ namespace lar
       // Get the detector length
       const double detectorLength = DetectorDiagonal(*fGeometryService);
       std::cout << "Detector length=" << detectorLength << " cm" << std::endl;
+
+      fNtuple->Branch("ExitKE_sum", &fExitKE_sum, "ExitKE_sum/D");
+      fNtuple->Branch("ExitKE_max", &fExitKE_max, "ExitKE_max/D");
+      hEnuVsExit = tfs->make<TH2D>(
+          "hEnuVsExit",
+          "Neutrino energy vs exited energy;E_{#nu} [GeV];E_{exit} [GeV]",
+          200, 0, 10,
+          200, 0, 10);
 
       // Access art's TFileService, which will handle creating and writing
       // histograms and n-tuples for us.
@@ -1006,50 +1020,37 @@ namespace lar
 
       // Store info for leading E sim numu GEANT 4 level
 
+      // Compute exited energy using ReportFirstExitRootOnly
+
+      fExitKE_sum = 0.0;
+      fExitKE_max = -9999.0;
+
       for (int i = 0; i < fSim_nParticles; i++)
       {
         const simb::MCParticle &particleVec = *(SimParticles[i]);
 
-        // const int last = Ntrajpoints - 1;
-        // const TLorentzVector& positionStart = particleVec.Position(0);
-        // const TLorentzVector& positionEnd = particleVec.Position(last);
-        // const TLorentzVector& momentumStart = particleVec.Momentum(0);
-        // const TLorentzVector& momentumEnd = particleVec.Momentum(last);
-        //  New stuff
-        // double fXmin, fXmax, fYmin, fYmax, fZmin, fZmax;
-        // auto const &geom = *fGeometryService;
-        // fXmin = -geom.DetLength();
-        // fXmax = geom.DetLength();
-        // fYmin = -geom.DetHalfWidth()*2;
-        // fYmax = geom.DetHalfWidth()*2;
-        // fZmin = -geom.DetHalfHeight()*2;
-        // fZmax = geom.DetHalfHeight()*2;
-        // std::cout << fXmax << " ," << fYmin << "," << fYmax << "," << fZmin << "," << fZmax << std::endl;
+        if (particleVec.Process() != "primary")
+          continue;
 
-        // 2) Loop over each particle
-        // for (int l=0; l<fSim_nParticles; l++) {
+        // skip neutrinos
+        int pdg = particleVec.PdgCode();
+        if (std::abs(pdg) == 12 || std::abs(pdg) == 14 || std::abs(pdg) == 16)
+          continue;
 
-        /*fSim_start_4position.push_back(positionStart.X());
-    fSim_start_4position.push_back(positionStart.Y());
-    fSim_start_4position.push_back(positionStart.Z());
-    fSim_start_4position.push_back(positionStart.T());
-        fSim_end_4position.push_back(positionEnd.X());
-    fSim_end_4position.push_back(positionEnd.Y());
-    fSim_end_4position.push_back(positionEnd.Z());
-    fSim_end_4position.push_back(positionEnd.T());
-        fSim_start_4mommenta.push_back(momentumStart.Px());
-    fSim_start_4mommenta.push_back(momentumStart.Py());
-    fSim_start_4mommenta.push_back(momentumStart.Pz());
-    fSim_start_4mommenta.push_back(momentumStart.E());
-        fSim_end_4mommenta.push_back(momentumEnd.Px());
-    fSim_end_4mommenta.push_back(momentumEnd.Py());
-    fSim_end_4mommenta.push_back(momentumEnd.Pz());
-    fSim_end_4mommenta.push_back(momentumEnd.E());
-    }*/
-        // loop over every trajectory point, compare to geometry,
-        if (particleVec.Process() == "primary")
-          ReportFirstExitRootOnly(particleVec, particleMap);
+        double ke_exit = ReportFirstExitRootOnly(particleVec, particleMap);
+
+        if (ke_exit > 0)
+        {
+          fExitKE_sum += ke_exit;
+
+          if (fExitKE_max < 0 || ke_exit > fExitKE_max)
+            fExitKE_max = ke_exit;
+        }
       }
+
+      // Fill histogram (event level)
+      if (hEnuVsExit && fGen_numu_E > 0 && fExitKE_sum > 0)
+        hEnuVsExit->Fill(fGen_numu_E, fExitKE_sum);
       // End four-vector collection
 
       // Collecting all Daughters of Each primary
@@ -1397,7 +1398,17 @@ namespace lar
     // This macro has to be defined for this module to be invoked from a
     // .fcl file; see MyEnergyAnalysis.fcl for more information.
     DEFINE_ART_MODULE(MyEnergyAnalysis)
+    void lar::example::MyEnergyAnalysis::endJob()
+{
+  gROOT->SetBatch(kTRUE);
 
+  if (!hEnuVsExit) return;
+
+  TCanvas c;
+  hEnuVsExit->Draw("colz");
+  c.SaveAs("Enu_vs_Eexit.png");
+  c.SaveAs("Enu_vs_Eexit.pdf");
+}
   } // namespace example
 } // namespace lar
 
@@ -1867,8 +1878,8 @@ namespace
     getAncestors(it->second, Mothers, particleMap);
   }
 
-  void ReportFirstExitRootOnly(const simb::MCParticle &part,
-                               const std::map<int, const simb::MCParticle *> &particleMap)
+  double ReportFirstExitRootOnly(const simb::MCParticle &part,
+                                 const std::map<int, const simb::MCParticle *> &particleMap)
   {
     const double X_MIN = -400.0, X_MAX = 400.0;
     const double Y_MIN = -600.0, Y_MAX = 600.0;
@@ -1881,20 +1892,22 @@ namespace
              (p.Z() >= Z_MIN && p.Z() <= Z_MAX);
     };
 
+    // keep your "only primaries" behavior
     std::vector<int> moms;
     getAncestors(&part, moms, particleMap);
     if (!moms.empty())
-      return;
+      return -9999.0;
 
     const size_t Ntraj = part.NumberTrajectoryPoints();
     if (Ntraj == 0)
-      return;
+      return -9999.0;
 
     bool hasEntered = false;
     for (size_t ipt = 0; ipt < Ntraj; ++ipt)
     {
       const TLorentzVector &pos = part.Position(ipt);
-      bool in = inside(pos);
+      const bool in = inside(pos);
+
       if (!hasEntered)
       {
         if (in)
@@ -1908,13 +1921,12 @@ namespace
           double KE = p4.E() - part.Mass();
           if (KE < 0)
             KE = 0;
-          std::cout << "Particle " << part.TrackId()
-                    << " EXITED at pt " << ipt
-                    << " with KE=" << KE << " GeV  motherID=0\n";
-          return;
+          return KE; // GeV
         }
       }
     }
+
+    return -9999.0;
   }
 
 } // local namespace
