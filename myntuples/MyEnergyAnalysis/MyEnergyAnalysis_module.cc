@@ -1297,40 +1297,42 @@ namespace lar
     // .fcl file; see MyEnergyAnalysis.fcl for more information.
 
     void lar::example::MyEnergyAnalysis::endJob()
-{
-  gROOT->SetBatch(kTRUE);
+    {
+      gROOT->SetBatch(kTRUE);
 
-  auto save1 = [](TH1* h, const std::string& base)
-  {
-    if (!h) return;
-    TCanvas c;
-    h->Draw("hist");
-    c.SaveAs((base + ".png").c_str());
-    c.SaveAs((base + ".pdf").c_str());
-  };
+      auto save1 = [](TH1 *h, const std::string &base)
+      {
+        if (!h)
+          return;
+        TCanvas c;
+        h->Draw("hist");
+        
+        c.SaveAs((base + ".pdf").c_str());
+      };
 
-  auto save2 = [](TH2* h, const std::string& base)
-  {
-    if (!h) return;
-    TCanvas c;
-    h->Draw("colz");
-    c.SaveAs((base + ".png").c_str());
-    c.SaveAs((base + ".pdf").c_str());
-  };
+      auto save2 = [](TH2 *h, const std::string &base)
+      {
+        if (!h)
+          return;
+        TCanvas c;
+        h->Draw("colz");
+        
+        c.SaveAs((base + ".pdf").c_str());
+      };
 
-  // examples:
-  save1(hExit_mu,    "ExitKE_mu");
-  save1(hExit_p,     "ExitKE_p");
-  save1(hExit_n,     "ExitKE_n");
-  save1(hExit_pip,   "ExitKE_pip");
-  save1(hExit_pim,   "ExitKE_pim");
-  save1(hExit_other, "ExitKE_other");
+      // examples:
+      save1(hExit_mu, "ExitKE_mu");
+      save1(hExit_p, "ExitKE_p");
+      save1(hExit_n, "ExitKE_n");
+      save1(hExit_pip, "ExitKE_pip");
+      save1(hExit_pim, "ExitKE_pim");
+      save1(hExit_other, "ExitKE_other");
 
-  save2(hEnuVsExit,  "Enu_vs_Exit");
-}
-  
-  DEFINE_ART_MODULE(MyEnergyAnalysis)
-} // namespace example
+      save2(hEnuVsExit, "Enu_vs_Exit");
+    }
+
+    DEFINE_ART_MODULE(MyEnergyAnalysis)
+  } // namespace example
 } // namespace lar
 
 // Back to our local namespace.
