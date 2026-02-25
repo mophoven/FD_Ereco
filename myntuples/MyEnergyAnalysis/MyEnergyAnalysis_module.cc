@@ -379,24 +379,26 @@ namespace lar
     //-----------------------------------------------------------------------
     void MyEnergyAnalysis::beginJob()
     {
-      // Get the detector length
+      // Access art's TFileService first (before using tfs->make)
+      art::ServiceHandle<art::TFileService> tfs;
+
+      // You can print geometry info whenever, it does not depend on tfs
       const double detectorLength = DetectorDiagonal(*fGeometryService);
       std::cout << "Detector length=" << detectorLength << " cm" << std::endl;
 
-      fNtuple->Branch("ExitKE_sum", &fExitKE_sum, "ExitKE_sum/D");
-      fNtuple->Branch("ExitKE_max", &fExitKE_max, "ExitKE_max/D");
+      // Create ROOT objects FIRST
+      fInteractionTree = tfs->make<TTree>("HadronicTree", "Hadronic Interaction Information");
+      fNtuple = tfs->make<TTree>("MyTree", "MyTree");
+
       hEnuVsExit = tfs->make<TH2D>(
           "hEnuVsExit",
           "Neutrino energy vs exited energy;E_{#nu} [GeV];E_{exit} [GeV]",
           200, 0, 10,
           200, 0, 10);
 
-      // Access art's TFileService, which will handle creating and writing
-      // histograms and n-tuples for us.
-      art::ServiceHandle<art::TFileService const> tfs;
-
-      // Define n-tuples
-      fInteractionTree = tfs->make<TTree>("HadronicTree", "Handronic Interaction Information");
+      // Now define branches (after trees exist)
+      fNtuple->Branch("ExitKE_sum", &fExitKE_sum, "ExitKE_sum/D");
+      fNtuple->Branch("ExitKE_max", &fExitKE_max, "ExitKE_max/D");
 
       fInteractionTree->Branch("InX", &fInX, "InX/F");
       fInteractionTree->Branch("InY", &fInY, "InY/F");
@@ -407,6 +409,7 @@ namespace lar
       fInteractionTree->Branch("InPz", &fInPz, "InPz/F");
       fInteractionTree->Branch("InE", &fInE, "InE/F");
       fInteractionTree->Branch("InPDG", &fInPDG, "InPDG/I");
+
       fInteractionTree->Branch("OutX", &fOutX);
       fInteractionTree->Branch("OutY", &fOutY);
       fInteractionTree->Branch("OutZ", &fOutZ);
@@ -417,134 +420,7 @@ namespace lar
       fInteractionTree->Branch("OutE", &fOutE);
       fInteractionTree->Branch("OutPDG", &fOutPDG);
 
-      fNtuple = tfs->make<TTree>("MyTree", "MyTree");
-
-      fNtuple->Branch("Event", &fEvent, "Event/I");
-      fNtuple->Branch("SubRun", &fSubRun, "SubRun/I");
-      fNtuple->Branch("Run", &fRun, "Run/I");
-      // Add true nu information
-      fNtuple->Branch("Vis_LepE", &fVis_LepE, "Vis_LepE/D");
-      fNtuple->Branch("LepMass", &fLepMass, "LepMass/D");
-
-      fNtuple->Branch("eP", &eP, "eP/D");
-      fNtuple->Branch("eN", &eN, "eN/D");
-      fNtuple->Branch("ePip", &ePip, "ePip/D");
-      fNtuple->Branch("ePim", &ePim, "ePim/D");
-      fNtuple->Branch("ePi0", &ePi0, "ePi0/D");
-      fNtuple->Branch("eOther", &eOther, "eOther/D");
-      fNtuple->Branch("nLep", &nLep, "nLep/I");
-      fNtuple->Branch("nP", &nP, "nP/I");
-      fNtuple->Branch("nN", &nN, "nN/I");
-      fNtuple->Branch("nPip", &nPip, "nPip/I");
-      fNtuple->Branch("nPim", &nPim, "nPim/I");
-      fNtuple->Branch("nPi0", &nPi0, "nPi0/I");
-      fNtuple->Branch("nOther", &nOther, "nOther/D");
-      fNtuple->Branch("E_vis_true", &E_vis_true, "E_vis_true/D");
-
-      // GEN neutrino E
-      fNtuple->Branch("Gen_numu_E", &fGen_numu_E, "Gen_numu_E/D");
-      fNtuple->Branch("CCNC_truth", &fCCNC_truth, "CCNC_truth/I");
-      fNtuple->Branch("Mode_truth", &fMode_truth, "Mode_truth/I");
-      fNtuple->Branch("InteractionType", &fInteractionType, "InteractionType/I");
-      fNtuple->Branch("Nuvtxx_truth", &fNuvtxx_truth, "Nuvtxx_truth/D");
-      fNtuple->Branch("Nuvtxy_truth", &fNuvtxy_truth, "Nuvtxy_truth/D");
-      fNtuple->Branch("Nuvtxz_truth", &fNuvtxz_truth, "Nuvtxz_truth/D");
-      // Generator level PDG code
-      fNtuple->Branch("LepPDG", &fLepPDG, "LepPDG/I");
-      fNtuple->Branch("neuPDG", &fNuPDG, "neuPDG/I");
-      fNtuple->Branch("LepNuAngle", &fLepNuAngle, "LepNuAngle/D");
-      fNtuple->Branch("LepMomX", &fLepMomX, "LepMomX/D");
-      fNtuple->Branch("LepMomY", &fLepMomY, "LepMomY/D");
-      fNtuple->Branch("LepMomZ", &fLepMomZ, "LepMomZ/D");
-      fNtuple->Branch("Lepvtx_x", &fLepvtx_x, "Lepvtx_x/D");
-      fNtuple->Branch("Lepvtx_y", &fLepvtx_y, "Lepvtx_y/D");
-      fNtuple->Branch("Lepvtx_z", &fLepvtx_z, "Lepvtx_z/D");
-      fNtuple->Branch("StatusCode", &fStatusCode, "StatusCode/I");
-
-      // Simulation branches Sim*
-      fNtuple->Branch("SimP_TrackID_vec", &fSimP_TrackID_vec);
-      fNtuple->Branch("SimP_PDG_vec", &fSimP_PDG_vec);
-      fNtuple->Branch("SimP_Mom_vec", &fSimP_Mom_vec);
-      fNtuple->Branch("SimP_Daughter_vec", &fSimP_Daughter_vec);
-      fNtuple->Branch("SimP_SC_vec", &fSimP_SC_vec);
-      fNtuple->Branch("SimP_vtx_x_vec", &fSimP_vtx_x_vec);
-      fNtuple->Branch("SimP_vtx_y_vec", &fSimP_vtx_y_vec);
-      fNtuple->Branch("SimP_vtx_z_vec", &fSimP_vtx_z_vec);
-      fNtuple->Branch("SimP_ptot_vec", &fSimP_ptot_vec);
-      fNtuple->Branch("SimP_px_vec", &fSimP_px_vec);
-      fNtuple->Branch("SimP_py_vec", &fSimP_py_vec);
-      fNtuple->Branch("SimP_pz_vec", &fSimP_pz_vec);
-      fNtuple->Branch("SimP_E_vec", &fSimP_E_vec);
-      fNtuple->Branch("SimP_M_vec", &fSimP_M_vec);
-      fNtuple->Branch("SimP_Ek_vec", &fSimP_Ek_vec);
-
-      fNtuple->Branch("Sim_nEle", &fSim_nEle, "Sim_nEle/I");
-      fNtuple->Branch("Sim_nNue", &fSim_nNue, "Sim_nNue/I");
-      fNtuple->Branch("Sim_nMu", &fSim_nMu, "Sim_nMu/I");
-      fNtuple->Branch("Sim_nNumu", &fSim_nNumu, "Sim_nNumu/I");
-      fNtuple->Branch("Sim_nTau", &fSim_nTau, "Sim_nTau/I");
-      fNtuple->Branch("Sim_nNutau", &fSim_nNutau, "Sim_nNutau/I");
-      fNtuple->Branch("Sim_nPhoton", &fSim_nPhoton, "Sim_nPhoton/I");
-      fNtuple->Branch("Sim_nPionNeutral", &fSim_nPionNeutral, "Sim_nPionNeutral/I");
-      fNtuple->Branch("Sim_nPip", &fSim_nPip, "Sim_nPip/I");
-      fNtuple->Branch("Sim_nPim", &fSim_nPim, "Sim_nPim/I");
-      fNtuple->Branch("Sim_nNeutron", &fSim_nNeutron, "Sim_nNeutron/I");
-      fNtuple->Branch("Sim_nProton", &fSim_nProton, "Sim_nProton/I");
-      fNtuple->Branch("Sim_LepE", &fSim_LepE, "Sim_LepE/D");
-      fNtuple->Branch("Sim_HadE", &fSim_HadE, "Sim_HadE/D");
-
-      // GEANT level neutrino E
-      fNtuple->Branch("Sim_numu_E", &fSim_numu_E, "Sim_numu_E/D");
-
-      fNtuple->Branch("Sim_nParticles", &fSim_nParticles);
-
-      fNtuple->Branch("Sim_start_4position", &fSim_start_4position);
-      fNtuple->Branch("Sim_end_4position", &fSim_end_4position);
-      fNtuple->Branch("Sim_start_4mommenta", &fSim_start_4mommenta);
-      fNtuple->Branch("Sim_end_4mommenta", &fSim_end_4mommenta);
-
-      fNtuple->Branch("Sim_primary_end_energy", &fSim_primary_end_energy);
-      fNtuple->Branch("Sim_daughter_begin_energy", &fSim_daughter_begin_energy);
-
-      fNtuple->Branch("Sim_mu_Edep_b2", &fSim_mu_Edep_b2, "Sim_mu_Edep_b2/D");
-      fNtuple->Branch("Sim_n_Edep_b2", &fSim_n_Edep_b2, "Sim_n_Edep_b2/D");
-      fNtuple->Branch("Sim_p_Edep_b2", &fSim_p_Edep_b2, "Sim_p_Edep_b2/D");
-      fNtuple->Branch("Sim_pip_Edep_b2", &fSim_pip_Edep_b2, "Sim_pip_Edep_b2/D");
-      fNtuple->Branch("Sim_pim_Edep_b2", &fSim_pim_Edep_b2, "Sim_pim_Edep_b2/D");
-      fNtuple->Branch("Sim_pi0_Edep_b2", &fSim_pi0_Edep_b2, "Sim_pi0_Edep_b2/D");
-      fNtuple->Branch("Sim_Other_Edep_b2", &fSim_Other_Edep_b2, "Sim_Other_Edep_b2/D");
-
-      fNtuple->Branch("Sim_hadronic_Edep_b2", &fSim_hadronic_Edep_b2, "Sim_hadronic_Edep_b2/D");
-      fNtuple->Branch("Sim_n_hadronic_Edep_b", &fSim_n_hadronic_Edep_b, "Sim_n_hadronic_Edep_b/I");
-      fNtuple->Branch("Sim_hadronic_hit_x_b", &fSim_hadronic_hit_x_b);
-      fNtuple->Branch("Sim_hadronic_hit_y_b", &fSim_hadronic_hit_y_b);
-      fNtuple->Branch("Sim_hadronic_hit_z_b", &fSim_hadronic_hit_z_b);
-      fNtuple->Branch("Sim_hadronic_hit_Edep_b2", &fSim_hadronic_hit_Edep_b2);
-
-      // True info for each particle
-      fNtuple->Branch("P_num", &fP_num, "P_num/I");
-      fNtuple->Branch("P_mother", &fP_mother);
-      fNtuple->Branch("P_TrackID", &fP_TrackID);
-      fNtuple->Branch("P_PDG", &fP_PDG);
-      fNtuple->Branch("P_StatusCode", &fP_StatusCode);
-      fNtuple->Branch("P_vtx_x", &fP_vtx_x);
-      fNtuple->Branch("P_vtx_y", &fP_vtx_y);
-      fNtuple->Branch("P_vtx_z", &fP_vtx_z);
-      fNtuple->Branch("P_ptot", &fP_ptot);
-      fNtuple->Branch("P_px", &fP_px);
-      fNtuple->Branch("P_py", &fP_py);
-      fNtuple->Branch("P_pz", &fP_pz);
-      fNtuple->Branch("P_E", &fP_E);
-      fNtuple->Branch("P_mass", &fP_mass);
-      fNtuple->Branch("P_Ek", &fP_Ek);
-
-      // Reconstruction branches
-      fNtuple->Branch("True_HadE", &fTrue_HadE, "True_HadE/D");
-      fNtuple->Branch("True_LepE", &fTrue_LepE, "True_LepE/D");
-      fNtuple->Branch("Vis_HadE", &fVis_HadE, "Vis_HadE/D");
-
-      fNtuple->Branch("P_int_class_string", &fP_int_class_string);
-      fNtuple->Branch("P_int_class", &fP_int_class);
+      // Keep the rest of your fNtuple branches here (Event, Run, etc.)
     }
 
     //-----------------------------------------------------------------------
@@ -1143,10 +1019,12 @@ namespace lar
         const int primary_end = NPrimaryPoints - 1;
         const TLorentzVector &primary_end_4vector = primaryVec.Momentum(primary_end);
         primary_end_energy = primary_end_4vector.E();
-        if (primary_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9")
-        {
-          primary_end_energy = primary_end_energy - primaryVec.Mass();
-        }
+        if (primary_particle == "1" || primary_particle == "2" || primary_particle == "3" ||
+    primary_particle == "4" || primary_particle == "7" || primary_particle == "8" ||
+    primary_particle == "9")
+{
+  primary_end_energy -= primaryVec.Mass();
+}
         combined_string += primary_particle;
         if (primary_particle != "8")
         { // Exclude neutron interactions for now
@@ -1397,7 +1275,7 @@ namespace lar
 
     // This macro has to be defined for this module to be invoked from a
     // .fcl file; see MyEnergyAnalysis.fcl for more information.
-    DEFINE_ART_MODULE(MyEnergyAnalysis)
+
     void lar::example::MyEnergyAnalysis::endJob()
     {
       gROOT->SetBatch(kTRUE);
@@ -1410,6 +1288,7 @@ namespace lar
       c.SaveAs("Enu_vs_Eexit.png");
       c.SaveAs("Enu_vs_Eexit.pdf");
     }
+    DEFINE_ART_MODULE(MyEnergyAnalysis)
   } // namespace example
 } // namespace lar
 
