@@ -911,7 +911,7 @@ namespace lar
 
       for (int i = 0; i < fSim_nParticles; i++)
       {
-        onst simb::MCParticle &particleVec = *(SimParticles[i]);
+        const simb::MCParticle &particleVec = *(SimParticles[i]);
 
         if (particleVec.Process() != "primary")
           continue;
@@ -1297,28 +1297,38 @@ namespace lar
     // .fcl file; see MyEnergyAnalysis.fcl for more information.
 
     void lar::example::MyEnergyAnalysis::endJob()
-    {
-      gROOT->SetBatch(kTRUE);
+{
+  gROOT->SetBatch(kTRUE);
 
-      if (!hEnuVsExit)
-        return;
+  auto save1 = [](TH1* h, const std::string& base)
+  {
+    if (!h) return;
+    TCanvas c;
+    h->Draw("hist");
+    c.SaveAs((base + ".png").c_str());
+    c.SaveAs((base + ".pdf").c_str());
+  };
 
-      TCanvas c;
-      hEnuVsExit->Draw("colz");
-      c.SaveAs("Enu_vs_Eexit.png");
-      c.SaveAs("Enu_vs_Eexit.pdf");
-      h->Draw("hist");
-      c.SaveAs((std::string(base) + ".png").c_str());
-      c.SaveAs((std::string(base) + ".pdf").c_str());
-    };
+  auto save2 = [](TH2* h, const std::string& base)
+  {
+    if (!h) return;
+    TCanvas c;
+    h->Draw("colz");
+    c.SaveAs((base + ".png").c_str());
+    c.SaveAs((base + ".pdf").c_str());
+  };
 
-    save1(hExit_mu, "ExitKE_mu");
-    save1(hExit_p, "ExitKE_p");
-    save1(hExit_n, "ExitKE_n");
-    save1(hExit_pip, "ExitKE_pip");
-    save1(hExit_pim, "ExitKE_pim");
-    save1(hExit_other, "ExitKE_other");
-  }
+  // examples:
+  save1(hExit_mu,    "ExitKE_mu");
+  save1(hExit_p,     "ExitKE_p");
+  save1(hExit_n,     "ExitKE_n");
+  save1(hExit_pip,   "ExitKE_pip");
+  save1(hExit_pim,   "ExitKE_pim");
+  save1(hExit_other, "ExitKE_other");
+
+  save2(hEnuVsExit,  "Enu_vs_Exit");
+}
+  
   DEFINE_ART_MODULE(MyEnergyAnalysis)
 } // namespace example
 } // namespace lar
