@@ -187,7 +187,7 @@ namespace lar
 
       // The analysis routine, called once per event.
       virtual void analyze(const art::Event &event) override;
-      virtual void beginJob() override;
+      void endJob() override;
 
     private:
       // The parameters we will read from the .fcl file.
@@ -1399,16 +1399,17 @@ namespace lar
     // .fcl file; see MyEnergyAnalysis.fcl for more information.
     DEFINE_ART_MODULE(MyEnergyAnalysis)
     void lar::example::MyEnergyAnalysis::endJob()
-{
-  gROOT->SetBatch(kTRUE);
+    {
+      gROOT->SetBatch(kTRUE);
 
-  if (!hEnuVsExit) return;
+      if (!hEnuVsExit)
+        return;
 
-  TCanvas c;
-  hEnuVsExit->Draw("colz");
-  c.SaveAs("Enu_vs_Eexit.png");
-  c.SaveAs("Enu_vs_Eexit.pdf");
-}
+      TCanvas c;
+      hEnuVsExit->Draw("colz");
+      c.SaveAs("Enu_vs_Eexit.png");
+      c.SaveAs("Enu_vs_Eexit.pdf");
+    }
   } // namespace example
 } // namespace lar
 
