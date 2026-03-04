@@ -1804,9 +1804,9 @@ namespace
   double ReportFirstExitRootOnly(const simb::MCParticle &part,
                                  const std::map<int, const simb::MCParticle *> &particleMap)
   {
-    const double X_MIN = -400.0, X_MAX = 400.0;
-    const double Y_MIN = -600.0, Y_MAX = 600.0;
-    const double Z_MIN = 0.0, Z_MAX = 1300.0;
+    const double X_MIN = -359.5, X_MAX = 359.5;
+    const double Y_MIN = -604.0, Y_MAX = 604.0;
+    const double Z_MIN = 0.0, Z_MAX = 1394.0;
 
     auto inside = [&](TLorentzVector const &p)
     {
@@ -1895,3 +1895,7 @@ namespace
 //  On Windows Shift + Alt + F
 // using the data making plots of one each different kind of particles with exited energy and one with ploting neutrino energy vs exited energy
 // getting the data to useable space: new root tree
+// compare energy of exited  with the sum of the energy
+// try to make figure 3.2 from the thesis
+// total - Edep vs exited to see linear coloration
+// as many points as possible to see the correlation
