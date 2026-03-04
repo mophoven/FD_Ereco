@@ -104,7 +104,8 @@ namespace
 
   void fillInteractionTree(const simb::MCParticle*, const Vertex&, const std::map<int, const simb::MCParticle*>&, TTree*, 
                             float&, float&, float&, float&, float&, float&, float&, float&, float&, int&, std::string&, int&, std::vector<float>&, std::vector<float>&,
-                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>& , std::vector<int>&, std::vector<std::string>&, std::vector<int>&, float&, int&);
+                            std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<float>&, std::vector<int>&, 
+                            std::vector<std::string>&, std::vector<int>&, float&, int&);
 
   std::vector<Vertex> clusterVertices(const std::vector<const simb::MCParticle*>&);
 
@@ -208,6 +209,7 @@ namespace lar
       std::vector<float> fOutPx, fOutPy, fOutPz, fOutE;
       std::vector<float> fOutMass;
       std::vector<int> fOutPDG, fOutId;
+      std::vector<simb::MCTrajectory> fSimP_Traj_vec; //saving trajectory points
       float fDeltaKE;
       //std::vector<std::char> fOutProcess;
 
@@ -410,6 +412,7 @@ namespace lar
       fInteractionTree->Branch("InPDG", &fInPDG, "InPDG/I");
       fInteractionTree->Branch("InTrackID", &fInId);
       fInteractionTree->Branch("InProcess", &fInProcess, "InProcess/C");
+     
 
       fInteractionTree->Branch("OutX", &fOutX);
       fInteractionTree->Branch("OutY", &fOutY);
@@ -424,12 +427,14 @@ namespace lar
       fInteractionTree->Branch("OutTrackID", &fOutId);
       fInteractionTree->Branch("DeltaKE", &fDeltaKE);
       fInteractionTree->Branch("Event", &fEvent);
+      
 
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
       fNtuple->Branch("Event", &fEvent, "Event/I");
       fNtuple->Branch("SubRun", &fSubRun, "SubRun/I");
       fNtuple->Branch("Run", &fRun, "Run/I");
+      
       // Add true nu information
       fNtuple->Branch("Vis_LepE", &fVis_LepE, "Vis_LepE/D");
       fNtuple->Branch("LepMass", &fLepMass, "LepMass/D");
@@ -471,6 +476,7 @@ namespace lar
 
       // Simulation branches Sim*
       fNtuple->Branch("SimP_TrackID_vec", &fSimP_TrackID_vec);
+      fNtuple->Branch("SimP_Traj_vec", &fSimP_Traj_vec); //added
       fNtuple->Branch("SimP_PDG_vec", &fSimP_PDG_vec);
       fNtuple->Branch("SimP_Mom_vec", &fSimP_Mom_vec);
       fNtuple->Branch("SimP_Daughter_vec", &fSimP_Daughter_vec);
@@ -625,6 +631,7 @@ namespace lar
       fSimP_TrackID_vec.clear();
       EDep_TrackID_vec.clear();
       fSimP_PDG_vec.clear();
+      fSimP_Traj_vec.clear(); //added
       fSimP_Mom_vec.clear();
       fSimP_Daughter_vec.clear();
       fSimP_SC_vec.clear();
@@ -882,13 +889,16 @@ namespace lar
 
         // For the methods you can call for MCParticle, see ${NUSIMDATA_INC}/nusimdata/SimulationBase/MCParticle.h.
         fSimTrackID = particle.TrackId();
+        //fSimP_Traj_vec = particle.Trajectory();
         fSimP_TrackID_vec.push_back(fSimTrackID);
+  
         // Add the address of the MCParticle to the map, with the track ID as the key.
         particleMap[fSimTrackID] = &particle;
 
         // Only for primary particles in the event
         fSimPDG = particle.PdgCode();
         fSimP_PDG_vec.push_back(fSimPDG);
+        fSimP_Traj_vec.push_back(particle.Trajectory());  //added
         fSimP_Mom_vec.push_back(particle.Mother());
         fSimP_SC_vec.push_back(particle.StatusCode());
         fSimP_vtx_x_vec.push_back(particle.Vx());
@@ -1158,7 +1168,11 @@ namespace lar
         // std::cout << "Number of Interaction Vertices for particle: " << fSimP_TrackID_vec[i] << " is: " << interactionVertices.size() << std::endl;
         for (const Vertex &vtx : interactionVertices)
         {
-          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree, fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInMass, fInPDG, fInProcess, fInId, fOutX, fOutY, fOutZ, fOutT, fOutPx, fOutPy, fOutPz, fOutE, fOutMass, fOutPDG, fOutProcess, fOutId, fDeltaKE, fEvent);
+          fillInteractionTree(currentpart, vtx, particleMap, fInteractionTree,
+          fInX, fInY, fInZ, fInT, fInPx, fInPy, fInPz, fInE, fInMass, fInPDG, 
+          fInProcess, fInId, fOutX, fOutY, fOutZ, fOutT,
+          fOutPx, fOutPy, fOutPz, fOutE, fOutMass, fOutPDG, fOutProcess,
+           fOutId, fDeltaKE, fEvent);
         }
         if (currentMom == 0)
         {
@@ -2038,6 +2052,7 @@ namespace
     std::vector<int>& fOutPDG, std::vector<std::string>& fOutProcess, std::vector<int>& fOutId,
     float& fDeltaKE, int& fEvent) {
 
+
   // Clear outgoing particle containers
   fOutX.clear(); fOutY.clear(); fOutZ.clear(); fOutT.clear();
   fOutPx.clear(); fOutPy.clear(); fOutPz.clear(); fOutE.clear(); fOutMass.clear();
@@ -2054,6 +2069,7 @@ namespace
   fInPDG = incoming->PdgCode();
   fInProcess = incoming->EndProcess();
   fInId = incoming->TrackId();
+
 
   int incomingID = incoming->TrackId();
   double minDist = 1e10;
@@ -2141,6 +2157,7 @@ namespace
       fOutPDG.push_back(daughter->PdgCode());
       fOutProcess.push_back(daughter->EndProcess());
       fOutId.push_back(daughter->TrackId());
+      
     }
     //std::cout << "Incoming particle process: " << fInProcess << std::endl;
 
@@ -2197,8 +2214,8 @@ namespace
         totalOutKE += fOutE[i];
        }
 
-       else if(fOutPDG[i] == -2112 || fOutPDG[i] == -2212){
-        totalOutKE += fOutE[i] + fOutMass[i]; //accounts for baryon/antibaryon pair creation
+       else if(fOutPDG[i] == -2112 || fOutPDG[i] == -2212 || fOutPDG[i] == -3112 || fOutPDG[i] == -3222){ //anti proton, neutron, sigma hyperons
+        totalOutKE += fOutE[i] - 2*fOutMass[i]; //subtracting mass of antiptcl we may not see but know is there
        }
 
        else{
@@ -2213,9 +2230,9 @@ namespace
         totalInKE = fInE;
        }
 
-    else if(fInPDG == -2112 || fInPDG == -2212){
-        totalInKE = fInE + fInMass; //accounts for baryon/antibaryon pair creation
-       }
+    else if(fInPDG == -2112 || fInPDG == -2212 || fInPDG == -3112 || fInPDG == -3222){ //anti baryon
+        totalInKE = fInE - 2*fInMass; //if we have antiptcl decay to antiptcl, this will cancel out
+       } 
 
     else{
       totalInKE = fInE - fInMass;
