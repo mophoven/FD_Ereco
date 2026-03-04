@@ -1733,10 +1733,10 @@ namespace
             mass = 11.1749;
             break; 
         case 1000060130: //carbon 13
-            mass = 13.0001;
+            mass = 12.1095; //fixed 3/4/26
             break;
         case 1000060140: //carbon 14
-            mass = 13.046; //sigfigs???
+            mass = 13.0410; //fixed 3/4/26
             break;
         case 1000070130: //nitrogen 13
             mass = 12.1112;
