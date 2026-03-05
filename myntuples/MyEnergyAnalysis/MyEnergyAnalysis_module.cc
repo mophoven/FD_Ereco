@@ -202,6 +202,14 @@ namespace lar
       TH1D *hExit_pip = nullptr;
       TH1D *hExit_pim = nullptr;
       TH1D *hExit_other = nullptr;
+
+      TH2D *hFrac_mu = nullptr;
+      TH2D *hFrac_p = nullptr;
+      TH2D *hFrac_n = nullptr;
+      TH2D *hFrac_pip = nullptr;
+      TH2D *hFrac_pim = nullptr;
+      TH2D *hFrac_pi0 = nullptr;
+      TH2D *hFrac_other = nullptr;
       // The n-tuple to create
       TTree *fNtuple;
 
@@ -403,6 +411,14 @@ namespace lar
       hExit_pip = tfs->make<TH1D>("hExit_pip", "Exited KE (primary #pi^{+});KE_{exit} [GeV];Entries", 200, 0, 10);
       hExit_pim = tfs->make<TH1D>("hExit_pim", "Exited KE (primary #pi^{-});KE_{exit} [GeV];Entries", 200, 0, 10);
       hExit_other = tfs->make<TH1D>("hExit_other", "Exited KE (other primaries);KE_{exit} [GeV];Entries", 200, 0, 10);
+
+      hFrac_mu = tfs->make<TH2D>("hFrac_mu", "#mu deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_p = tfs->make<TH2D>("hFrac_p", "p deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_n = tfs->make<TH2D>("hFrac_n", "n deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_pip = tfs->make<TH2D>("hFrac_pip", "#pi^{+} deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_pim = tfs->make<TH2D>("hFrac_pim", "#pi^{-} deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_pi0 = tfs->make<TH2D>("hFrac_pi0", "#pi^{0} deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_other = tfs->make<TH2D>("hFrac_other", "Other deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
 
       // Now define branches (after trees exist)
       fNtuple->Branch("ExitKE_sum", &fExitKE_sum, "ExitKE_sum/D");
@@ -1288,6 +1304,47 @@ namespace lar
       {
         std::cout << "Particle ID=" << particleHandle->at(particle_index).TrackId() << " has no primary!" << std::endl;
       }
+      const double MeV_to_GeV = 1e-3;
+
+      double dep_mu = fSim_mu_Edep_b2 * MeV_to_GeV;
+      double dep_p = fSim_p_Edep_b2 * MeV_to_GeV;
+      double dep_n = fSim_n_Edep_b2 * MeV_to_GeV;
+      double dep_pip = fSim_pip_Edep_b2 * MeV_to_GeV;
+      double dep_pim = fSim_pim_Edep_b2 * MeV_to_GeV;
+      double dep_pi0 = fSim_pi0_Edep_b2 * MeV_to_GeV;
+      double dep_other = fSim_Other_Edep_b2 * MeV_to_GeV;
+
+      double true_mu = fVis_LepE;
+      double true_p = eP;
+      double true_n = eN;
+      double true_pip = ePip;
+      double true_pim = ePim;
+      double true_pi0 = ePi0;
+      double true_other = eOther;
+
+      auto fillFrac = [&](TH2D *h, double Etrue, double Edep)
+      {
+        if (!h)
+          return;
+        if (fGen_numu_E <= 0)
+          return;
+        if (Etrue <= 0)
+          return;
+
+        double frac = Edep / Etrue;
+        if (frac < 0)
+          frac = 0;
+
+        h->Fill(fGen_numu_E, frac);
+      };
+
+      fillFrac(hFrac_mu, true_mu, dep_mu);
+      fillFrac(hFrac_p, true_p, dep_p);
+      fillFrac(hFrac_n, true_n, dep_n);
+      fillFrac(hFrac_pip, true_pip, dep_pip);
+      fillFrac(hFrac_pim, true_pim, dep_pim);
+      fillFrac(hFrac_pi0, true_pi0, dep_pi0);
+      fillFrac(hFrac_other, true_other, dep_other);
 
       fNtuple->Fill();
 
@@ -1306,7 +1363,7 @@ namespace lar
           return;
         TCanvas c;
         h->Draw("hist");
-        
+
         c.SaveAs((base + ".pdf").c_str());
       };
 
@@ -1316,7 +1373,7 @@ namespace lar
           return;
         TCanvas c;
         h->Draw("colz");
-        
+
         c.SaveAs((base + ".pdf").c_str());
       };
 
@@ -1329,6 +1386,13 @@ namespace lar
       save1(hExit_other, "ExitKE_other");
 
       save2(hEnuVsExit, "Enu_vs_Exit");
+      save2(hFrac_mu, "Frac_mu");
+save2(hFrac_p, "Frac_p");
+save2(hFrac_n, "Frac_n");
+save2(hFrac_pip, "Frac_pip");
+save2(hFrac_pim, "Frac_pim");
+save2(hFrac_pi0, "Frac_pi0");
+save2(hFrac_other, "Frac_other");
     }
 
     DEFINE_ART_MODULE(MyEnergyAnalysis)
