@@ -1236,7 +1236,7 @@ namespace lar
                 {
                   fSim_pi0_Edep_b2 += energyDeposit.energy;
                 } // std::cout << "fire pi0! " << std::endl; } // end pi0 deposited energy
-                else if (particle.PdgCode() == 321 || particle.PdgCode() == -321 || particle.PdgCode() == 311 || particle.PdgCode() == -311 || particle.PdgCode() == 130 || particle.PdgCode() == 310 || particle.PdgCode() == 22 || (particle.PdgCode() >= 100 && particle.PdgCode() <= -9999) || (particle.PdgCode() >= -9999 && particle.PdgCode() <= -100)) // eOther which includes: kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
+                else if (particle.PdgCode() == 321 || particle.PdgCode() == -321 || particle.PdgCode() == 311 || particle.PdgCode() == -311 || particle.PdgCode() == 130 || particle.PdgCode() == 310 || particle.PdgCode() == 22 || (particle.PdgCode() >= 100 && particle.PdgCode() <= 9999) || (particle.PdgCode() >= -9999 && particle.PdgCode() <= -100)) // eOther which includes: kPdgKP, kPdgKM, kPdgK0, kPdgAntiK0, kPdgK0L, kPdgK0S, kPdgGamma, IsHadron(pdg)
                 {
                   fSim_Other_Edep_b2 += energyDeposit.energy;
                   // std::cout << "fire Other! " << std::endl;
@@ -1386,13 +1386,14 @@ namespace lar
       save1(hExit_other, "ExitKE_other");
 
       save2(hEnuVsExit, "Enu_vs_Exit");
+
       save2(hFrac_mu, "Frac_mu");
-save2(hFrac_p, "Frac_p");
-save2(hFrac_n, "Frac_n");
-save2(hFrac_pip, "Frac_pip");
-save2(hFrac_pim, "Frac_pim");
-save2(hFrac_pi0, "Frac_pi0");
-save2(hFrac_other, "Frac_other");
+      save2(hFrac_p, "Frac_p");
+      save2(hFrac_n, "Frac_n");
+      save2(hFrac_pip, "Frac_pip");
+      save2(hFrac_pim, "Frac_pim");
+      save2(hFrac_pi0, "Frac_pi0");
+      save2(hFrac_other, "Frac_other");
     }
 
     DEFINE_ART_MODULE(MyEnergyAnalysis)
