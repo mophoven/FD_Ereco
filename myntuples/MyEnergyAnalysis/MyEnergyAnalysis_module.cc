@@ -46,6 +46,7 @@
 #include "TH2.h"
 #include "TCanvas.h"
 #include "TROOT.h"
+#include <set>
 
 // C++ includes
 #include <cmath>
@@ -925,6 +926,8 @@ namespace lar
       fExitKE_sum = 0.0;
       fExitKE_max = -9999.0;
 
+      std::set<int> exitingPrimaries;
+
       for (int i = 0; i < fSim_nParticles; i++)
       {
         const simb::MCParticle &particleVec = *(SimParticles[i]);
@@ -940,6 +943,7 @@ namespace lar
 
         if (ke_exit > 0)
         {
+          exitingPrimaries.insert(particleVec.TrackId());
           fExitKE_sum += ke_exit;
           if (fExitKE_max < 0 || ke_exit > fExitKE_max)
             fExitKE_max = ke_exit;
@@ -1337,14 +1341,65 @@ namespace lar
 
         h->Fill(fGen_numu_E, frac);
       };
+      bool exitedMuon = false;
+      if (primarylep_trkID > 0 && exitingPrimaries.count(primarylep_trkID))
+        exitedMuon = true;
 
-      fillFrac(hFrac_mu, true_mu, dep_mu);
-      fillFrac(hFrac_p, true_p, dep_p);
-      fillFrac(hFrac_n, true_n, dep_n);
-      fillFrac(hFrac_pip, true_pip, dep_pip);
-      fillFrac(hFrac_pim, true_pim, dep_pim);
-      fillFrac(hFrac_pi0, true_pi0, dep_pi0);
-      fillFrac(hFrac_other, true_other, dep_other);
+      bool exitedProton = false;
+      for (int id : proton_trkID)
+      {
+        if (exitingPrimaries.count(id))
+        {
+          exitedProton = true;
+          break;
+        }
+      }
+
+      bool exitedNeutron = false;
+      for (int id : neutron_trkID)
+      {
+        if (exitingPrimaries.count(id))
+        {
+          exitedNeutron = true;
+          break;
+        }
+      }
+
+      bool exitedPip = false;
+      for (int id : pip_trkID)
+      {
+        if (exitingPrimaries.count(id))
+        {
+          exitedPip = true;
+          break;
+        }
+      }
+
+      bool exitedPim = false;
+      for (int id : pim_trkID)
+      {
+        if (exitingPrimaries.count(id))
+        {
+          exitedPim = true;
+          break;
+        }
+      }
+
+      bool exitedPi0 = false;
+      for (int id : pi0_trkID)
+      {
+        if (exitingPrimaries.count(id))
+        {
+          exitedPi0 = true;
+          break;
+        }
+      }
+      if (exitedMuon)    fillFrac(hFrac_mu, true_mu, dep_mu);
+if (exitedProton)  fillFrac(hFrac_p, true_p, dep_p);
+if (exitedNeutron) fillFrac(hFrac_n, true_n, dep_n);
+if (exitedPip)     fillFrac(hFrac_pip, true_pip, dep_pip);
+if (exitedPim)     fillFrac(hFrac_pim, true_pim, dep_pim);
+if (exitedPi0)     fillFrac(hFrac_pi0, true_pi0, dep_pi0);
 
       fNtuple->Fill();
 
