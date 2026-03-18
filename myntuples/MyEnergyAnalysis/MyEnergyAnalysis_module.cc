@@ -1394,12 +1394,18 @@ namespace lar
           break;
         }
       }
-      if (exitedMuon)    fillFrac(hFrac_mu, true_mu, dep_mu);
-if (exitedProton)  fillFrac(hFrac_p, true_p, dep_p);
-if (exitedNeutron) fillFrac(hFrac_n, true_n, dep_n);
-if (exitedPip)     fillFrac(hFrac_pip, true_pip, dep_pip);
-if (exitedPim)     fillFrac(hFrac_pim, true_pim, dep_pim);
-if (exitedPi0)     fillFrac(hFrac_pi0, true_pi0, dep_pi0);
+      if (exitedMuon)
+        fillFrac(hFrac_mu, true_mu, dep_mu);
+      if (exitedProton)
+        fillFrac(hFrac_p, true_p, dep_p);
+      if (exitedNeutron)
+        fillFrac(hFrac_n, true_n, dep_n);
+      if (exitedPip)
+        fillFrac(hFrac_pip, true_pip, dep_pip);
+      if (exitedPim)
+        fillFrac(hFrac_pim, true_pim, dep_pim);
+      if (exitedPi0)
+        fillFrac(hFrac_pi0, true_pi0, dep_pi0);
 
       fNtuple->Fill();
 
@@ -1907,8 +1913,7 @@ namespace
   {
     if (!currentpart)
       return;
-    // if (depth > 1000)//do we need a depth limit?
-    // return;
+
     int momId = currentpart->Mother();
     if (momId <= 0)
       return;
