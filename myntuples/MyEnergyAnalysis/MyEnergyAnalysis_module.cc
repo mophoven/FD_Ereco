@@ -1316,7 +1316,7 @@ namespace lar
       double dep_pip = fSim_pip_Edep_b2 * MeV_to_GeV;
       double dep_pim = fSim_pim_Edep_b2 * MeV_to_GeV;
       double dep_pi0 = fSim_pi0_Edep_b2 * MeV_to_GeV;
-      double dep_other = fSim_Other_Edep_b2 * MeV_to_GeV;
+      
 
       double true_mu = fVis_LepE;
       double true_p = eP;
@@ -1324,7 +1324,7 @@ namespace lar
       double true_pip = ePip;
       double true_pim = ePim;
       double true_pi0 = ePi0;
-      double true_other = eOther;
+      
 
       auto fillFrac = [&](TH2D *h, double Etrue, double Edep)
       {
