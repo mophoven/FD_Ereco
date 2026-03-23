@@ -1591,15 +1591,15 @@ namespace
   //   }
   // }
 
-  double getMassFromPDG(int pdg){
+  double getMassFromPDG(int pdg){ //isotope masses are converted from amu to GeV using a conversion factor of 0.9314941, and then rounded to 6 sigfigs, with nucleon masses taken from https://www.chemlin.org/chemical-elements/isotopes.php
 
   double mass;
     switch(pdg) { //big if statement
 
-        case 11: //electron or positron
+        case 11: //electron 
             mass = 0.000511;
             break;
-        case -11:
+        case -11: //positron
             mass = 0.000511;
             break;
         case 12: //electron neutrino
@@ -1638,13 +1638,13 @@ namespace
         case -221: 
           mass = 0.547862;
             break;
-        case 331: //eta prime light meson //2 in data
+        case 331: //eta prime light meson
             mass = 0.95778;
             break;
-        case -331: // 1 in data
+        case -331: 
             mass = 0.95778;
             break;
-        case 321: //charged kaons //5 in data
+        case 321: //charged kaons 
           mass = 0.493677;
             break;
         case -321: //3 in data
@@ -1657,7 +1657,7 @@ namespace
         case 310: //short neutral kaon
           mass = 0.497677;
             break;
-        case 311: //K_0 //no k_0's
+        case 311: //K_0 
           mass = 0.497677;
             break;
         case -311: 
@@ -1666,38 +1666,38 @@ namespace
         case 2112: //neutron
             mass = 0.939565;
             break;
-        case -2112:  //antineutron
+        case -2112: //antineutron
             mass = 0.939565;
             break;
         case 2212: //proton
-            mass = 0.938272; //7 sigfigs?
+            mass = 0.938272; 
             break;
-        case -2212: //antiproton, account for mass of pair
+        case -2212: //antiproton
             mass = 0.938272;
             break;
         case 3122: //Lambda strange baryon
-            mass = 0.939565; //neutron (or proton) mass to account for creation
+            mass = 0.939565; //neutron (or proton) mass for strange baryons to account for creation
             break;
-        case -3122: 
+        case -3122: //anti lambda
             mass = 0.939565;
             break;
         case 3212: //Sigma 0 strange baryon
             mass = 0.939565; 
             break;
         case -3212: 
-            mass = 0.939565; //neutron mass
+            mass = 0.939565; //anti sigma0
             break;
         case 3222: //sigma+ strange baryon
             mass = 0.939565;
             break;
-        case -3222 : // ??
+        case -3222 : //anti sigma+ 
             mass = 0.939565;
             break;
         case 3112: //sigma- strange baryon
             mass = 0.939565;
             break;
         case -3112: 
-            mass = 0.939565;
+            mass = 0.939565; //anti sigma-
             break;
         case 1000010020: //deuterium
             mass = 1.87561;
@@ -1712,10 +1712,10 @@ namespace
             mass = 3.72738;
             break;
         case 1000040080: //beryllium 8
-            mass = 7.45486;
+            mass = 7.45485;
             break;
         case 1000040090: //beryllium 9
-            mass = 8.39276;
+            mass = 8.39275;
             break;
         case 1000050100: //boron 10
             mass = 9.32444;
@@ -1724,7 +1724,7 @@ namespace
             mass = 10.2526;
             break;
         case 1000050120: //boron 12
-            mass = 11.1888;
+            mass = 11.1887;
             break;
         case 1000060110: //carbon 11
             mass = 10.2540;
@@ -1736,7 +1736,7 @@ namespace
             mass = 12.1095; //fixed 3/4/26
             break;
         case 1000060140: //carbon 14
-            mass = 13.0410; //fixed 3/4/26
+            mass = 13.0409; //fixed 3/4/26
             break;
         case 1000070130: //nitrogen 13
             mass = 12.1112;
@@ -1745,7 +1745,7 @@ namespace
             mass = 13.0402;
             break; 
         case 1000070150: //nitrogen 15
-            mass = 13.9690;
+            mass = 13.9689;
             break;
         case 1000070160: //nitrogen 16
             mass = 14.9060;
@@ -1766,13 +1766,13 @@ namespace
             mass = 17.6923;
             break;
         case 1000100200: //neon 20
-            mass = 18.6178;
+            mass = 18.6177;
             break;
         case 1000100210: //neon 21
-            mass = 19.5506;
+            mass = 19.5505;
             break;
         case 1000100220: //neon 22
-            mass = 20.4798;
+            mass = 20.4797;
             break;
         case 1000110220: //sodium 22
             mass = 20.4821;
@@ -1787,7 +1787,7 @@ namespace
             mass = 23.2724;
             break;
         case 1000120220: //magnesium 22
-            mass = 20.4864;
+            mass = 20.4863;
             break;
         case 1000120230: //magnesium 23
             mass = 21.4128;
@@ -1802,7 +1802,7 @@ namespace
             mass = 24.1965;
             break;
         case 1000120270: //magnesium 27
-            mass = 25.1297;
+            mass = 25.1296;
             break;
         case 1000130260: //aluminum 26
             mass = 24.2000;
@@ -1811,7 +1811,7 @@ namespace
             mass = 25.1265;
             break;
         case 1000130280: //aluminum 28
-            mass = 26.0584;
+            mass = 26.0583;
             break;
         case 1000130290: //aluminum 29
             mass = 26.9885;
@@ -1820,7 +1820,7 @@ namespace
             mass = 27.9223;
             break;
         case 1000130310: //aluminum 31
-            mass = 28.8548;
+            mass = 28.8547;
             break;
         case 1000130320: //aluminum 32
             mass = 29.7901;
@@ -1835,7 +1835,7 @@ namespace
             mass = 26.9843;
             break;
         case 1000140300: //silicon 30
-            mass = 27.9133;
+            mass = 27.9132;
             break;
         case 1000140310: //silicon 31
             mass = 28.8462;
@@ -1844,7 +1844,7 @@ namespace
             mass = 29.7766;
             break;
         case 1000140330: //silicon 33
-            mass = 30.7117;
+            mass = 30.7116;
             break;
         case 1000150300: //phosphorus 30
             mass = 27.9170;
@@ -1853,7 +1853,7 @@ namespace
             mass = 28.8442;
             break;
         case 1000150320: //phosphorus 32
-            mass = 29.7759;
+            mass = 29.7758;
             break;
         case 1000150330: //phosphorus 33
             mass = 30.7053;
@@ -1868,7 +1868,7 @@ namespace
             mass = 33.5059;
             break;
         case 1000150370: //phosphorus 37
-            mass = 34.4387;
+            mass = 34.4386;
             break;
         case 1000150380: //phosphorus 38
             mass = 35.3745;
@@ -1877,7 +1877,7 @@ namespace
             mass = 29.7736;
             break;
         case 1000160330: //sulfur 33
-            mass = 30.7046;
+            mass = 30.7045;
             break;
         case 1000160340: //sulfur 34
             mass = 31.6327;
@@ -1888,12 +1888,11 @@ namespace
         case 1000160360: //sulfur 36
             mass = 33.4950;
             break;
-
         case 1000160370: //sulfur 37
             mass = 34.4302;
             break;
         case 1000160380: //sulfur 38
-            mass = 35.3618;
+            mass = 35.3617;
             break;
         case 1000170340: //chlorine 34
             mass = 31.6377;
@@ -1904,8 +1903,8 @@ namespace
         case 1000170360: //chlorine 36
             mass = 33.4956;
             break;
-        case 1000170370: //chlorine 37
-            mass = 34.4252;
+        case 1000170370: //chlorine 37 
+            mass = 34.4248; 
             break;
         case 1000170380: //chlorine 38
             mass = 35.3583;
@@ -1914,22 +1913,22 @@ namespace
             mass = 36.2898;
             break;
         case 1000170400: //chlorine 40
-            mass = 37.2236;
+            mass = 37.2235;
             break;
         case 1000180360: //argon 36
             mass = 33.4944;
             break;
         case 1000180370: //argon 37
-            mass = 34.4252;
+            mass = 34.4251;
             break;
         case 1000180380: //argon 38 
             mass = 35.3529;
             break;
         case 1000180390: //argon 39
-            mass = 36.2859;
+            mass = 36.2858;
             break;
         case 1000180400: //argon 40
-            mass = 37.2156; //was previously 37.21556
+            mass = 37.2156; //calculation gives 37.2155, but 37.2156 seems to be what GEANT is using
             break;
         case 1000190380: //potassium 38
             mass = 35.3583;
@@ -1938,10 +1937,10 @@ namespace
             mass = 36.2848;
             break;
         case 1000190400: //potassium 40
-            mass = 37.2166;
+            mass = 37.2165;
             break;
         case 1000190410: //potassium 41
-            mass = 40.9514;
+            mass = 38.1460; //fixed!
             break;
         case 1000200400: //calcium 40
             mass = 37.2147;
@@ -1950,19 +1949,19 @@ namespace
             mass = 44.6520;
             break;
         case 1000220490: //titanium 49
-            mass = 45.5835;
+            mass = 45.5834;
             break;
         case 1000230490: //vanadium 49
             mass = 45.5835;
             break;
         case 1000230500: //vanadium 50
-            mass = 46.518;
+            mass = 46.5137;
             break;
         case 1000230510: //vanadium 51
-            mass = 47.4423;
+            mass = 47.4422;
             break;
         case 1000240490: //chromium 49
-            mass = 45.5857;
+            mass = 45.5856;
             break;
         case 1000240500: //chromium 50
             mass = 46.5122;
@@ -1971,16 +1970,16 @@ namespace
             mass = 47.4425;
             break;
         case 1000240520: //chromium 52
-            mass = 48.3701;
+            mass = 48.3700;
             break;
         case 1000240530: //chromium 53
-            mass = 49.3017;
+            mass = 49.3016;
             break;
         case 1000240540: //chromium 54
             mass = 50.2315;
             break;
         case 1000250530: //manganese 53
-            mass = 49.3018;
+            mass = 49.3017;
             break;
         case 1000250540: //manganese 54
             mass = 50.2324;
@@ -1998,10 +1997,10 @@ namespace
             mass = 49.3050;
             break;
         case 1000260540: //iron 54
-            mass = 50.2312;
+            mass = 50.2311;
             break;
         case 1000260550: //iron 55
-            mass = 51.1615;
+            mass = 51.1614;
             break;
         case 1000260560: //iron 56
             mass = 52.0898;
@@ -2010,16 +2009,16 @@ namespace
             mass = 53.0217;
             break;
         case 1000260580: //iron 58
-            mass = 53.9513;
+            mass = 53.9512;
             break;
         case 1000270570: //cobalt 57
-            mass = 53.0221;
+            mass = 53.0220;
             break; 
         case 1000270600: //cobalt 60
             mass = 55.8142;
             break;
         case 1000280580: //nickel 58
-            mass = 53.9522;
+            mass = 53.9521;
             break;
         case 1000280590: //nickel 59
             mass = 54.8827;
@@ -2028,7 +2027,7 @@ namespace
             mass = 55.8109;
             break;
         case 1000280610: //nickel 61
-            mass = 56.7427;
+            mass = 56.7426;
             break;
         default:
             std::cerr <<"Error in PDG code " << pdg << std::endl;
