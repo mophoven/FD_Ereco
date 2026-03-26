@@ -197,6 +197,22 @@ namespace lar
       double fExitKE_sum;                     // sum of first-exit KE over primary particles (GeV)
       double fExitKE_max;                     // max first-exit KE among primaries (GeV)
       TH2D *hEnuVsExit = nullptr;
+
+      TH1D *hExit_mu = nullptr;
+      TH1D *hExit_p = nullptr;
+      TH1D *hExit_n = nullptr;
+      TH1D *hExit_pip = nullptr;
+      TH1D *hExit_pim = nullptr;
+      TH1D *hExit_other = nullptr;
+
+      TH2D *hFrac_mu = nullptr;
+      TH2D *hFrac_p = nullptr;
+      TH2D *hFrac_n = nullptr;
+      TH2D *hFrac_pip = nullptr;
+      TH2D *hFrac_pim = nullptr;
+      TH2D *hFrac_pi0 = nullptr;
+      TH2D *hFrac_other = nullptr;
+
       TH2D *hFracExit_mu = nullptr;
       TH2D *hFracExit_p = nullptr;
       TH2D *hFracExit_n = nullptr;
@@ -398,7 +414,21 @@ namespace lar
       fInteractionTree = tfs->make<TTree>("HadronicTree", "Hadronic Interaction Information");
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
-      hEnuVsExit = tfs->make<TH2D>("hEnuVsExit", "Neutrino energy vs exited energy;E_{#nu} [GeV];E_{exit} [GeV]", 200, 0, 10, 200, 0, 10);
+      hExit_mu = tfs->make<TH1D>("hExit_mu", "Exited KE (primary mu);KE_{exit} [GeV];Entries", 200, 0, 10);
+      hExit_p = tfs->make<TH1D>("hExit_p", "Exited KE (primary p);KE_{exit} [GeV];Entries", 200, 0, 10);
+      hExit_n = tfs->make<TH1D>("hExit_n", "Exited KE (primary n);KE_{exit} [GeV];Entries", 200, 0, 10);
+      hExit_pip = tfs->make<TH1D>("hExit_pip", "Exited KE (primary #pi^{+});KE_{exit} [GeV];Entries", 200, 0, 10);
+      hExit_pim = tfs->make<TH1D>("hExit_pim", "Exited KE (primary #pi^{-});KE_{exit} [GeV];Entries", 200, 0, 10);
+      hExit_other = tfs->make<TH1D>("hExit_other", "Exited KE (other primaries);KE_{exit} [GeV];Entries", 200, 0, 10);
+
+      hFrac_mu = tfs->make<TH2D>("hFrac_mu", "#mu deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_p = tfs->make<TH2D>("hFrac_p", "p deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_n = tfs->make<TH2D>("hFrac_n", "n deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_pip = tfs->make<TH2D>("hFrac_pip", "#pi^{+} deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_pim = tfs->make<TH2D>("hFrac_pim", "#pi^{-} deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_pi0 = tfs->make<TH2D>("hFrac_pi0", "#pi^{0} deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+      hFrac_other = tfs->make<TH2D>("hFrac_other", "Other deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+
       hFracExit_mu = tfs->make<TH2D>("hFracExit_mu", "#mu exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}", 200, 0, 10, 200, 0, 1.2);
       hFracExit_p = tfs->make<TH2D>("hFracExit_p", "p exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}", 200, 0, 10, 200, 0, 1.2);
       hFracExit_n = tfs->make<TH2D>("hFracExit_n", "n exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}", 200, 0, 10, 200, 0, 1.2);
@@ -918,17 +948,16 @@ namespace lar
           return;
         if (Eexit <= 0)
           return;
-        fExitKE_sum = 0.0;
-        fExitKE_max = -9999.0;
-
-        std::set<int> exitingPrimaries;
-
         double frac = 1.0 - (Eexit / Etrue);
         if (frac < 0)
           frac = 0;
 
         h->Fill(fGen_numu_E, frac);
       };
+      fExitKE_sum = 0.0;
+      fExitKE_max = -9999.0;
+
+      std::set<int> exitingPrimaries;
 
       for (int i = 0; i < fSim_nParticles; i++)
       {
@@ -946,10 +975,25 @@ namespace lar
         if (ke_exit > 0)
         {
           exitingPrimaries.insert(particleVec.TrackId());
-          fExitKE_sum += ke_exit;
-          double trueE = -1.0;
 
-          // use KE for charged hadrons and neutrons, same convention as your other plots
+          fExitKE_sum += ke_exit;
+          if (fExitKE_max < 0 || ke_exit > fExitKE_max)
+            fExitKE_max = ke_exit;
+
+          if (std::abs(pdg) == 13 && hExit_mu)
+            hExit_mu->Fill(ke_exit);
+          else if (pdg == 2212 && hExit_p)
+            hExit_p->Fill(ke_exit);
+          else if (pdg == 2112 && hExit_n)
+            hExit_n->Fill(ke_exit);
+          else if (pdg == 211 && hExit_pip)
+            hExit_pip->Fill(ke_exit);
+          else if (pdg == -211 && hExit_pim)
+            hExit_pim->Fill(ke_exit);
+          else if (hExit_other)
+            hExit_other->Fill(ke_exit);
+
+          double trueE = -1.0;
           if (std::abs(pdg) == 13)
             trueE = particleVec.E() - particleVec.Mass();
           else if (pdg == 2212)
@@ -961,7 +1005,7 @@ namespace lar
           else if (pdg == -211)
             trueE = particleVec.E() - particleVec.Mass();
           else if (pdg == 111)
-            trueE = particleVec.E(); // for pi0 use total energy
+            trueE = particleVec.E();
           else
             trueE = particleVec.E() - particleVec.Mass();
 
@@ -1455,22 +1499,30 @@ namespace lar
       };
 
       // examples:
-      save1(hExit_mu, "ExitKE_mu");
-      save1(hExit_p, "ExitKE_p");
-      save1(hExit_n, "ExitKE_n");
-      save1(hExit_pip, "ExitKE_pip");
-      save1(hExit_pim, "ExitKE_pim");
-      save1(hExit_other, "ExitKE_other");
+     save1(hExit_mu, "ExitKE_mu");
+save1(hExit_p, "ExitKE_p");
+save1(hExit_n, "ExitKE_n");
+save1(hExit_pip, "ExitKE_pip");
+save1(hExit_pim, "ExitKE_pim");
+save1(hExit_other, "ExitKE_other");
 
-      save2(hEnuVsExit, "Enu_vs_Exit");
+save2(hEnuVsExit, "Enu_vs_Exit");
 
-      save2(hFrac_mu, "Frac_mu");
-      save2(hFrac_p, "Frac_p");
-      save2(hFrac_n, "Frac_n");
-      save2(hFrac_pip, "Frac_pip");
-      save2(hFrac_pim, "Frac_pim");
-      save2(hFrac_pi0, "Frac_pi0");
-      save2(hFrac_other, "Frac_other");
+save2(hFrac_mu, "Frac_mu");
+save2(hFrac_p, "Frac_p");
+save2(hFrac_n, "Frac_n");
+save2(hFrac_pip, "Frac_pip");
+save2(hFrac_pim, "Frac_pim");
+save2(hFrac_pi0, "Frac_pi0");
+save2(hFrac_other, "Frac_other");
+
+save2(hFracExit_mu, "FracExit_mu");
+save2(hFracExit_p, "FracExit_p");
+save2(hFracExit_n, "FracExit_n");
+save2(hFracExit_pip, "FracExit_pip");
+save2(hFracExit_pim, "FracExit_pim");
+save2(hFracExit_pi0, "FracExit_pi0");
+save2(hFracExit_other, "FracExit_other");
     }
 
     DEFINE_ART_MODULE(MyEnergyAnalysis)
