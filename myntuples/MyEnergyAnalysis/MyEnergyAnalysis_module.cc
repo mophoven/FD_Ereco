@@ -1551,7 +1551,7 @@ namespace
         minDist = dist;
         bestMom = incoming->Momentum(i);
         bestIdx = i;
-        if (i < 0) preBestMom = incoming->Momentum(i - 1);
+        if (i > 0) preBestMom = incoming->Momentum(i - 1);
         else       preBestMom = bestMom;
         if (i == incoming->NumberTrajectoryPoints() - 1)
         {
