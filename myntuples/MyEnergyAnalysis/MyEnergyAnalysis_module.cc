@@ -196,6 +196,7 @@ namespace lar
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
       double fExitKE_sum;                     // sum of first-exit KE over primary particles (GeV)
       double fExitKE_max;                     // max first-exit KE among primaries (GeV)
+
       TH2D *hEnuVsExit = nullptr;
 
       TH1D *hExit_mu = nullptr;
@@ -413,6 +414,8 @@ namespace lar
       // Create ROOT objects FIRST
       fInteractionTree = tfs->make<TTree>("HadronicTree", "Hadronic Interaction Information");
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
+
+      hEnuVsExit = tfs->make<TH2D>("hEnuVsExit","Neutrino energy vs exited energy;E_{#nu} [GeV];E_{exit} [GeV]", 200, 0, 10, 200, 0, 10);
 
       hExit_mu = tfs->make<TH1D>("hExit_mu", "Exited KE (primary mu);KE_{exit} [GeV];Entries", 200, 0, 10);
       hExit_p = tfs->make<TH1D>("hExit_p", "Exited KE (primary p);KE_{exit} [GeV];Entries", 200, 0, 10);
@@ -1025,7 +1028,8 @@ namespace lar
             fillExitFrac(hFracExit_other, trueE, ke_exit);
         }
       }
-
+      if (hEnuVsExit && fGen_numu_E > 0 && fExitKE_sum > 0)
+        hEnuVsExit->Fill(fGen_numu_E, fExitKE_sum);
       // Fill histogram (event level)
       if (hEnuVsExit && fGen_numu_E > 0 && fExitKE_sum > 0)
         hEnuVsExit->Fill(fGen_numu_E, fExitKE_sum);
@@ -1499,30 +1503,32 @@ namespace lar
       };
 
       // examples:
-     save1(hExit_mu, "ExitKE_mu");
-save1(hExit_p, "ExitKE_p");
-save1(hExit_n, "ExitKE_n");
-save1(hExit_pip, "ExitKE_pip");
-save1(hExit_pim, "ExitKE_pim");
-save1(hExit_other, "ExitKE_other");
+      
 
-save2(hEnuVsExit, "Enu_vs_Exit");
+      save1(hExit_mu, "ExitKE_mu");
+      save1(hExit_p, "ExitKE_p");
+      save1(hExit_n, "ExitKE_n");
+      save1(hExit_pip, "ExitKE_pip");
+      save1(hExit_pim, "ExitKE_pim");
+      save1(hExit_other, "ExitKE_other");
 
-save2(hFrac_mu, "Frac_mu");
-save2(hFrac_p, "Frac_p");
-save2(hFrac_n, "Frac_n");
-save2(hFrac_pip, "Frac_pip");
-save2(hFrac_pim, "Frac_pim");
-save2(hFrac_pi0, "Frac_pi0");
-save2(hFrac_other, "Frac_other");
+      save2(hEnuVsExit, "Enu_vs_Exit");
 
-save2(hFracExit_mu, "FracExit_mu");
-save2(hFracExit_p, "FracExit_p");
-save2(hFracExit_n, "FracExit_n");
-save2(hFracExit_pip, "FracExit_pip");
-save2(hFracExit_pim, "FracExit_pim");
-save2(hFracExit_pi0, "FracExit_pi0");
-save2(hFracExit_other, "FracExit_other");
+      save2(hFrac_mu, "Frac_mu");
+      save2(hFrac_p, "Frac_p");
+      save2(hFrac_n, "Frac_n");
+      save2(hFrac_pip, "Frac_pip");
+      save2(hFrac_pim, "Frac_pim");
+      save2(hFrac_pi0, "Frac_pi0");
+      save2(hFrac_other, "Frac_other");
+
+      save2(hFracExit_mu, "FracExit_mu");
+      save2(hFracExit_p, "FracExit_p");
+      save2(hFracExit_n, "FracExit_n");
+      save2(hFracExit_pip, "FracExit_pip");
+      save2(hFracExit_pim, "FracExit_pim");
+      save2(hFracExit_pi0, "FracExit_pi0");
+      save2(hFracExit_other, "FracExit_other");
     }
 
     DEFINE_ART_MODULE(MyEnergyAnalysis)
