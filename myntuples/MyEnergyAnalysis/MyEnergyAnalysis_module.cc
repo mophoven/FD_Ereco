@@ -1503,7 +1503,7 @@ namespace lar
       };
 
       // examples:
-      
+      save2(hEnuVsExit, "Enu_vs_Exit");
 
       save1(hExit_mu, "ExitKE_mu");
       save1(hExit_p, "ExitKE_p");
@@ -2098,3 +2098,8 @@ namespace
 // try to make figure 3.2 from the thesis
 // total - Edep vs exited to see linear coloration
 // as many points as possible to see the correlation
+
+// look for a variable for fraction plots (1st part)
+// Send all of the plot to Milo with more events
+// Print out traj point for proton that Edep/Etrue > 1 to see if there is something weird
+// change the file name before running to avoid overwriting old files
