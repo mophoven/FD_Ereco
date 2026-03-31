@@ -1546,7 +1546,7 @@ namespace
     {
       TLorentzVector pos = incoming->Position(i);
       double dist = std::hypot(pos.X() - vertex.x, pos.Y() - vertex.y, pos.Z() - vertex.z);
-      if (dist < minDist)
+      if (dist <= (minDist + 1e-3))
       {
         minDist = dist;
         bestMom = incoming->Momentum(i);
