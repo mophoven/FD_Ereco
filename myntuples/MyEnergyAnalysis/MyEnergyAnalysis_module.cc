@@ -409,7 +409,7 @@ namespace lar
       art::ServiceHandle<art::TFileService> tfs;
 
 
-      gStyle->SetPalette(kViridis);
+      gStyle->SetPalette(kVisibleSpectrum);
       gStyle->SetNumberContours(100);
 
       // You can print geometry info whenever, it does not depend on tfs
