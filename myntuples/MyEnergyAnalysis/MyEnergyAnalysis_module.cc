@@ -47,6 +47,7 @@
 #include "TCanvas.h"
 #include "TROOT.h"
 #include <set>
+#include "TStyle.h"
 
 // C++ includes
 #include <cmath>
@@ -198,6 +199,14 @@ namespace lar
       double fExitKE_max;                     // max first-exit KE among primaries (GeV)
 
       TH2D *hEnuVsExit = nullptr;
+
+      TH2D *hFrac_mu = nullptr;
+      TH2D *hFrac_p = nullptr;
+      TH2D *hFrac_n = nullptr;
+      TH2D *hFrac_pip = nullptr;
+      TH2D *hFrac_pim = nullptr;
+      TH2D *hFrac_pi0 = nullptr;
+      TH2D *hFrac_other = nullptr;
 
       TH1D *hExit_mu = nullptr;
       TH1D *hExit_p = nullptr;
@@ -399,6 +408,10 @@ namespace lar
       // Access art's TFileService first (before using tfs->make)
       art::ServiceHandle<art::TFileService> tfs;
 
+
+      gStyle->SetPalette(kViridis);
+      gStyle->SetNumberContours(100);
+
       // You can print geometry info whenever, it does not depend on tfs
       const double detectorLength = DetectorDiagonal(*fGeometryService);
       std::cout << "Detector length=" << detectorLength << " cm" << std::endl;
@@ -408,6 +421,38 @@ namespace lar
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
       hEnuVsExit = tfs->make<TH2D>("hEnuVsExit", "Neutrino energy vs exited energy;E_{#nu} [GeV];E_{exit} [GeV]", 200, 0, 10, 200, 0, 10);
+
+      hFrac_mu = tfs->make<TH2D>(
+          "hFrac_mu",
+          "Muon Deposited Energy;Primary #nu Energy (GeV);Muon E_{dep}/Muon total E",
+          100, 0, 10, 100, 0, 1.05);
+
+      hFrac_p = tfs->make<TH2D>(
+          "hFrac_p",
+          "Protons Deposited Energy;Primary #nu Energy (GeV);Protons E_{dep}/Protons total KE",
+          100, 0, 10, 100, 0, 1.05);
+
+      hFrac_n = tfs->make<TH2D>(
+          "hFrac_n",
+          "Neutrons Deposited Energy;Primary #nu Energy (GeV);Neutrons E_{dep}/Neutrons total KE",
+          100, 0, 10, 100, 0, 1.05);
+
+      hFrac_pip = tfs->make<TH2D>(
+          "hFrac_pip",
+          "Pions+ Deposited Energy;Primary #nu Energy (GeV);Pions+ E_{dep}/Pions+ total KE",
+          100, 0, 10, 100, 0, 1.05);
+
+      hFrac_pim = tfs->make<TH2D>(
+          "hFrac_pim",
+          "Pions- Deposited Energy;Primary #nu Energy (GeV);Pions- E_{dep}/Pions- total KE",
+          100, 0, 10, 100, 0, 1.05);
+
+      hFrac_pi0 = tfs->make<TH2D>(
+          "hFrac_pi0",
+          "Pions0 Deposited Energy;Primary #nu Energy (GeV);Pions0 E_{dep}/Pions0 total KE",
+          100, 0, 10, 100, 0, 1.05);
+
+      hFrac_other = tfs->make<TH2D>("hFrac_other", "Other Deposited Energy;Primary #nu Energy (GeV);Other E_{dep}/Other total KE", 100, 0, 10, 100, 0, 1.05);
 
       hExit_mu = tfs->make<TH1D>("hExit_mu", "Exited KE (primary mu);KE_{exit} [GeV];Entries", 200, 0, 10);
       hExit_p = tfs->make<TH1D>("hExit_p", "Exited KE (primary p);KE_{exit} [GeV];Entries", 200, 0, 10);
@@ -1015,7 +1060,6 @@ namespace lar
       if (hEnuVsExit && fGen_numu_E > 0 && fExitKE_sum > 0)
         hEnuVsExit->Fill(fGen_numu_E, fExitKE_sum);
 
-
       std::vector<std::vector<const simb::MCParticle *>> DaughterpartVec;
       std::vector<const simb::MCParticle *> primary_vec;
 
@@ -1354,6 +1398,34 @@ namespace lar
         std::cout << "Particle ID=" << particleHandle->at(particle_index).TrackId() << " has no primary!" << std::endl;
       }
 
+      const double MeV_to_GeV = 1e-3;
+
+      auto fillFrac = [&](TH2D *h, double Etrue, double EdepMeV)
+      {
+        if (!h)
+          return;
+        if (fGen_numu_E <= 0)
+          return;
+        if (Etrue <= 0)
+          return;
+
+        double frac = (EdepMeV * MeV_to_GeV) / Etrue;
+        if (frac < 0)
+          frac = 0;
+        h->Fill(fGen_numu_E, frac);
+      };
+
+      // muon uses total energy
+      fillFrac(hFrac_mu, fTrue_LepE, fSim_mu_Edep_b2);
+
+      // hadrons use KE, matching how eP/eN/ePip/ePim/ePi0 are built
+      fillFrac(hFrac_p, eP, fSim_p_Edep_b2);
+      fillFrac(hFrac_n, eN, fSim_n_Edep_b2);
+      fillFrac(hFrac_pip, ePip, fSim_pip_Edep_b2);
+      fillFrac(hFrac_pim, ePim, fSim_pim_Edep_b2);
+      fillFrac(hFrac_pi0, ePi0, fSim_pi0_Edep_b2);
+      fillFrac(hFrac_other, eOther, fSim_Other_Edep_b2);
+
       fNtuple->Fill();
 
     } // MyEnergyAnalysis::analyze()
@@ -1386,7 +1458,7 @@ namespace lar
       };
 
       // examples:
-      save2(hEnuVsExit, "Enu_vs_Exit");
+      
 
       save1(hExit_mu, "ExitKE_mu");
       save1(hExit_p, "ExitKE_p");
@@ -1396,6 +1468,14 @@ namespace lar
       save1(hExit_other, "ExitKE_other");
 
       save2(hEnuVsExit, "Enu_vs_Exit");
+
+      save2(hFrac_mu, "Frac_mu");
+      save2(hFrac_p, "Frac_p");
+      save2(hFrac_n, "Frac_n");
+      save2(hFrac_pip, "Frac_pip");
+      save2(hFrac_pim, "Frac_pim");
+      save2(hFrac_pi0, "Frac_pi0");
+      save2(hFrac_other, "Frac_other");
 
       save2(hFracExit_mu, "FracExit_mu");
       save2(hFracExit_p, "FracExit_p");
