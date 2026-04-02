@@ -206,14 +206,6 @@ namespace lar
       TH1D *hExit_pim = nullptr;
       TH1D *hExit_other = nullptr;
 
-      TH2D *hFrac_mu = nullptr;
-      TH2D *hFrac_p = nullptr;
-      TH2D *hFrac_n = nullptr;
-      TH2D *hFrac_pip = nullptr;
-      TH2D *hFrac_pim = nullptr;
-      TH2D *hFrac_pi0 = nullptr;
-      TH2D *hFrac_other = nullptr;
-
       TH2D *hFracExit_mu = nullptr;
       TH2D *hFracExit_p = nullptr;
       TH2D *hFracExit_n = nullptr;
@@ -415,7 +407,7 @@ namespace lar
       fInteractionTree = tfs->make<TTree>("HadronicTree", "Hadronic Interaction Information");
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
-      hEnuVsExit = tfs->make<TH2D>("hEnuVsExit","Neutrino energy vs exited energy;E_{#nu} [GeV];E_{exit} [GeV]", 200, 0, 10, 200, 0, 10);
+      hEnuVsExit = tfs->make<TH2D>("hEnuVsExit", "Neutrino energy vs exited energy;E_{#nu} [GeV];E_{exit} [GeV]", 200, 0, 10, 200, 0, 10);
 
       hExit_mu = tfs->make<TH1D>("hExit_mu", "Exited KE (primary mu);KE_{exit} [GeV];Entries", 200, 0, 10);
       hExit_p = tfs->make<TH1D>("hExit_p", "Exited KE (primary p);KE_{exit} [GeV];Entries", 200, 0, 10);
@@ -423,14 +415,6 @@ namespace lar
       hExit_pip = tfs->make<TH1D>("hExit_pip", "Exited KE (primary #pi^{+});KE_{exit} [GeV];Entries", 200, 0, 10);
       hExit_pim = tfs->make<TH1D>("hExit_pim", "Exited KE (primary #pi^{-});KE_{exit} [GeV];Entries", 200, 0, 10);
       hExit_other = tfs->make<TH1D>("hExit_other", "Exited KE (other primaries);KE_{exit} [GeV];Entries", 200, 0, 10);
-
-      hFrac_mu = tfs->make<TH2D>("hFrac_mu", "#mu deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
-      hFrac_p = tfs->make<TH2D>("hFrac_p", "p deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
-      hFrac_n = tfs->make<TH2D>("hFrac_n", "n deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
-      hFrac_pip = tfs->make<TH2D>("hFrac_pip", "#pi^{+} deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
-      hFrac_pim = tfs->make<TH2D>("hFrac_pim", "#pi^{-} deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
-      hFrac_pi0 = tfs->make<TH2D>("hFrac_pi0", "#pi^{0} deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
-      hFrac_other = tfs->make<TH2D>("hFrac_other", "Other deposited fraction;E_{#nu} [GeV];E_{dep}/E_{true}", 200, 0, 10, 200, 0, 1.2);
 
       hFracExit_mu = tfs->make<TH2D>("hFracExit_mu", "#mu exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}", 200, 0, 10, 200, 0, 1.2);
       hFracExit_p = tfs->make<TH2D>("hFracExit_p", "p exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}", 200, 0, 10, 200, 0, 1.2);
@@ -1030,12 +1014,7 @@ namespace lar
       }
       if (hEnuVsExit && fGen_numu_E > 0 && fExitKE_sum > 0)
         hEnuVsExit->Fill(fGen_numu_E, fExitKE_sum);
-      // Fill histogram (event level)
-      if (hEnuVsExit && fGen_numu_E > 0 && fExitKE_sum > 0)
-        hEnuVsExit->Fill(fGen_numu_E, fExitKE_sum);
-      // End four-vector collection
 
-      // Collecting all Daughters of Each primary
 
       std::vector<std::vector<const simb::MCParticle *>> DaughterpartVec;
       std::vector<const simb::MCParticle *> primary_vec;
@@ -1374,102 +1353,6 @@ namespace lar
       {
         std::cout << "Particle ID=" << particleHandle->at(particle_index).TrackId() << " has no primary!" << std::endl;
       }
-      const double MeV_to_GeV = 1e-3;
-
-      double dep_mu = fSim_mu_Edep_b2 * MeV_to_GeV;
-      double dep_p = fSim_p_Edep_b2 * MeV_to_GeV;
-      double dep_n = fSim_n_Edep_b2 * MeV_to_GeV;
-      double dep_pip = fSim_pip_Edep_b2 * MeV_to_GeV;
-      double dep_pim = fSim_pim_Edep_b2 * MeV_to_GeV;
-      double dep_pi0 = fSim_pi0_Edep_b2 * MeV_to_GeV;
-
-      double true_mu = fVis_LepE;
-      double true_p = eP;
-      double true_n = eN;
-      double true_pip = ePip;
-      double true_pim = ePim;
-      double true_pi0 = ePi0;
-
-      auto fillFrac = [&](TH2D *h, double Etrue, double Edep)
-      {
-        if (!h)
-          return;
-        if (fGen_numu_E <= 0)
-          return;
-        if (Etrue <= 0)
-          return;
-
-        double frac = Edep / Etrue;
-        if (frac < 0)
-          frac = 0;
-
-        h->Fill(fGen_numu_E, frac);
-      };
-      bool exitedMuon = false;
-      if (primarylep_trkID > 0 && exitingPrimaries.count(primarylep_trkID))
-        exitedMuon = true;
-
-      bool exitedProton = false;
-      for (int id : proton_trkID)
-      {
-        if (exitingPrimaries.count(id))
-        {
-          exitedProton = true;
-          break;
-        }
-      }
-
-      bool exitedNeutron = false;
-      for (int id : neutron_trkID)
-      {
-        if (exitingPrimaries.count(id))
-        {
-          exitedNeutron = true;
-          break;
-        }
-      }
-
-      bool exitedPip = false;
-      for (int id : pip_trkID)
-      {
-        if (exitingPrimaries.count(id))
-        {
-          exitedPip = true;
-          break;
-        }
-      }
-
-      bool exitedPim = false;
-      for (int id : pim_trkID)
-      {
-        if (exitingPrimaries.count(id))
-        {
-          exitedPim = true;
-          break;
-        }
-      }
-
-      bool exitedPi0 = false;
-      for (int id : pi0_trkID)
-      {
-        if (exitingPrimaries.count(id))
-        {
-          exitedPi0 = true;
-          break;
-        }
-      }
-      if (exitedMuon)
-        fillFrac(hFrac_mu, true_mu, dep_mu);
-      if (exitedProton)
-        fillFrac(hFrac_p, true_p, dep_p);
-      if (exitedNeutron)
-        fillFrac(hFrac_n, true_n, dep_n);
-      if (exitedPip)
-        fillFrac(hFrac_pip, true_pip, dep_pip);
-      if (exitedPim)
-        fillFrac(hFrac_pim, true_pim, dep_pim);
-      if (exitedPi0)
-        fillFrac(hFrac_pi0, true_pi0, dep_pi0);
 
       fNtuple->Fill();
 
@@ -1513,14 +1396,6 @@ namespace lar
       save1(hExit_other, "ExitKE_other");
 
       save2(hEnuVsExit, "Enu_vs_Exit");
-
-      save2(hFrac_mu, "Frac_mu");
-      save2(hFrac_p, "Frac_p");
-      save2(hFrac_n, "Frac_n");
-      save2(hFrac_pip, "Frac_pip");
-      save2(hFrac_pim, "Frac_pim");
-      save2(hFrac_pi0, "Frac_pi0");
-      save2(hFrac_other, "Frac_other");
 
       save2(hFracExit_mu, "FracExit_mu");
       save2(hFracExit_p, "FracExit_p");
