@@ -425,34 +425,34 @@ namespace lar
       hFrac_mu = tfs->make<TH2D>(
           "hFrac_mu",
           "Muon Deposited Energy;Primary #nu Energy (GeV);Muon E_{dep}/Muon total E",
-          100, 0, 10, 100, 0, 1.05);
+          200, 0, 10, 200, 0, 1.2);
 
       hFrac_p = tfs->make<TH2D>(
           "hFrac_p",
           "Protons Deposited Energy;Primary #nu Energy (GeV);Protons E_{dep}/Protons total KE",
-          100, 0, 10, 100, 0, 1.05);
+          200, 0, 10, 200, 0, 1.2);
 
       hFrac_n = tfs->make<TH2D>(
           "hFrac_n",
           "Neutrons Deposited Energy;Primary #nu Energy (GeV);Neutrons E_{dep}/Neutrons total KE",
-          100, 0, 10, 100, 0, 1.05);
+          200, 0, 10, 200, 0, 1.2);
 
       hFrac_pip = tfs->make<TH2D>(
           "hFrac_pip",
           "Pions+ Deposited Energy;Primary #nu Energy (GeV);Pions+ E_{dep}/Pions+ total KE",
-          100, 0, 10, 100, 0, 1.05);
+          200, 0, 10, 200, 0, 1.2);
 
       hFrac_pim = tfs->make<TH2D>(
           "hFrac_pim",
           "Pions- Deposited Energy;Primary #nu Energy (GeV);Pions- E_{dep}/Pions- total KE",
-          100, 0, 10, 100, 0, 1.05);
+          200, 0, 10, 200, 0, 1.2);
 
       hFrac_pi0 = tfs->make<TH2D>(
           "hFrac_pi0",
           "Pions0 Deposited Energy;Primary #nu Energy (GeV);Pions0 E_{dep}/Pions0 total KE",
-          100, 0, 10, 100, 0, 1.05);
+          200, 0, 10, 200, 0, 1.2);
 
-      hFrac_other = tfs->make<TH2D>("hFrac_other", "Other Deposited Energy;Primary #nu Energy (GeV);Other E_{dep}/Other total KE", 100, 0, 10, 100, 0, 1.05);
+      hFrac_other = tfs->make<TH2D>("hFrac_other", "Other Deposited Energy;Primary #nu Energy (GeV);Other E_{dep}/Other total KE", 200, 0, 10, 200, 0, 1.2);
 
       hExit_mu = tfs->make<TH1D>("hExit_mu", "Exited KE (primary mu);KE_{exit} [GeV];Entries", 200, 0, 10);
       hExit_p = tfs->make<TH1D>("hExit_p", "Exited KE (primary p);KE_{exit} [GeV];Entries", 200, 0, 10);
