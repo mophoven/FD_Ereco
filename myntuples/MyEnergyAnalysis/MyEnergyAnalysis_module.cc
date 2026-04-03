@@ -408,7 +408,6 @@ namespace lar
       // Access art's TFileService first (before using tfs->make)
       art::ServiceHandle<art::TFileService> tfs;
 
-
       gStyle->SetPalette(kVisibleSpectrum);
       gStyle->SetNumberContours(100);
 
@@ -1204,17 +1203,23 @@ namespace lar
               //	if(primary_position.X() == daughter_position_start.X() && primary_position.Y() == daughter_position_start.Y() && primary_position.Z() == daughter_position_start.Z()){
               //	primary_end_energy = primary_momentum.E();	//Store Primary energy
 
-              daughter_particles += daughter_particle; // Store daughter
-              daughter_particle = "";
+              daughter_particles += daughter_particle;
+
+              std::string daughter_code = daughter_particle;
 
               const TLorentzVector &daughter_begin_4vector = daughterVec.Momentum(0);
               double daughter_begin_energy = daughter_begin_4vector.E();
-              if (daughter_particle == "1" || "2" || "3" || "4" || "7" || "8" || "9")
-              { // Subtract rest mass if not pion
-                daughter_begin_energy = daughter_begin_energy - daughterVec.Mass();
+
+              if (daughter_code == "1" || daughter_code == "2" || daughter_code == "3" ||
+                  daughter_code == "4" || daughter_code == "7" || daughter_code == "8" ||
+                  daughter_code == "9")
+              {
+                daughter_begin_energy -= daughterVec.Mass();
               }
-              daughter_begin_sum += daughter_begin_energy; // sum daughter particle's energy
+
+              daughter_begin_sum += daughter_begin_energy;
               daughter_begin_energy = 0;
+              daughter_particle = "";
               //}
             }
           }
@@ -1426,6 +1431,59 @@ namespace lar
       fillFrac(hFrac_pi0, ePi0, fSim_pi0_Edep_b2);
       fillFrac(hFrac_other, eOther, fSim_Other_Edep_b2);
 
+      if (eP > 0)
+      {
+        double protonFrac = (fSim_p_Edep_b2 * MeV_to_GeV) / eP;
+
+        if (protonFrac > 1.0)
+        {
+          std::cout << "\n========== PROTON Edep/Etrue > 1 ==========\n";
+          std::cout << "Event: " << event.id() << "\n";
+          std::cout << "Enu [GeV] = " << fGen_numu_E << "\n";
+          std::cout << "Proton Etrue [GeV] = " << eP << "\n";
+          std::cout << "Proton Edep [GeV] = " << fSim_p_Edep_b2 * MeV_to_GeV << "\n";
+          std::cout << "Fraction = " << protonFrac << "\n";
+          std::cout << "Number of proton track IDs = " << proton_trkID.size() << "\n";
+
+          for (int trkID : proton_trkID)
+          {
+            auto it = particleMap.find(trkID);
+            if (it == particleMap.end())
+            {
+              std::cout << "Track " << trkID << " not found in particleMap\n";
+              continue;
+            }
+
+            const simb::MCParticle &p = *(it->second);
+
+            std::cout << "\n--- Proton track ID " << trkID << " ---\n";
+            std::cout << "PDG = " << p.PdgCode() << "\n";
+            std::cout << "Mother = " << p.Mother() << "\n";
+            std::cout << "Process = " << p.Process() << "\n";
+            std::cout << "Ntraj = " << p.NumberTrajectoryPoints() << "\n";
+
+            for (size_t ipt = 0; ipt < p.NumberTrajectoryPoints(); ++ipt)
+            {
+              const TLorentzVector &pos = p.Position(ipt);
+              const TLorentzVector &mom = p.Momentum(ipt);
+
+              double KE = mom.E() - p.Mass();
+              if (KE < 0)
+                KE = 0;
+
+              std::cout
+                  << "ipt=" << ipt
+                  << " x=" << pos.X()
+                  << " y=" << pos.Y()
+                  << " z=" << pos.Z()
+                  << " E=" << mom.E()
+                  << " KE=" << KE
+                  << "\n";
+            }
+          }
+        }
+      }
+
       fNtuple->Fill();
 
     } // MyEnergyAnalysis::analyze()
@@ -1458,7 +1516,6 @@ namespace lar
       };
 
       // examples:
-      
 
       save1(hExit_mu, "ExitKE_mu");
       save1(hExit_p, "ExitKE_p");
