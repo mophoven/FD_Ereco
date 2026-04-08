@@ -48,6 +48,7 @@
 #include "TROOT.h"
 #include <set>
 #include "TStyle.h"
+#include <fstream>
 
 // C++ includes
 #include <cmath>
@@ -222,6 +223,9 @@ namespace lar
       TH2D *hFracExit_pim = nullptr;
       TH2D *hFracExit_pi0 = nullptr;
       TH2D *hFracExit_other = nullptr;
+
+      std::ofstream fDebugCSV;
+
       // The n-tuple to create
       TTree *fNtuple;
 
@@ -467,6 +471,9 @@ namespace lar
       hFracExit_pim = tfs->make<TH2D>("hFracExit_pim", "#pi^{-} exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}", 200, 0, 10, 200, 0, 1.2);
       hFracExit_pi0 = tfs->make<TH2D>("hFracExit_pi0", "#pi^{0} exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}", 200, 0, 10, 200, 0, 1.2);
       hFracExit_other = tfs->make<TH2D>("hFracExit_other", "other exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}", 200, 0, 10, 200, 0, 1.2);
+
+      fDebugCSV.open("proton_frac_gt_1p05.csv");
+      fDebugCSV << "run,subrun,event,enu_GeV,protonEtrue_GeV,protonEdep_GeV,fraction,nProtonTrackIDs,trackID,pdg,mother,process,nTraj,ipt,x,y,z,E,KE\n";
 
       // Now define branches (after trees exist)
       fNtuple->Branch("ExitKE_sum", &fExitKE_sum, "ExitKE_sum/D");
@@ -1450,7 +1457,17 @@ namespace lar
             auto it = particleMap.find(trkID);
             if (it == particleMap.end())
             {
-              std::cout << "Track " << trkID << " not found in particleMap\n";
+              fDebugCSV
+                  << event.run() << ","
+                  << event.subRun() << ","
+                  << event.event() << ","
+                  << fGen_numu_E << ","
+                  << eP << ","
+                  << fSim_p_Edep_b2 * MeV_to_GeV << ","
+                  << protonFrac << ","
+                  << proton_trkID.size() << ","
+                  << trkID << ","
+                  << "NOT_FOUND,,,,,,,,\n";
               continue;
             }
 
@@ -1479,6 +1496,27 @@ namespace lar
                   << " E=" << mom.E()
                   << " KE=" << KE
                   << "\n";
+
+              fDebugCSV
+                  << event.run() << ","
+                  << event.subRun() << ","
+                  << event.event() << ","
+                  << fGen_numu_E << ","
+                  << eP << ","
+                  << fSim_p_Edep_b2 * MeV_to_GeV << ","
+                  << protonFrac << ","
+                  << proton_trkID.size() << ","
+                  << trkID << ","
+                  << p.PdgCode() << ","
+                  << p.Mother() << ","
+                  << "\"" << p.Process() << "\"" << ","
+                  << p.NumberTrajectoryPoints() << ","
+                  << ipt << ","
+                  << pos.X() << ","
+                  << pos.Y() << ","
+                  << pos.Z() << ","
+                  << mom.E() << ","
+                  << KE << "\n";
             }
           }
         }
