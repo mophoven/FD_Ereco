@@ -9,7 +9,7 @@ services:
   # Load the service that manages root files for histograms.
   # Any histograms or n-tuples that you create in the program will be
   # written to this file.
-  TFileService:           { fileName: "myntuple.root" }
+  TFileService:           { fileName: "100EvtTest.root"}
 
 
 
@@ -44,8 +44,7 @@ source:
   maxEvents:  10
 
   # Include the name of an art::Event input file
-  fileNames: ["/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/31/11/nu_dune10kt_1x2x6_13009312_0_20181104T221530_gen_g4_detsim_reco.root",
-              "/pnfs/dune/tape_backed/dunepro/mcc11/protodune/mc/full-reconstructed/07/51/34/24/nu_dune10kt_1x2x6_12855866_0_20181104T211351_gen_g4_detsim_reco.root"]
+  fileNames: ["/pnfs/dune/persistent/staging/fardet-hd/21/b6/nu_dune10kt_1x2x6_1061_0_20230822T200326Z_gen_g4_detsim_hitreco.root"]
 }
 
 
@@ -86,6 +85,7 @@ physics:
 
       GenieGenModuleLabel: "generator"
       SimulationLabel: "largeant"
+      SimChannelLabel: "tpcrawdecoder:simpleSC"
 
 
       # In this example, which primary particle(s) we'll focus on in an event.
@@ -114,5 +114,6 @@ physics:
   end_paths: [ analysis ]
 }
 
-services.Geometry: @local::dune10kt_1x2x6_v2_geo
-services.Geometry.GDML: "dune10kt_v2_1x2x6.gdml"
+services.Geometry.GDML: "dune10kt_v5_refactored_1x2x6.gdml"
+services.Geometry.ROOT: "dune10kt_v5_refactored_1x2x6.gdml"
+services.Geometry.SkipConfigurationCheck: true

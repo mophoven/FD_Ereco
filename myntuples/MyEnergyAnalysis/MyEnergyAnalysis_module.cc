@@ -173,6 +173,12 @@ namespace lar
             Name("SimulationLabel"),
             Comment("tag of the input data product with the detector simulation "
                     "information")};
+        
+        fhicl::Atom<art::InputTag> SimChannelLabel{
+            Name("SimChannelLabel"),
+            Comment("tag of the input data product with the SimChannels, "
+                    "e.g. tpcrawdecoder:simpleSC")};
+        
  
       }; // Config
  
@@ -200,7 +206,7 @@ namespace lar
       // The parameters we will read from the .fcl file.
       art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
- 
+      art::InputTag fSimChannelLabel;
  
       TTree* fInteractionTree; // Tree for interaction information
  
@@ -382,10 +388,10 @@ namespace lar
     // Constructor
  
     MyEnergyAnalysis::MyEnergyAnalysis(Parameters const &config)
-        : EDAnalyzer(config), fGenieGenModuleLabel(config().GenieGenModuleLabel()), fSimulationProducerLabel(config().SimulationLabel())
+        : EDAnalyzer(config), fGenieGenModuleLabel(config().GenieGenModuleLabel()), fSimulationProducerLabel(config().SimulationLabel()), fSimChannelLabel(config().SimChannelLabel())
     {
       // Get a pointer to the geometry service provider.
-      fGeometryService = lar::providerFrom<geo::Geometry>();
+      fGeometryService = &*art::ServiceHandle<geo::Geometry>();
  
       // Tell beforehand all the data the module is going to read ("consumes") or
       // might read ("may_consume").
@@ -859,7 +865,7 @@ namespace lar
       //------------------------------------------------------------------------
       // Get all the simulated channels for the event. These channels
       // include the energy deposited for each simulated track.
-      auto simChannelHandle = event.getValidHandle<std::vector<sim::SimChannel>>(fSimulationProducerLabel);
+      auto simChannelHandle = event.getValidHandle<std::vector<sim::SimChannel>>(fSimChannelLabel);
  
       // Create a map pf MCParticle to its track ID, to be used for hadronic part later
       std::map<int, const simb::MCParticle *> particleMap;
@@ -1388,24 +1394,31 @@ namespace
       case 1000010030: mass = 2.80892;  break; // tritium
       case 1000020030: mass = 2.80839;  break; // He-3
       case 1000020040: mass = 3.72738;  break; // He-4
+      case 1000030070: mass = 6.53400;  break; // Li-7
       case 1000040080: mass = 7.45486;  break; // Be-8
       case 1000040090: mass = 8.39276;  break; // Be-9
+      case 1000040100: mass = 9.32375;  break; // Be-10
       case 1000050100: mass = 9.32444;  break; // B-10
       case 1000050110: mass = 10.2526;  break; // B-11
       case 1000050120: mass = 11.1888;  break; // B-12
+      case 1000060100: mass = 9.32581;  break; // C-10
       case 1000060110: mass = 10.2540;  break; // C-11
       case 1000060120: mass = 11.1749;  break; // C-12
       case 1000060130: mass = 12.1095;  break; // C-13
       case 1000060140: mass = 13.0409;  break; // C-14
+      case 1000060150: mass = 13.9750;  break; // C-15
       case 1000070130: mass = 12.1112;  break; // N-13
       case 1000070140: mass = 13.0402;  break; // N-14
       case 1000070150: mass = 13.9690;  break; // N-15
       case 1000070160: mass = 14.9060;  break; // N-16
+      case 1000080140: mass = 13.0421;  break; // O-14
       case 1000080150: mass = 13.9712;  break; // O-15
       case 1000080160: mass = 14.8951;  break; // O-16
+      case 1000080170: mass = 15.8363;  break; // O-17
       case 1000080180: mass = 16.7620;  break; // O-18
       case 1000090180: mass = 16.7632;  break; // F-18
       case 1000090190: mass = 17.6923;  break; // F-19
+      case 1000090210: mass = 19.5582;  break; // F-21
       case 1000100200: mass = 18.6178;  break; // Ne-20
       case 1000100210: mass = 19.5506;  break; // Ne-21
       case 1000100220: mass = 20.4798;  break; // Ne-22
@@ -1419,6 +1432,7 @@ namespace
       case 1000120250: mass = 23.2680;  break; // Mg-25
       case 1000120260: mass = 24.1965;  break; // Mg-26
       case 1000120270: mass = 25.1297;  break; // Mg-27
+      case 1000120280: mass = 26.0537;  break; // Mg-28
       case 1000130260: mass = 24.2000;  break; // Al-26
       case 1000130270: mass = 25.1265;  break; // Al-27
       case 1000130280: mass = 26.0584;  break; // Al-28
@@ -1433,6 +1447,7 @@ namespace
       case 1000140310: mass = 28.8462;  break; // Si-31
       case 1000140320: mass = 29.7766;  break; // Si-32
       case 1000140330: mass = 30.7117;  break; // Si-33
+      case 1000140340: mass = 31.6333;  break; // Si-34
       case 1000150300: mass = 27.9170;  break; // P-30
       case 1000150310: mass = 28.8442;  break; // P-31
       case 1000150320: mass = 29.7759;  break; // P-32
@@ -1442,6 +1457,7 @@ namespace
       case 1000150360: mass = 33.5059;  break; // P-36
       case 1000150370: mass = 34.4387;  break; // P-37
       case 1000150380: mass = 35.3745;  break; // P-38
+      case 1000160310: mass = 28.8459;  break; // S-31
       case 1000160320: mass = 29.7736;  break; // S-32
       case 1000160330: mass = 30.7046;  break; // S-33
       case 1000160340: mass = 31.6327;  break; // S-34
@@ -1449,6 +1465,7 @@ namespace
       case 1000160360: mass = 33.4950;  break; // S-36
       case 1000160370: mass = 34.4302;  break; // S-37
       case 1000160380: mass = 35.3618;  break; // S-38
+      case 1000160390: mass = 36.2918;  break; // S-39
       case 1000170340: mass = 31.6377;  break; // Cl-34
       case 1000170350: mass = 32.5646;  break; // Cl-35
       case 1000170360: mass = 33.4956;  break; // Cl-36
@@ -1456,18 +1473,27 @@ namespace
       case 1000170380: mass = 35.3583;  break; // Cl-38
       case 1000170390: mass = 36.2898;  break; // Cl-39
       case 1000170400: mass = 37.2236;  break; // Cl-40
+      case 1000180350: mass = 32.5638;  break; // Ar-35
       case 1000180360: mass = 33.4944;  break; // Ar-36
       case 1000180370: mass = 34.4252;  break; // Ar-37
       case 1000180380: mass = 35.3529;  break; // Ar-38
       case 1000180390: mass = 36.2859;  break; // Ar-39
       case 1000180400: mass = 37.2156;  break; // Ar-40
+      case 1000180410: mass = 38.1491;  break; // Ar-41
       case 1000190380: mass = 35.3583;  break; // K-38
       case 1000190390: mass = 36.2848;  break; // K-39
       case 1000190400: mass = 37.2166;  break; // K-40
       case 1000190410: mass = 38.1634;  break; // K-41 (V2 corrected value)
       case 1000200400: mass = 37.2147;  break; // Ca-40
+      case 1000200410: mass = 38.1463;  break; // Ca-41
+      case 1000200420: mass = 39.0690;  break; // Ca-42
+      case 1000200440: mass = 40.9306;  break; // Ca-44
+      case 1000210450: mass = 41.8582;  break; // Sc-45
+      case 1000220440: mass = 40.9247;  break; // Ti-44
+      case 1000220460: mass = 42.7953;  break; // Ti-46
       case 1000220480: mass = 44.6520;  break; // Ti-48
       case 1000220490: mass = 45.5835;  break; // Ti-49
+      case 1000230480: mass = 44.6661;  break; // V-48
       case 1000230490: mass = 45.5835;  break; // V-49
       case 1000230500: mass = 46.518;   break; // V-50
       case 1000230510: mass = 47.4423;  break; // V-51

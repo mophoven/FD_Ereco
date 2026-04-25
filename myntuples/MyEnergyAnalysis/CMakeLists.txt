@@ -52,17 +52,23 @@
 # that can be invoked as a procedure in a .fcl file) and the
 # libraries/resources needed to compile/execute the module.
 
-simple_plugin(MyEnergyAnalysis "module"
-              ${ART_FRAMEWORK_SERVICES_REGISTRY}
-              ${ART_ROOT_IO_TFILESERVICE_SERVICE}
-              ${ART_ROOT_IO_TFILE_SUPPORT}
-              ${MF_MESSAGELOGGER}
-              ${ROOT_CORE}
-              ${ROOT_HIST}
-              ${ROOT_PHYSICS}
-              ${ROOT_TREE}
-              larcorealg_Geometry
-              nusimdata_SimulationBase
+cet_build_plugin(MyEnergyAnalysis art::EDAnalyzer
+  LIBRARIES
+    REG
+      art::Framework_Core
+      art::Framework_Services_Registry
+      art_root_io::TFileService_service
+      art_root_io::tfile_support
+      messagefacility::MF_MessageLogger
+      ROOT::Core
+      ROOT::Hist
+      ROOT::Physics
+      ROOT::Tree
+      larcorealg::Geometry
+      nusimdata::SimulationBase
+      larcore::Geometry_Geometry_service
+      lardataobj::Simulation
+      larsim::Simulation
 )
 
 # The above will create libraries in $MRB_INSTALL; these are the ".so"
