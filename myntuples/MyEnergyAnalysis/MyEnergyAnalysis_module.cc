@@ -1379,7 +1379,7 @@ namespace
       case 3122:  mass = 1.11568;  break; // Lambda
       case -3122: mass = 1.11568;  break; // anti-Lambda
       case 3212:  mass = 1.31486;  break; // Sigma0
-      case -3212: mass = 0.939565; break; // anti-Sigma0 (V2 value)
+      case -3212: mass = 1.31486; break; // anti-Sigma0 
       case 3222:  mass = 1.18937;  break; // Sigma+
       case -3222: mass = 1.18937;  break;
       case 3112:  mass = 1.19745;  break; // Sigma-
@@ -1675,10 +1675,19 @@ namespace
         {
           totalOutKE += fOutE[i]; // use total energy for mesons and leptons
         }
-        else if (fOutPDG[i] == -2112 || fOutPDG[i] == -2212
-                 || fOutPDG[i] == -3112 || fOutPDG[i] == -3222) // anti-baryons
+        else if (fOutPDG[i] == -2112 || fOutPDG[i] == -2212) // anti-baryons have 2x mass subtracted
         {
           totalOutKE += fOutE[i] - 2 * fOutMass[i];
+        }
+        else if (fOutPDG[i] == 3122|| fOutPDG[i] ==  3212
+                 || fOutPDG[i] == 3222|| fOutPDG[i] == 3112) //hyperons should have neutron mass subtracted
+        {
+          totalOutKE += fOutE[i] - getMassFromPDG(2112);
+        }
+        else if (fOutPDG[i] == -3122|| fOutPDG[i] ==  -3212
+                 || fOutPDG[i] == -3222|| fOutPDG[i] == -3112) //anti-baryons should have 2x mass subtracted
+        {
+          totalOutKE += fOutE[i] - 2 * getMassFromPDG(2112);
         }
         else
         {
@@ -1694,10 +1703,19 @@ namespace
       {
         totalInKE = fInE;
       }
-      else if (fInPDG == -2112 || fInPDG == -2212
-               || fInPDG == -3112 || fInPDG == -3222)
+      else if (fInPDG == -2112 || fInPDG == -2212)
       {
-        totalInKE = fInE - 2 * fInMass;
+        totalInKE = fInE - 2 * fInMass; 
+      }
+      else if (fInPDG == 3122 || fInPDG == 3212
+               || fInPDG == 3222|| fInPDG == 3112) //hyperons should have neutron mass subtracted
+      {
+        totalInKE = fInE - getMassFromPDG(2112);
+      }
+      else if (fInPDG == -3122 || fInPDG == -3212
+               || fInPDG == -3222|| fInPDG == -3112) //anti hyperons have -2x neutron mass
+      {
+        totalInKE = fInE - 2 * getMassFromPDG(2112);
       }
       else
       {
