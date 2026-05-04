@@ -444,6 +444,9 @@ namespace lar
       // histograms and n-tuples for us.
       art::ServiceHandle<art::TFileService const> tfs;
 
+      gStyle->SetPalette(kVisibleSpectrum);
+      gStyle->SetNumberContours(100);
+
       // Define n-tuples
       fInteractionTree = tfs->make<TTree>("HadronicTree", "Handronic Interaction Information");
 
