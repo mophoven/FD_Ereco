@@ -232,6 +232,7 @@ namespace lar
       TH2D *hFrac_pi0 = nullptr;
       TH2D *hFrac_other = nullptr;
       TH2D *hFrac_primary = nullptr;
+      TH2D *hFrac_primary_p = nullptr;
       TH1D *hExit_mu = nullptr;
       TH1D *hExit_p = nullptr;
       TH1D *hExit_n = nullptr;
@@ -532,6 +533,11 @@ namespace lar
       hFrac_primary = tfs->make<TH2D>(
           "hFrac_primary",
           "Per-primary deposited energy fraction;Primary #nu Energy [GeV];Primary E_{dep}/Primary KE",
+          200, 0, 10, 200, 0, 2);
+
+      hFrac_primary_p = tfs->make<TH2D>(
+          "hFrac_primary_p",
+          "Per-primary proton deposited energy fraction;Primary #nu Energy [GeV];Primary proton E_{dep}/Primary proton KE",
           200, 0, 10, 200, 0, 2);
 
       hExit_mu = tfs->make<TH1D>(
@@ -1490,6 +1496,15 @@ namespace lar
           double frac = totalPrimaryEdep / primaryKE_MeV;
           hFrac_primary->Fill(fGen_numu_E, frac);
         }
+
+        if (hFrac_primary_p &&
+            fGen_numu_E > 0 &&
+            primaryKE_MeV > 0 &&
+            primaryParticle->PdgCode() == 2212)
+        {
+          double frac_p = totalPrimaryEdep / primaryKE_MeV;
+          hFrac_primary_p->Fill(fGen_numu_E, frac_p);
+        }
       }
 
       const double MeV_to_GeV = 1e-3;
@@ -1598,7 +1613,7 @@ namespace lar
       save2(hFrac_pi0, "Frac_pi0");
       save2(hFrac_other, "Frac_other");
       save2(hFrac_primary, "Frac_primary");
-
+      save2(hFrac_primary_p, "Frac_primary_p");
       save2(hFracExit_mu, "FracExit_mu");
       save2(hFracExit_p, "FracExit_p");
       save2(hFracExit_n, "FracExit_n");
