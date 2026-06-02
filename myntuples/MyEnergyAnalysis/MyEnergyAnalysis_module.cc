@@ -81,6 +81,9 @@ namespace
   // Utility function to get the diagonal of the detector
   double DetectorDiagonal(geo::GeometryCore const &geom);
 
+  // helper function
+  int GetPrimaryAncestorTrackID(int trackID, const std::map<int, const simb::MCParticle *> &particleMap);
+
   // Sort MC particles based on its start momentum P(0)
   // bool MomentumOrderMCParticle(const simb::MCParticle*, const simb::MCParticle*);
 
@@ -293,6 +296,12 @@ namespace lar
       std::vector<float> fSimP_M_vec;
       std::vector<float> fSimP_Ek_vec;
       std::vector<simb::MCTrajectory> fSimP_Traj_vec;
+
+      // Variables for the primary particle being processed
+      std::vector<int> fSim_primary_Edep_TrackID_vec;
+      std::vector<int> fSim_primary_Edep_PDG_vec;
+      std::vector<float> fSim_primary_Edep_KE_vec;
+      std::vector<float> fSim_primary_Edep_vec;
 
       int fSimTrackID; // GEANT ID of the particle being processed
       int EDepTrackID;
@@ -692,6 +701,12 @@ namespace lar
       fNtuple->Branch("Sim_hadronic_hit_z_b", &fSim_hadronic_hit_z_b);
       fNtuple->Branch("Sim_hadronic_hit_Edep_b2", &fSim_hadronic_hit_Edep_b2);
 
+      // Primary particle info
+      fNtuple->Branch("Sim_primary_Edep_TrackID", &fSim_primary_Edep_TrackID_vec);
+      fNtuple->Branch("Sim_primary_Edep_PDG", &fSim_primary_Edep_PDG_vec);
+      fNtuple->Branch("Sim_primary_Edep_KE", &fSim_primary_Edep_KE_vec);
+      fNtuple->Branch("Sim_primary_Edep", &fSim_primary_Edep_vec);
+
       // True info for each particle
       fNtuple->Branch("P_num", &fP_num, "P_num/I");
       fNtuple->Branch("P_mother", &fP_mother);
@@ -808,6 +823,12 @@ namespace lar
       fSimP_M_vec.clear();
       fSimP_Ek_vec.clear();
 
+      // primary particle info
+      fSim_primary_Edep_TrackID_vec.clear();
+      fSim_primary_Edep_PDG_vec.clear();
+      fSim_primary_Edep_KE_vec.clear();
+      fSim_primary_Edep_vec.clear();
+
       fSim_mu_Edep_b2 = 0.;
       fSim_n_Edep_b2 = 0.;
       fSim_p_Edep_b2 = 0.;
@@ -815,6 +836,7 @@ namespace lar
       fSim_pim_Edep_b2 = 0.;
       fSim_pi0_Edep_b2 = 0.;
       fSim_Other_Edep_b2 = 0.;
+      fSim_nuclei_Edep_b2 = 0.;
       fSim_hadronic_Edep_b2 = 0.;
 
       fSim_nParticles = 0;
@@ -1014,6 +1036,7 @@ namespace lar
       std::map<int, const simb::MCParticle *> particleMap;
       // Create a map of energy deposits to its track ID
       std::map<int, double> EDepMap;
+      std::map<int, double> EDepByPrimaryMap;
 
       //
       // Process Sim MCparticles info
@@ -1318,90 +1341,143 @@ namespace lar
       // Loop over the SimChannel objects in the event to look at the energy deposited by particle's track.
       for (auto const &channel : (*simChannelHandle))
       {
-
         auto const channelNumber = channel.Channel();
 
+        std::vector<geo::WireID> const Wires =
+            fGeometryService->ChannelToWire(channelNumber);
+
+        if (Wires.empty())
+        {
+          continue;
+        }
+
+        if (Wires[0].planeID().Plane != 0)
+        {
+          continue;
+        }
+
         auto const &timeSlices = channel.TDCIDEMap();
+
         for (auto const &timeSlice : timeSlices)
         {
-
           auto const &energyDeposits = timeSlice.second;
 
           for (auto const &energyDeposit : energyDeposits)
           {
+            // Method b: collect deposited energy from collection-plane channels
 
-            // Method b: First check if it's on collection plane
-            std::vector<geo::WireID> const Wires = fGeometryService->ChannelToWire(channelNumber);
-            if (Wires[0].planeID().Plane == 0)
+            auto search = particleMap.find(abs(energyDeposit.trackID));
+
+            int primaryEdepTrackID =
+                GetPrimaryAncestorTrackID(energyDeposit.trackID, particleMap);
+
+            if (primaryEdepTrackID > 0)
             {
+              EDepByPrimaryMap[primaryEdepTrackID] += energyDeposit.energy;
+            }
 
-              auto search = particleMap.find(abs(energyDeposit.trackID));
+            if (search != particleMap.end())
+            {
+              const simb::MCParticle &particle = *((*search).second);
 
-              if (search != particleMap.end())
-              { // found match in map
-
-                const simb::MCParticle &particle = *((*search).second);
-
-                if ((particle.Process() == "primary" && abs(particle.PdgCode()) == 13) || IsAncestorMotherPrimaryLep(particle, primarylep_trkID, particleMap))
-                {
-                  fSim_mu_Edep_b2 += energyDeposit.energy;
-                  continue;
-                } // end lepton deposited energy
-
-                if (particle.PdgCode() == 2112 || IsAncestorMotherNeutron(particle, neutron_trkID, particleMap))
-                {
-                  fSim_n_Edep_b2 += energyDeposit.energy;
-                }
-                else if (particle.PdgCode() == 2212 || IsAncestorMotherProton(particle, proton_trkID, particleMap))
-                {
-                  fSim_p_Edep_b2 += energyDeposit.energy;
-                }
-                else if (particle.PdgCode() == 211 || IsAncestorMotherPip(particle, pip_trkID, particleMap))
-                {
-                  fSim_pip_Edep_b2 += energyDeposit.energy;
-                }
-                else if (particle.PdgCode() == -211 || IsAncestorMotherPim(particle, pim_trkID, particleMap))
-                {
-                  fSim_pim_Edep_b2 += energyDeposit.energy;
-                }
-                else if (particle.PdgCode() == 111 || IsAncestorMotherPi0(particle, pi0_trkID, particleMap))
-                {
-                  fSim_pi0_Edep_b2 += energyDeposit.energy;
-                }
-                else if (particle.PdgCode() == 321 || particle.PdgCode() == -321 || particle.PdgCode() == 311 || particle.PdgCode() == -311 || particle.PdgCode() == 130 || particle.PdgCode() == 310 || particle.PdgCode() == 22 || (particle.PdgCode() >= 100 && particle.PdgCode() <= -9999) || (particle.PdgCode() >= -9999 && particle.PdgCode() <= -100)) // eOther
-                {
-                  fSim_Other_Edep_b2 += energyDeposit.energy;
-                }
-                else if (particle.PdgCode() >= 1000000000 && particle.PdgCode() <= 9999999999) // nucleus
-                {
-                  fSim_nuclei_Edep_b2 += energyDeposit.energy;
-                }
-              } // end found match
-
-              fSim_hadronic_Edep_b2 += energyDeposit.energy;
-              fSim_hadronic_hit_x_b.push_back(energyDeposit.x);
-              fSim_hadronic_hit_y_b.push_back(energyDeposit.y);
-              fSim_hadronic_hit_z_b.push_back(energyDeposit.z);
-              fSim_hadronic_hit_Edep_b2.push_back(energyDeposit.energy);
-
-              EDepTrackID = energyDeposit.trackID;
-              auto exist = EDepMap.find(EDepTrackID);
-              if (exist == EDepMap.end())
+              if ((particle.Process() == "primary" && abs(particle.PdgCode()) == 13) ||
+                  IsAncestorMotherPrimaryLep(particle, primarylep_trkID, particleMap))
               {
-                EDep_TrackID_vec.push_back(EDepTrackID);
-                EDepMap[EDepTrackID] = energyDeposit.energy;
-              }
-              else
-              {
-                EDepMap[EDepTrackID] += energyDeposit.energy;
+                fSim_mu_Edep_b2 += energyDeposit.energy;
+                continue;
               }
 
-            } // end plane == 0
+              if (particle.PdgCode() == 2112 ||
+                  IsAncestorMotherNeutron(particle, neutron_trkID, particleMap))
+              {
+                fSim_n_Edep_b2 += energyDeposit.energy;
+              }
+              else if (particle.PdgCode() == 2212 ||
+                       IsAncestorMotherProton(particle, proton_trkID, particleMap))
+              {
+                fSim_p_Edep_b2 += energyDeposit.energy;
+              }
+              else if (particle.PdgCode() == 211 ||
+                       IsAncestorMotherPip(particle, pip_trkID, particleMap))
+              {
+                fSim_pip_Edep_b2 += energyDeposit.energy;
+              }
+              else if (particle.PdgCode() == -211 ||
+                       IsAncestorMotherPim(particle, pim_trkID, particleMap))
+              {
+                fSim_pim_Edep_b2 += energyDeposit.energy;
+              }
+              else if (particle.PdgCode() == 111 ||
+                       IsAncestorMotherPi0(particle, pi0_trkID, particleMap))
+              {
+                fSim_pi0_Edep_b2 += energyDeposit.energy;
+              }
+              else if (particle.PdgCode() == 321 ||
+                       particle.PdgCode() == -321 ||
+                       particle.PdgCode() == 311 ||
+                       particle.PdgCode() == -311 ||
+                       particle.PdgCode() == 130 ||
+                       particle.PdgCode() == 310 ||
+                       particle.PdgCode() == 22 ||
+                       (particle.PdgCode() >= 100 && particle.PdgCode() <= 9999) ||
+                       (particle.PdgCode() >= -9999 && particle.PdgCode() <= -100))
+              {
+                fSim_Other_Edep_b2 += energyDeposit.energy;
+              }
+              else if (particle.PdgCode() >= 1000000000 &&
+                       particle.PdgCode() <= 9999999999)
+              {
+                fSim_nuclei_Edep_b2 += energyDeposit.energy;
+              }
+            } // end found match
+
+            fSim_hadronic_Edep_b2 += energyDeposit.energy;
+            fSim_hadronic_hit_x_b.push_back(energyDeposit.x);
+            fSim_hadronic_hit_y_b.push_back(energyDeposit.y);
+            fSim_hadronic_hit_z_b.push_back(energyDeposit.z);
+            fSim_hadronic_hit_Edep_b2.push_back(energyDeposit.energy);
+
+            EDepTrackID = energyDeposit.trackID;
+            auto exist = EDepMap.find(EDepTrackID);
+
+            if (exist == EDepMap.end())
+            {
+              EDep_TrackID_vec.push_back(EDepTrackID);
+              EDepMap[EDepTrackID] = energyDeposit.energy;
+            }
+            else
+            {
+              EDepMap[EDepTrackID] += energyDeposit.energy;
+            }
+
           } // end energy deposit loop
-        } // end For each time slice
-      } // end For each SimChannel
-
+        } // end time slice loop
+      } // end SimChannel loop
       fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
+
+      for (auto const &entry : EDepByPrimaryMap)
+      {
+        int primaryTrackID = entry.first;
+        double totalPrimaryEdep = entry.second;
+
+        auto primarySearch = particleMap.find(primaryTrackID);
+        if (primarySearch == particleMap.end())
+        {
+          continue;
+        }
+
+        const simb::MCParticle *primaryParticle = primarySearch->second;
+
+        fSim_primary_Edep_TrackID_vec.push_back(primaryTrackID);
+        fSim_primary_Edep_PDG_vec.push_back(primaryParticle->PdgCode());
+
+        // MCParticle energy is usually GeV, so convert KE to MeV
+        fSim_primary_Edep_KE_vec.push_back(
+            1000.0 * (primaryParticle->E() - primaryParticle->Mass()));
+
+        // sim::IDE::energy is already MeV
+        fSim_primary_Edep_vec.push_back(totalPrimaryEdep);
+      }
 
       const double MeV_to_GeV = 1e-3;
 
@@ -2598,6 +2674,34 @@ namespace
     return -9999.0;
   }
 
+  int GetPrimaryAncestorTrackID(
+      int trackID,
+      const std::map<int, const simb::MCParticle *> &particleMap)
+  {
+    int currentTrackID = std::abs(trackID);
+
+    auto search = particleMap.find(currentTrackID);
+    if (search == particleMap.end())
+    {
+      return -1;
+    }
+
+    const simb::MCParticle *particle = search->second;
+
+    while (particle->Mother() != 0)
+    {
+      int motherTrackID = std::abs(particle->Mother());
+
+      auto motherSearch = particleMap.find(motherTrackID);
+      if (motherSearch == particleMap.end())
+      {
+        break;
+      }
+
+      particle = motherSearch->second;
+    }
+
+    return std::abs(particle->TrackId());
+  }
+
 } // local namespace
-// new comment
-// new comment2
