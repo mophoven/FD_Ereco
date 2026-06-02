@@ -231,6 +231,7 @@ namespace lar
       TH2D *hFrac_pim = nullptr;
       TH2D *hFrac_pi0 = nullptr;
       TH2D *hFrac_other = nullptr;
+      TH2D *hFrac_primary = nullptr;
       TH1D *hExit_mu = nullptr;
       TH1D *hExit_p = nullptr;
       TH1D *hExit_n = nullptr;
@@ -526,6 +527,11 @@ namespace lar
       hFrac_other = tfs->make<TH2D>(
           "hFrac_other",
           "Other Deposited Energy;Primary #nu Energy [GeV];Other E_{dep}/Other total KE",
+          200, 0, 10, 200, 0, 2);
+
+      hFrac_primary = tfs->make<TH2D>(
+          "hFrac_primary",
+          "Per-primary deposited energy fraction;Primary #nu Energy [GeV];Primary E_{dep}/Primary KE",
           200, 0, 10, 200, 0, 2);
 
       hExit_mu = tfs->make<TH1D>(
@@ -1471,12 +1477,19 @@ namespace lar
         fSim_primary_Edep_TrackID_vec.push_back(primaryTrackID);
         fSim_primary_Edep_PDG_vec.push_back(primaryParticle->PdgCode());
 
-        // MCParticle energy is usually GeV, so convert KE to MeV
-        fSim_primary_Edep_KE_vec.push_back(
-            1000.0 * (primaryParticle->E() - primaryParticle->Mass()));
+        double primaryKE_MeV =
+            1000.0 * (primaryParticle->E() - primaryParticle->Mass());
+
+        fSim_primary_Edep_KE_vec.push_back(primaryKE_MeV);
 
         // sim::IDE::energy is already MeV
         fSim_primary_Edep_vec.push_back(totalPrimaryEdep);
+
+        if (hFrac_primary && fGen_numu_E > 0 && primaryKE_MeV > 0)
+        {
+          double frac = totalPrimaryEdep / primaryKE_MeV;
+          hFrac_primary->Fill(fGen_numu_E, frac);
+        }
       }
 
       const double MeV_to_GeV = 1e-3;
@@ -1584,6 +1597,7 @@ namespace lar
       save2(hFrac_pim, "Frac_pim");
       save2(hFrac_pi0, "Frac_pi0");
       save2(hFrac_other, "Frac_other");
+      save2(hFrac_primary, "Frac_primary");
 
       save2(hFracExit_mu, "FracExit_mu");
       save2(hFracExit_p, "FracExit_p");
