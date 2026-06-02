@@ -64,6 +64,10 @@ cet_build_plugin(MyEnergyAnalysis art::EDAnalyzer
       ROOT::Hist
       ROOT::Physics
       ROOT::Tree
+      ROOT::Graf
+      ROOT::Graf3d
+      ROOT::Gpad
+      ROOT::RIO
       larcorealg::Geometry
       nusimdata::SimulationBase
       larcore::Geometry_Geometry_service
