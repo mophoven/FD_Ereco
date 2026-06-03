@@ -615,44 +615,31 @@ namespace lar
           200, 0, 10, 200, 0, 1.2);
 
       hFracNew_mu = tfs->make<TH2D>(
-          "hFracNew_mu", "New per-primary muon deposited energy;
-          Primary #nu Energy[GeV];
-          New Muon E_{dep} / Muon true E ", 
+          "hFracNew_mu", "New per-primary muon deposited energy; Primary #nu Energy[GeV]; New Muon E_{dep} / Muon true E ", 
               200,
           0, 10, 200, 0, 2);
 
       hFracNew_p = tfs->make<TH2D>(
-          "hFracNew_p", "New per-primary proton deposited energy;
-          Primary #nu Energy[GeV];
-          New Proton E_{dep} / Proton true KE ", 
+          "hFracNew_p", "New per-primary proton deposited energy; Primary #nu Energy[GeV]; New Proton E_{dep} / Proton true KE ", 
               200,
           0, 10, 200, 0, 2);
 
       hFracNew_n = tfs->make<TH2D>(
-          "hFracNew_n", "New per-primary neutron deposited energy;
-          Primary #nu Energy[GeV];
-          New Neutron E_{dep} / Neutron true KE ", 
+          "hFracNew_n", "New per-primary neutron deposited energy; Primary #nu Energy[GeV]; New Neutron E_{dep} / Neutron true KE ", 
               200,
           0, 10, 200, 0, 2);
 
       hFracNew_pip = tfs->make<TH2D>(
-          "hFracNew_pip", "New per-primary pion+ deposited energy;
-          Primary #nu Energy[GeV];
-          New #pi ^ {+} E_{dep} / #pi ^ { + } true KE ", 
-              200,
-          0, 10, 200, 0, 2);
+          "hFracNew_pip", "New per-primary pion+ deposited energy; Primary #nu Energy[GeV]; New #pi ^ {+} E_{dep} / #pi ^ { + } true KE ", 
+          200,0, 10, 200, 0, 2);
 
       hFracNew_pim = tfs->make<TH2D>(
-          "hFracNew_pim", "New per-primary pion- deposited energy;
-          Primary #nu Energy[GeV];
-          New #pi ^ {-} E_{dep} / #pi ^ { - } true KE ", 
+          "hFracNew_pim", "New per-primary pion- deposited energy; Primary #nu Energy[GeV]; New #pi ^ {-} E_{dep} / #pi ^ { - } true KE ", 
               200,
           0, 10, 200, 0, 2);
 
       hFracNew_pi0 = tfs->make<TH2D>(
-          "hFracNew_pi0", "New per-primary pion0 deposited energy;
-          Primary #nu Energy[GeV];
-          New #pi ^ {0} E_{dep} / #pi ^ {0} true KE ", 
+          "hFracNew_pi0", "New per-primary pion0 deposited energy; Primary #nu Energy[GeV]; New #pi ^ {0} E_{dep} / #pi ^ {0} true KE ", 
               200,
           0, 10, 200, 0, 2);
 
@@ -1557,7 +1544,7 @@ namespace lar
 
         fSim_primary_Edep_vec.push_back(totalPrimaryEdep);
 
-        add this :
+        
 
             if (std::abs(primaryPDG) == 13)
         {
