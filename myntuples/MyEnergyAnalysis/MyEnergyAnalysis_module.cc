@@ -231,6 +231,15 @@ namespace lar
       TH2D *hFrac_pim = nullptr;
       TH2D *hFrac_pi0 = nullptr;
       TH2D *hFrac_other = nullptr;
+
+      TH2D *hFracNew_mu = nullptr;
+      TH2D *hFracNew_p = nullptr;
+      TH2D *hFracNew_n = nullptr;
+      TH2D *hFracNew_pip = nullptr;
+      TH2D *hFracNew_pim = nullptr;
+      TH2D *hFracNew_pi0 = nullptr;
+      TH2D *hFracNew_other = nullptr;
+
       TH2D *hFrac_primary = nullptr;
       TH2D *hFrac_primary_p = nullptr;
       TH1D *hExit_mu = nullptr;
@@ -604,6 +613,51 @@ namespace lar
           "hFracExit_other",
           "other exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}",
           200, 0, 10, 200, 0, 1.2);
+
+      hFracNew_mu = tfs->make<TH2D>(
+          "hFracNew_mu", "New per-primary muon deposited energy;
+          Primary #nu Energy[GeV];
+          New Muon E_{dep} / Muon true E ", 
+              200,
+          0, 10, 200, 0, 2);
+
+      hFracNew_p = tfs->make<TH2D>(
+          "hFracNew_p", "New per-primary proton deposited energy;
+          Primary #nu Energy[GeV];
+          New Proton E_{dep} / Proton true KE ", 
+              200,
+          0, 10, 200, 0, 2);
+
+      hFracNew_n = tfs->make<TH2D>(
+          "hFracNew_n", "New per-primary neutron deposited energy;
+          Primary #nu Energy[GeV];
+          New Neutron E_{dep} / Neutron true KE ", 
+              200,
+          0, 10, 200, 0, 2);
+
+      hFracNew_pip = tfs->make<TH2D>(
+          "hFracNew_pip", "New per-primary pion+ deposited energy;
+          Primary #nu Energy[GeV];
+          New #pi ^ {+} E_{dep} / #pi ^ { + } true KE ", 
+              200,
+          0, 10, 200, 0, 2);
+
+      hFracNew_pim = tfs->make<TH2D>(
+          "hFracNew_pim", "New per-primary pion- deposited energy;
+          Primary #nu Energy[GeV];
+          New #pi ^ {-} E_{dep} / #pi ^ { - } true KE ", 
+              200,
+          0, 10, 200, 0, 2);
+
+      hFracNew_pi0 = tfs->make<TH2D>(
+          "hFracNew_pi0", "New per-primary pion0 deposited energy;
+          Primary #nu Energy[GeV];
+          New #pi ^ {0} E_{dep} / #pi ^ {0} true KE ", 
+              200,
+          0, 10, 200, 0, 2);
+
+      hFracNew_other = tfs->make<TH2D>(
+          "hFracNew_other", "New per-primary other deposited energy;Primary #nu Energy [GeV];New Other E_{dep}/Other true KE", 200, 0, 10, 200, 0, 2);
 
       fNtuple->Branch("ExitKE_sum", &fExitKE_sum, "ExitKE_sum/D");
       fNtuple->Branch("ExitKE_max", &fExitKE_max, "ExitKE_max/D");
@@ -1467,6 +1521,14 @@ namespace lar
       } // end SimChannel loop
       fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
 
+      double new_mu_Edep_MeV = 0.;
+      double new_p_Edep_MeV = 0.;
+      double new_n_Edep_MeV = 0.;
+      double new_pip_Edep_MeV = 0.;
+      double new_pim_Edep_MeV = 0.;
+      double new_pi0_Edep_MeV = 0.;
+      double new_other_Edep_MeV = 0.;
+
       for (auto const &entry : EDepByPrimaryMap)
       {
         int primaryTrackID = entry.first;
@@ -1480,6 +1542,8 @@ namespace lar
 
         const simb::MCParticle *primaryParticle = primarySearch->second;
 
+        int primaryPDG = primaryParticle->PdgCode();
+
         fSim_primary_Edep_TrackID_vec.push_back(primaryTrackID);
         fSim_primary_Edep_PDG_vec.push_back(primaryParticle->PdgCode());
 
@@ -1490,6 +1554,39 @@ namespace lar
 
         // sim::IDE::energy is already MeV
         fSim_primary_Edep_vec.push_back(totalPrimaryEdep);
+
+        fSim_primary_Edep_vec.push_back(totalPrimaryEdep);
+
+        add this :
+
+            if (std::abs(primaryPDG) == 13)
+        {
+          new_mu_Edep_MeV += totalPrimaryEdep;
+        }
+        else if (primaryPDG == 2212)
+        {
+          new_p_Edep_MeV += totalPrimaryEdep;
+        }
+        else if (primaryPDG == 2112)
+        {
+          new_n_Edep_MeV += totalPrimaryEdep;
+        }
+        else if (primaryPDG == 211)
+        {
+          new_pip_Edep_MeV += totalPrimaryEdep;
+        }
+        else if (primaryPDG == -211)
+        {
+          new_pim_Edep_MeV += totalPrimaryEdep;
+        }
+        else if (primaryPDG == 111)
+        {
+          new_pi0_Edep_MeV += totalPrimaryEdep;
+        }
+        else
+        {
+          new_other_Edep_MeV += totalPrimaryEdep;
+        }
 
         if (hFrac_primary && fGen_numu_E > 0 && primaryKE_MeV > 0)
         {
@@ -1542,6 +1639,20 @@ namespace lar
       fillFrac(hFrac_pi0, ePi0, fSim_pi0_Edep_b2);
 
       fillFrac(hFrac_other, eOther, fSim_Other_Edep_b2);
+
+      fillFrac(hFracNew_mu, fTrue_LepE, new_mu_Edep_MeV);
+
+      fillFrac(hFracNew_p, eP, new_p_Edep_MeV);
+
+      fillFrac(hFracNew_n, eN, new_n_Edep_MeV);
+
+      fillFrac(hFracNew_pip, ePip, new_pip_Edep_MeV);
+
+      fillFrac(hFracNew_pim, ePim, new_pim_Edep_MeV);
+
+      fillFrac(hFracNew_pi0, ePi0, new_pi0_Edep_MeV);
+
+      fillFrac(hFracNew_other, eOther, new_other_Edep_MeV);
 
       if (false)
       {
@@ -1612,6 +1723,15 @@ namespace lar
       save2(hFrac_pim, "Frac_pim");
       save2(hFrac_pi0, "Frac_pi0");
       save2(hFrac_other, "Frac_other");
+
+      save2(hFracNew_mu, "FracNew_mu");
+      save2(hFracNew_p, "FracNew_p");
+      save2(hFracNew_n, "FracNew_n");
+      save2(hFracNew_pip, "FracNew_pip");
+      save2(hFracNew_pim, "FracNew_pim");
+      save2(hFracNew_pi0, "FracNew_pi0");
+      save2(hFracNew_other, "FracNew_other");
+
       save2(hFrac_primary, "Frac_primary");
       save2(hFrac_primary_p, "Frac_primary_p");
       save2(hFracExit_mu, "FracExit_mu");
