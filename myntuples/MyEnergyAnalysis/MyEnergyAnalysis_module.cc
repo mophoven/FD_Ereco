@@ -240,6 +240,14 @@ namespace lar
       TH2D *hFracNew_pi0 = nullptr;
       TH2D *hFracNew_other = nullptr;
 
+      TH2D *hMissNew_mu = nullptr;
+      TH2D *hMissNew_p = nullptr;
+      TH2D *hMissNew_n = nullptr;
+      TH2D *hMissNew_pip = nullptr;
+      TH2D *hMissNew_pim = nullptr;
+      TH2D *hMissNew_pi0 = nullptr;
+      TH2D *hMissNew_other = nullptr;
+
       TH2D *hFrac_primary = nullptr;
       TH2D *hFrac_primary_p = nullptr;
       TH1D *hExit_mu = nullptr;
@@ -615,36 +623,71 @@ namespace lar
           200, 0, 10, 200, 0, 1.2);
 
       hFracNew_mu = tfs->make<TH2D>(
-          "hFracNew_mu", "New per-primary muon deposited energy; Primary #nu Energy[GeV]; New Muon E_{dep} / Muon true E ", 
-              200,
+          "hFracNew_mu", "New per-primary muon deposited energy; Primary #nu Energy[GeV]; New Muon E_{dep} / Muon true E ",
+          200,
           0, 10, 200, 0, 2);
 
       hFracNew_p = tfs->make<TH2D>(
-          "hFracNew_p", "New per-primary proton deposited energy; Primary #nu Energy[GeV]; New Proton E_{dep} / Proton true KE ", 
-              200,
+          "hFracNew_p", "New per-primary proton deposited energy; Primary #nu Energy[GeV]; New Proton E_{dep} / Proton true KE ",
+          200,
           0, 10, 200, 0, 2);
 
       hFracNew_n = tfs->make<TH2D>(
-          "hFracNew_n", "New per-primary neutron deposited energy; Primary #nu Energy[GeV]; New Neutron E_{dep} / Neutron true KE ", 
-              200,
+          "hFracNew_n", "New per-primary neutron deposited energy; Primary #nu Energy[GeV]; New Neutron E_{dep} / Neutron true KE ",
+          200,
           0, 10, 200, 0, 2);
 
       hFracNew_pip = tfs->make<TH2D>(
-          "hFracNew_pip", "New per-primary pion+ deposited energy; Primary #nu Energy[GeV]; New #pi ^ {+} E_{dep} / #pi ^ { + } true KE ", 
-          200,0, 10, 200, 0, 2);
+          "hFracNew_pip", "New per-primary pion+ deposited energy; Primary #nu Energy[GeV]; New #pi ^ {+} E_{dep} / #pi ^ { + } true KE ",
+          200, 0, 10, 200, 0, 2);
 
       hFracNew_pim = tfs->make<TH2D>(
-          "hFracNew_pim", "New per-primary pion- deposited energy; Primary #nu Energy[GeV]; New #pi ^ {-} E_{dep} / #pi ^ { - } true KE ", 
-              200,
+          "hFracNew_pim", "New per-primary pion- deposited energy; Primary #nu Energy[GeV]; New #pi ^ {-} E_{dep} / #pi ^ { - } true KE ",
+          200,
           0, 10, 200, 0, 2);
 
       hFracNew_pi0 = tfs->make<TH2D>(
-          "hFracNew_pi0", "New per-primary pion0 deposited energy; Primary #nu Energy[GeV]; New #pi ^ {0} E_{dep} / #pi ^ {0} true KE ", 
-              200,
+          "hFracNew_pi0", "New per-primary pion0 deposited energy; Primary #nu Energy[GeV]; New #pi ^ {0} E_{dep} / #pi ^ {0} true KE ",
+          200,
           0, 10, 200, 0, 2);
 
       hFracNew_other = tfs->make<TH2D>(
           "hFracNew_other", "New per-primary other deposited energy;Primary #nu Energy [GeV];New Other E_{dep}/Other true KE", 200, 0, 10, 200, 0, 2);
+
+      hMissNew_mu = tfs->make<TH2D>(
+          "hMissNew_mu",
+          "New per-primary muon missing fraction;Primary #nu Energy [GeV];1 - New Muon E_{dep}/Muon true E",
+          200, 0, 10, 200, -1, 1.2);
+
+      hMissNew_p = tfs->make<TH2D>(
+          "hMissNew_p",
+          "New per-primary proton missing fraction;Primary #nu Energy [GeV];1 - New Proton E_{dep}/Proton true KE",
+          200, 0, 10, 200, -1, 1.2);
+
+      hMissNew_n = tfs->make<TH2D>(
+          "hMissNew_n",
+          "New per-primary neutron missing fraction;Primary #nu Energy [GeV];1 - New Neutron E_{dep}/Neutron true KE",
+          200, 0, 10, 200, -1, 1.2);
+
+      hMissNew_pip = tfs->make<TH2D>(
+          "hMissNew_pip",
+          "New per-primary pion+ missing fraction;Primary #nu Energy [GeV];1 - New #pi^{+} E_{dep}/#pi^{+} true KE",
+          200, 0, 10, 200, -1, 1.2);
+
+      hMissNew_pim = tfs->make<TH2D>(
+          "hMissNew_pim",
+          "New per-primary pion- missing fraction;Primary #nu Energy [GeV];1 - New #pi^{-} E_{dep}/#pi^{-} true KE",
+          200, 0, 10, 200, -1, 1.2);
+
+      hMissNew_pi0 = tfs->make<TH2D>(
+          "hMissNew_pi0",
+          "New per-primary pion0 missing fraction;Primary #nu Energy [GeV];1 - New #pi^{0} E_{dep}/#pi^{0} true KE",
+          200, 0, 10, 200, -1, 1.2);
+
+      hMissNew_other = tfs->make<TH2D>(
+          "hMissNew_other",
+          "New per-primary other missing fraction;Primary #nu Energy [GeV];1 - New Other E_{dep}/Other true KE",
+          200, 0, 10, 200, -1, 1.2);
 
       fNtuple->Branch("ExitKE_sum", &fExitKE_sum, "ExitKE_sum/D");
       fNtuple->Branch("ExitKE_max", &fExitKE_max, "ExitKE_max/D");
@@ -1544,9 +1587,7 @@ namespace lar
 
         fSim_primary_Edep_vec.push_back(totalPrimaryEdep);
 
-        
-
-            if (std::abs(primaryPDG) == 13)
+        if (std::abs(primaryPDG) == 13)
         {
           new_mu_Edep_MeV += totalPrimaryEdep;
         }
@@ -1597,18 +1638,42 @@ namespace lar
 
       {
         if (!h)
+
           return;
 
         if (fGen_numu_E <= 0)
+
           return;
 
         if (Etrue <= 0)
+
           return;
 
         double frac = (EdepMeV * MeV_to_GeV) / Etrue;
 
         if (frac < 0)
+
           frac = 0;
+
+        h->Fill(fGen_numu_E, frac);
+      };
+
+      auto fillMissingFrac = [&](TH2D *h, double Etrue, double EdepMeV)
+
+      {
+        if (!h)
+
+          return;
+
+        if (fGen_numu_E <= 0)
+
+          return;
+
+        if (Etrue <= 0)
+
+          return;
+
+        double frac = 1.0 - ((EdepMeV * MeV_to_GeV) / Etrue);
 
         h->Fill(fGen_numu_E, frac);
       };
@@ -1640,6 +1705,20 @@ namespace lar
       fillFrac(hFracNew_pi0, ePi0, new_pi0_Edep_MeV);
 
       fillFrac(hFracNew_other, eOther, new_other_Edep_MeV);
+
+      fillMissingFrac(hMissingFrac_mu, fTrue_LepE, new_mu_Edep_MeV);
+
+      fillMissingFrac(hMissingFrac_p, eP, new_p_Edep_MeV);
+
+      fillMissingFrac(hMissingFrac_n, eN, new_n_Edep_MeV);
+
+      fillMissingFrac(hMissingFrac_pip, ePip, new_pip_Edep_MeV);
+
+      fillMissingFrac(hMissingFrac_pim, ePim, new_pim_Edep_MeV);
+
+      fillMissingFrac(hMissingFrac_pi0, ePi0, new_pi0_Edep_MeV);
+
+      fillMissingFrac(hMissingFrac_other, eOther, new_other_Edep_MeV);
 
       if (false)
       {
@@ -1728,6 +1807,14 @@ namespace lar
       save2(hFracExit_pim, "FracExit_pim");
       save2(hFracExit_pi0, "FracExit_pi0");
       save2(hFracExit_other, "FracExit_other");
+
+      save2(hMissNew_mu, "MissNew_mu");
+      save2(hMissNew_p, "MissNew_p");
+      save2(hMissNew_n, "MissNew_n");
+      save2(hMissNew_pip, "MissNew_pip");
+      save2(hMissNew_pim, "MissNew_pim");
+      save2(hMissNew_pi0, "MissNew_pi0");
+      save2(hMissNew_other, "MissNew_other");
     }
 
     // This macro has to be defined for this module to be invoked from a
@@ -2841,3 +2928,5 @@ namespace
   }
 
 } // local namespace
+// plot Edep/Eexit
+// look at Milo's code (interaction tree function)
