@@ -1706,19 +1706,19 @@ namespace lar
 
       fillFrac(hFracNew_other, eOther, new_other_Edep_MeV);
 
-      fillMissingFrac(hMissingFrac_mu, fTrue_LepE, new_mu_Edep_MeV);
+      fillMissingFrac(hMissNew_mu, fTrue_LepE, new_mu_Edep_MeV);
 
-      fillMissingFrac(hMissingFrac_p, eP, new_p_Edep_MeV);
+fillMissingFrac(hMissNew_p, eP, new_p_Edep_MeV);
 
-      fillMissingFrac(hMissingFrac_n, eN, new_n_Edep_MeV);
+fillMissingFrac(hMissNew_n, eN, new_n_Edep_MeV);
 
-      fillMissingFrac(hMissingFrac_pip, ePip, new_pip_Edep_MeV);
+fillMissingFrac(hMissNew_pip, ePip, new_pip_Edep_MeV);
 
-      fillMissingFrac(hMissingFrac_pim, ePim, new_pim_Edep_MeV);
+fillMissingFrac(hMissNew_pim, ePim, new_pim_Edep_MeV);
 
-      fillMissingFrac(hMissingFrac_pi0, ePi0, new_pi0_Edep_MeV);
+fillMissingFrac(hMissNew_pi0, ePi0, new_pi0_Edep_MeV);
 
-      fillMissingFrac(hMissingFrac_other, eOther, new_other_Edep_MeV);
+fillMissingFrac(hMissNew_other, eOther, new_other_Edep_MeV);
 
       if (false)
       {
