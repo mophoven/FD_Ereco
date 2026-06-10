@@ -264,6 +264,14 @@ namespace lar
       TH2D *hFracExit_pi0 = nullptr;
       TH2D *hFracExit_other = nullptr;
 
+      TH2D *hDepOverExit_mu = nullptr;
+      TH2D *hDepOverExit_p = nullptr;
+      TH2D *hDepOverExit_n = nullptr;
+      TH2D *hDepOverExit_pip = nullptr;
+      TH2D *hDepOverExit_pim = nullptr;
+      TH2D *hDepOverExit_pi0 = nullptr;
+      TH2D *hDepOverExit_other = nullptr;
+
       TTree *fInteractionTree; // Tree for interaction information
 
       float fInX, fInY, fInZ, fInT;
@@ -688,6 +696,20 @@ namespace lar
           "hMissNew_other",
           "New per-primary other missing fraction;Primary #nu Energy [GeV];1 - New Other E_{dep}/Other true KE",
           200, 0, 10, 200, -1, 1.2);
+
+      hDepOverExit_mu = tfs->make<TH2D>("hDepOverExit_mu", "Muon Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
+
+      hDepOverExit_p = tfs->make<TH2D>("hDepOverExit_p", "Proton Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
+
+      hDepOverExit_n = tfs->make<TH2D>("hDepOverExit_n", "Neutron Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
+
+      hDepOverExit_pip = tfs->make<TH2D>("hDepOverExit_pip", "Pion+ Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
+
+      hDepOverExit_pim = tfs->make<TH2D>("hDepOverExit_pim", "Pion- Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
+
+      hDepOverExit_pi0 = tfs->make<TH2D>("hDepOverExit_pi0", "Pion0 Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
+
+      hDepOverExit_other = tfs->make<TH2D>("hDepOverExit_other", "Other Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
 
       fNtuple->Branch("ExitKE_sum", &fExitKE_sum, "ExitKE_sum/D");
       fNtuple->Branch("ExitKE_max", &fExitKE_max, "ExitKE_max/D");
@@ -1574,6 +1596,8 @@ namespace lar
 
         int primaryPDG = primaryParticle->PdgCode();
 
+        double primaryExitKE_GeV = ReportFirstExitRootOnly(*primaryParticle, particleMap);
+
         fSim_primary_Edep_TrackID_vec.push_back(primaryTrackID);
         fSim_primary_Edep_PDG_vec.push_back(primaryParticle->PdgCode());
 
@@ -1629,6 +1653,41 @@ namespace lar
         {
           double frac_p = totalPrimaryEdep / primaryKE_MeV;
           hFrac_primary_p->Fill(fGen_numu_E, frac_p);
+        }
+
+        if (fGen_numu_E > 0 && primaryExitKE_GeV > 0)
+
+        {
+
+          double depOverExit = (totalPrimaryEdep * 1e-3) / primaryExitKE_GeV;
+
+          if (std::abs(primaryPDG) == 13 && hDepOverExit_mu)
+
+            hDepOverExit_mu->Fill(fGen_numu_E, depOverExit);
+
+          else if (primaryPDG == 2212 && hDepOverExit_p)
+
+            hDepOverExit_p->Fill(fGen_numu_E, depOverExit);
+
+          else if (primaryPDG == 2112 && hDepOverExit_n)
+
+            hDepOverExit_n->Fill(fGen_numu_E, depOverExit);
+
+          else if (primaryPDG == 211 && hDepOverExit_pip)
+
+            hDepOverExit_pip->Fill(fGen_numu_E, depOverExit);
+
+          else if (primaryPDG == -211 && hDepOverExit_pim)
+
+            hDepOverExit_pim->Fill(fGen_numu_E, depOverExit);
+
+          else if (primaryPDG == 111 && hDepOverExit_pi0)
+
+            hDepOverExit_pi0->Fill(fGen_numu_E, depOverExit);
+
+          else if (hDepOverExit_other)
+
+            hDepOverExit_other->Fill(fGen_numu_E, depOverExit);
         }
       }
 
@@ -1708,17 +1767,17 @@ namespace lar
 
       fillMissingFrac(hMissNew_mu, fTrue_LepE, new_mu_Edep_MeV);
 
-fillMissingFrac(hMissNew_p, eP, new_p_Edep_MeV);
+      fillMissingFrac(hMissNew_p, eP, new_p_Edep_MeV);
 
-fillMissingFrac(hMissNew_n, eN, new_n_Edep_MeV);
+      fillMissingFrac(hMissNew_n, eN, new_n_Edep_MeV);
 
-fillMissingFrac(hMissNew_pip, ePip, new_pip_Edep_MeV);
+      fillMissingFrac(hMissNew_pip, ePip, new_pip_Edep_MeV);
 
-fillMissingFrac(hMissNew_pim, ePim, new_pim_Edep_MeV);
+      fillMissingFrac(hMissNew_pim, ePim, new_pim_Edep_MeV);
 
-fillMissingFrac(hMissNew_pi0, ePi0, new_pi0_Edep_MeV);
+      fillMissingFrac(hMissNew_pi0, ePi0, new_pi0_Edep_MeV);
 
-fillMissingFrac(hMissNew_other, eOther, new_other_Edep_MeV);
+      fillMissingFrac(hMissNew_other, eOther, new_other_Edep_MeV);
 
       if (false)
       {
@@ -1815,6 +1874,14 @@ fillMissingFrac(hMissNew_other, eOther, new_other_Edep_MeV);
       save2(hMissNew_pim, "MissNew_pim");
       save2(hMissNew_pi0, "MissNew_pi0");
       save2(hMissNew_other, "MissNew_other");
+
+      save2(hDepOverExit_mu, "DepOverExit_mu");
+      save2(hDepOverExit_p, "DepOverExit_p");
+      save2(hDepOverExit_n, "DepOverExit_n");
+      save2(hDepOverExit_pip, "DepOverExit_pip");
+      save2(hDepOverExit_pim, "DepOverExit_pim");
+      save2(hDepOverExit_pi0, "DepOverExit_pi0");
+      save2(hDepOverExit_other, "DepOverExit_other");
     }
 
     // This macro has to be defined for this module to be invoked from a
