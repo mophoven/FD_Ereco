@@ -942,7 +942,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
         // exothermic release (e.g. nCapture), which reappears as gammas.
       }
 
-      // --- build channel key: "n+Ar40[neutronInelastic]->Ar38+2n" ---
+      // --- build channel key: "n+Ar40[neutronInelastic]->Ar38+2n" --- make the channel tag track Eb per channel here and not in csv script
       auto nucName = [](int pdg) -> std::string {
         if (!isNucleus(pdg)) return std::to_string(pdg);
         return "Z" + std::to_string(nuclearZ(pdg)) + "A" + std::to_string(nuclearA(pdg));
@@ -1009,7 +1009,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
     }
     if (!everInside) continue;        // never in the detector at all
     if (exitKE < 0) continue;         // ended inside -> contained
-    if (exitKE < 0) exitKE = 0;
+      
 
     // Energy that becomes invisible when the track leaves the active volume.
     // Created particles (mu, e, pi, gamma, ...) take their rest mass with them and
