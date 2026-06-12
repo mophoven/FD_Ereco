@@ -2997,3 +2997,4 @@ namespace
 } // local namespace
 // plot Edep/Eexit
 // look at Milo's code (interaction tree function)
+// plot Edep+Eexit vs Etotal
