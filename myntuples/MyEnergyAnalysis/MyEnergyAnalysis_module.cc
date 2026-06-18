@@ -2460,7 +2460,7 @@ namespace
 
   // For root-level (motherless) primary particles, find the first detector-exit
   // trajectory point and return the KE at that point (from V2)
-  double ReportFirstExitRootOnly(const simb::MCParticle &part,
+ [[maybe_unused]] double ReportFirstExitRootOnly(const simb::MCParticle &part,
                                  const std::map<int, const simb::MCParticle *> &particleMap)
   {
     const double X_MIN = -359.5, X_MAX = 359.5;
