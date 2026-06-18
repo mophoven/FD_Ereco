@@ -1411,14 +1411,7 @@ namespace lar
     {
       gROOT->SetBatch(kTRUE);
 
-      auto save1 = [](TH1 *h, const std::string &base)
-      {
-        if (!h)
-          return;
-        TCanvas c;
-        h->Draw("hist");
-        c.SaveAs((base + ".pdf").c_str());
-      };
+     
 
       auto save2 = [](TH2 *h, const std::string &base)
       {
