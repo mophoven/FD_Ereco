@@ -129,8 +129,8 @@ namespace
                     std::vector<int> &,
                     const std::map<int, const simb::MCParticle *> &);
 
-  double ReportFirstExitRootOnly(const simb::MCParticle &part,
-                                 const std::map<int, const simb::MCParticle *> &particleMap);
+  [[maybe_unused]] double ReportFirstExitRootOnly(const simb::MCParticle &part,
+                                                  const std::map<int, const simb::MCParticle *> &particleMap);
 
   // std::vector<primaryVertex> clusterPrimaryVertices(const simb::MCParticle*, const std::vector<const simb::MCParticle*>&);
 
@@ -673,8 +673,6 @@ namespace lar
 
       ftotalExited = 0.; // from V2
 
-      
-
       // Initialize track ID
       primarylep_trkID = -1;
       neutron_trkID.clear();
@@ -1113,8 +1111,6 @@ namespace lar
       fSim_nProton = SimProtons.size();
       fSim_nParticles = SimParticles.size();
 
-      
-
       // Collecting all Daughters of Each primary
 
       std::vector<std::vector<const simb::MCParticle *>> DaughterpartVec;
@@ -1331,9 +1327,6 @@ namespace lar
         {
           new_other_Edep_MeV += totalPrimaryEdep;
         }
-
-        
-
       }
 
       const double MeV_to_GeV = 1e-3;
@@ -1410,8 +1403,6 @@ namespace lar
     void MyEnergyAnalysis::endJob()
     {
       gROOT->SetBatch(kTRUE);
-
-     
 
       auto save2 = [](TH2 *h, const std::string &base)
       {
@@ -2460,8 +2451,8 @@ namespace
 
   // For root-level (motherless) primary particles, find the first detector-exit
   // trajectory point and return the KE at that point (from V2)
- [[maybe_unused]] double ReportFirstExitRootOnly(const simb::MCParticle &part,
-                                 const std::map<int, const simb::MCParticle *> &particleMap)
+  [[maybe_unused]] double ReportFirstExitRootOnly(const simb::MCParticle &part,
+                                                  const std::map<int, const simb::MCParticle *> &particleMap)
   {
     const double X_MIN = -359.5, X_MAX = 359.5;
     const double Y_MIN = -604.0, Y_MAX = 604.0;
