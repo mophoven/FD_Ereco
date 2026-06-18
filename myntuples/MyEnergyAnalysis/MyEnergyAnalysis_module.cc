@@ -219,19 +219,6 @@ namespace lar
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
       art::InputTag fSimChannelLabel;
 
-      double fExitKE_sum;
-
-      double fExitKE_max;
-
-      TH2D *hEnuVsExit = nullptr;
-      TH2D *hFrac_mu = nullptr;
-      TH2D *hFrac_p = nullptr;
-      TH2D *hFrac_n = nullptr;
-      TH2D *hFrac_pip = nullptr;
-      TH2D *hFrac_pim = nullptr;
-      TH2D *hFrac_pi0 = nullptr;
-      TH2D *hFrac_other = nullptr;
-
       TH2D *hFracNew_mu = nullptr;
       TH2D *hFracNew_p = nullptr;
       TH2D *hFracNew_n = nullptr;
@@ -239,38 +226,6 @@ namespace lar
       TH2D *hFracNew_pim = nullptr;
       TH2D *hFracNew_pi0 = nullptr;
       TH2D *hFracNew_other = nullptr;
-
-      TH2D *hMissNew_mu = nullptr;
-      TH2D *hMissNew_p = nullptr;
-      TH2D *hMissNew_n = nullptr;
-      TH2D *hMissNew_pip = nullptr;
-      TH2D *hMissNew_pim = nullptr;
-      TH2D *hMissNew_pi0 = nullptr;
-      TH2D *hMissNew_other = nullptr;
-
-      TH2D *hFrac_primary = nullptr;
-      TH2D *hFrac_primary_p = nullptr;
-      TH1D *hExit_mu = nullptr;
-      TH1D *hExit_p = nullptr;
-      TH1D *hExit_n = nullptr;
-      TH1D *hExit_pip = nullptr;
-      TH1D *hExit_pim = nullptr;
-      TH1D *hExit_other = nullptr;
-      TH2D *hFracExit_mu = nullptr;
-      TH2D *hFracExit_p = nullptr;
-      TH2D *hFracExit_n = nullptr;
-      TH2D *hFracExit_pip = nullptr;
-      TH2D *hFracExit_pim = nullptr;
-      TH2D *hFracExit_pi0 = nullptr;
-      TH2D *hFracExit_other = nullptr;
-
-      TH2D *hDepOverExit_mu = nullptr;
-      TH2D *hDepOverExit_p = nullptr;
-      TH2D *hDepOverExit_n = nullptr;
-      TH2D *hDepOverExit_pip = nullptr;
-      TH2D *hDepOverExit_pim = nullptr;
-      TH2D *hDepOverExit_pi0 = nullptr;
-      TH2D *hDepOverExit_other = nullptr;
 
       TTree *fInteractionTree; // Tree for interaction information
 
@@ -515,121 +470,6 @@ namespace lar
 
       fNtuple = tfs->make<TTree>("MyTree", "MyTree");
 
-      hEnuVsExit = tfs->make<TH2D>(
-          "hEnuVsExit",
-          "Neutrino energy vs exited energy;E_{#nu} [GeV];E_{exit} [GeV]",
-          200, 0, 10, 200, 0, 10);
-
-      hFrac_mu = tfs->make<TH2D>(
-          "hFrac_mu",
-          "Muon Deposited Energy;Primary #nu Energy [GeV];Muon E_{dep}/Muon total E",
-          200, 0, 10, 200, 0, 2);
-
-      hFrac_p = tfs->make<TH2D>(
-          "hFrac_p",
-          "Protons Deposited Energy;Primary #nu Energy [GeV];Protons E_{dep}/Protons total KE",
-          200, 0, 10, 200, 0, 2);
-
-      hFrac_n = tfs->make<TH2D>(
-          "hFrac_n",
-          "Neutrons Deposited Energy;Primary #nu Energy [GeV];Neutrons E_{dep}/Neutrons total KE",
-          200, 0, 10, 200, 0, 2);
-
-      hFrac_pip = tfs->make<TH2D>(
-          "hFrac_pip",
-          "Pions+ Deposited Energy;Primary #nu Energy [GeV];Pions+ E_{dep}/Pions+ total KE",
-          200, 0, 10, 200, 0, 2);
-
-      hFrac_pim = tfs->make<TH2D>(
-          "hFrac_pim",
-          "Pions- Deposited Energy;Primary #nu Energy [GeV];Pions- E_{dep}/Pions- total KE",
-          200, 0, 10, 200, 0, 2);
-
-      hFrac_pi0 = tfs->make<TH2D>(
-          "hFrac_pi0",
-          "Pions0 Deposited Energy;Primary #nu Energy [GeV];Pions0 E_{dep}/Pions0 total KE",
-          200, 0, 10, 200, 0, 2);
-
-      hFrac_other = tfs->make<TH2D>(
-          "hFrac_other",
-          "Other Deposited Energy;Primary #nu Energy [GeV];Other E_{dep}/Other total KE",
-          200, 0, 10, 200, 0, 2);
-
-      hFrac_primary = tfs->make<TH2D>(
-          "hFrac_primary",
-          "Per-primary deposited energy fraction;Primary #nu Energy [GeV];Primary E_{dep}/Primary KE",
-          200, 0, 10, 200, 0, 2);
-
-      hFrac_primary_p = tfs->make<TH2D>(
-          "hFrac_primary_p",
-          "Per-primary proton deposited energy fraction;Primary #nu Energy [GeV];Primary proton E_{dep}/Primary proton KE",
-          200, 0, 10, 200, 0, 2);
-
-      hExit_mu = tfs->make<TH1D>(
-          "hExit_mu",
-          "Exited KE, primary mu;KE_{exit} [GeV];Entries",
-          200, 0, 10);
-
-      hExit_p = tfs->make<TH1D>(
-          "hExit_p",
-          "Exited KE, primary p;KE_{exit} [GeV];Entries",
-          200, 0, 10);
-
-      hExit_n = tfs->make<TH1D>(
-          "hExit_n",
-          "Exited KE, primary n;KE_{exit} [GeV];Entries",
-          200, 0, 10);
-
-      hExit_pip = tfs->make<TH1D>(
-          "hExit_pip",
-          "Exited KE, primary #pi^{+};KE_{exit} [GeV];Entries",
-          200, 0, 10);
-
-      hExit_pim = tfs->make<TH1D>(
-          "hExit_pim",
-          "Exited KE, primary #pi^{-};KE_{exit} [GeV];Entries",
-          200, 0, 10);
-
-      hExit_other = tfs->make<TH1D>(
-          "hExit_other",
-          "Exited KE, other primaries;KE_{exit} [GeV];Entries",
-          200, 0, 10);
-
-      hFracExit_mu = tfs->make<TH2D>(
-          "hFracExit_mu",
-          "#mu exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}",
-          200, 0, 10, 200, 0, 1.2);
-
-      hFracExit_p = tfs->make<TH2D>(
-          "hFracExit_p",
-          "p exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}",
-          200, 0, 10, 200, 0, 1.2);
-
-      hFracExit_n = tfs->make<TH2D>(
-          "hFracExit_n",
-          "n exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}",
-          200, 0, 10, 200, 0, 1.2);
-
-      hFracExit_pip = tfs->make<TH2D>(
-          "hFracExit_pip",
-          "#pi^{+} exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}",
-          200, 0, 10, 200, 0, 1.2);
-
-      hFracExit_pim = tfs->make<TH2D>(
-          "hFracExit_pim",
-          "#pi^{-} exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}",
-          200, 0, 10, 200, 0, 1.2);
-
-      hFracExit_pi0 = tfs->make<TH2D>(
-          "hFracExit_pi0",
-          "#pi^{0} exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}",
-          200, 0, 10, 200, 0, 1.2);
-
-      hFracExit_other = tfs->make<TH2D>(
-          "hFracExit_other",
-          "other exit fraction;E_{#nu} [GeV];1 - E_{exit}/E_{true}",
-          200, 0, 10, 200, 0, 1.2);
-
       hFracNew_mu = tfs->make<TH2D>(
           "hFracNew_mu", "New per-primary muon deposited energy; Primary #nu Energy[GeV]; New Muon E_{dep} / Muon true E ",
           200,
@@ -661,58 +501,6 @@ namespace lar
 
       hFracNew_other = tfs->make<TH2D>(
           "hFracNew_other", "New per-primary other deposited energy;Primary #nu Energy [GeV];New Other E_{dep}/Other true KE", 200, 0, 10, 200, 0, 2);
-
-      hMissNew_mu = tfs->make<TH2D>(
-          "hMissNew_mu",
-          "New per-primary muon missing fraction;Primary #nu Energy [GeV];1 - New Muon E_{dep}/Muon true E",
-          200, 0, 10, 200, -1, 1.2);
-
-      hMissNew_p = tfs->make<TH2D>(
-          "hMissNew_p",
-          "New per-primary proton missing fraction;Primary #nu Energy [GeV];1 - New Proton E_{dep}/Proton true KE",
-          200, 0, 10, 200, -1, 1.2);
-
-      hMissNew_n = tfs->make<TH2D>(
-          "hMissNew_n",
-          "New per-primary neutron missing fraction;Primary #nu Energy [GeV];1 - New Neutron E_{dep}/Neutron true KE",
-          200, 0, 10, 200, -1, 1.2);
-
-      hMissNew_pip = tfs->make<TH2D>(
-          "hMissNew_pip",
-          "New per-primary pion+ missing fraction;Primary #nu Energy [GeV];1 - New #pi^{+} E_{dep}/#pi^{+} true KE",
-          200, 0, 10, 200, -1, 1.2);
-
-      hMissNew_pim = tfs->make<TH2D>(
-          "hMissNew_pim",
-          "New per-primary pion- missing fraction;Primary #nu Energy [GeV];1 - New #pi^{-} E_{dep}/#pi^{-} true KE",
-          200, 0, 10, 200, -1, 1.2);
-
-      hMissNew_pi0 = tfs->make<TH2D>(
-          "hMissNew_pi0",
-          "New per-primary pion0 missing fraction;Primary #nu Energy [GeV];1 - New #pi^{0} E_{dep}/#pi^{0} true KE",
-          200, 0, 10, 200, -1, 1.2);
-
-      hMissNew_other = tfs->make<TH2D>(
-          "hMissNew_other",
-          "New per-primary other missing fraction;Primary #nu Energy [GeV];1 - New Other E_{dep}/Other true KE",
-          200, 0, 10, 200, -1, 1.2);
-
-      hDepOverExit_mu = tfs->make<TH2D>("hDepOverExit_mu", "Muon Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
-
-      hDepOverExit_p = tfs->make<TH2D>("hDepOverExit_p", "Proton Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
-
-      hDepOverExit_n = tfs->make<TH2D>("hDepOverExit_n", "Neutron Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
-
-      hDepOverExit_pip = tfs->make<TH2D>("hDepOverExit_pip", "Pion+ Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
-
-      hDepOverExit_pim = tfs->make<TH2D>("hDepOverExit_pim", "Pion- Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
-
-      hDepOverExit_pi0 = tfs->make<TH2D>("hDepOverExit_pi0", "Pion0 Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
-
-      hDepOverExit_other = tfs->make<TH2D>("hDepOverExit_other", "Other Edep over Eexit;Primary #nu Energy [GeV];New E_{dep}/E_{exit}", 200, 0, 10, 200, 0, 5);
-
-      fNtuple->Branch("ExitKE_sum", &fExitKE_sum, "ExitKE_sum/D");
-      fNtuple->Branch("ExitKE_max", &fExitKE_max, "ExitKE_max/D");
 
       fNtuple->Branch("Event", &fEvent, "Event/I");
       fNtuple->Branch("SubRun", &fSubRun, "SubRun/I");
@@ -885,8 +673,7 @@ namespace lar
 
       ftotalExited = 0.; // from V2
 
-      fExitKE_sum = 0.0;
-      fExitKE_max = -9999.0;
+      
 
       // Initialize track ID
       primarylep_trkID = -1;
@@ -1326,99 +1113,7 @@ namespace lar
       fSim_nProton = SimProtons.size();
       fSim_nParticles = SimParticles.size();
 
-      auto fillExitFrac = [&](TH2D *h, double Etrue, double Eexit)
-      {
-        if (!h)
-          return;
-        if (fGen_numu_E <= 0)
-          return;
-        if (Etrue <= 0)
-          return;
-        if (Eexit <= 0)
-          return;
-
-        double frac = 1.0 - (Eexit / Etrue);
-        if (frac < 0)
-          frac = 0;
-
-        h->Fill(fGen_numu_E, frac);
-      };
-
-      std::set<int> exitingPrimaries;
-
-      for (int i = 0; i < fSim_nParticles; i++)
-      {
-        const simb::MCParticle &particleVec = *(SimParticles[i]);
-
-        if (particleVec.Process() != "primary")
-          continue;
-
-        int pdg = particleVec.PdgCode();
-
-        if (std::abs(pdg) == 12 || std::abs(pdg) == 14 || std::abs(pdg) == 16)
-          continue;
-
-        double ke_exit = ReportFirstExitRootOnly(particleVec, particleMap);
-
-        if (ke_exit > 0)
-        {
-          exitingPrimaries.insert(particleVec.TrackId());
-
-          fExitKE_sum += ke_exit;
-          if (fExitKE_max < 0 || ke_exit > fExitKE_max)
-            fExitKE_max = ke_exit;
-
-          if (std::abs(pdg) == 13 && hExit_mu)
-            hExit_mu->Fill(ke_exit);
-          else if (pdg == 2212 && hExit_p)
-            hExit_p->Fill(ke_exit);
-          else if (pdg == 2112 && hExit_n)
-            hExit_n->Fill(ke_exit);
-          else if (pdg == 211 && hExit_pip)
-            hExit_pip->Fill(ke_exit);
-          else if (pdg == -211 && hExit_pim)
-            hExit_pim->Fill(ke_exit);
-          else if (hExit_other)
-            hExit_other->Fill(ke_exit);
-
-          double trueE = -1.0;
-
-          if (std::abs(pdg) == 13)
-            trueE = particleVec.E() - particleVec.Mass();
-          else if (pdg == 2212)
-            trueE = particleVec.E() - particleVec.Mass();
-          else if (pdg == 2112)
-            trueE = particleVec.E() - particleVec.Mass();
-          else if (pdg == 211)
-            trueE = particleVec.E() - particleVec.Mass();
-          else if (pdg == -211)
-            trueE = particleVec.E() - particleVec.Mass();
-          else if (pdg == 111)
-            trueE = particleVec.E();
-          else
-            trueE = particleVec.E() - particleVec.Mass();
-
-          if (std::abs(pdg) == 13)
-            fillExitFrac(hFracExit_mu, trueE, ke_exit);
-          else if (pdg == 2212)
-            fillExitFrac(hFracExit_p, trueE, ke_exit);
-          else if (pdg == 2112)
-            fillExitFrac(hFracExit_n, trueE, ke_exit);
-          else if (pdg == 211)
-            fillExitFrac(hFracExit_pip, trueE, ke_exit);
-          else if (pdg == -211)
-            fillExitFrac(hFracExit_pim, trueE, ke_exit);
-          else if (pdg == 111)
-            fillExitFrac(hFracExit_pi0, trueE, ke_exit);
-          else
-            fillExitFrac(hFracExit_other, trueE, ke_exit);
-        }
-      }
-
-      if (hEnuVsExit && fGen_numu_E > 0 && fExitKE_sum > 0)
-        hEnuVsExit->Fill(fGen_numu_E, fExitKE_sum);
-
-      ftotalExited = fExitKE_sum;
+      
 
       // Collecting all Daughters of Each primary
 
@@ -1596,8 +1291,6 @@ namespace lar
 
         int primaryPDG = primaryParticle->PdgCode();
 
-        double primaryExitKE_GeV = ReportFirstExitRootOnly(*primaryParticle, particleMap);
-
         fSim_primary_Edep_TrackID_vec.push_back(primaryTrackID);
         fSim_primary_Edep_PDG_vec.push_back(primaryParticle->PdgCode());
 
@@ -1607,7 +1300,6 @@ namespace lar
         fSim_primary_Edep_KE_vec.push_back(primaryKE_MeV);
 
         // sim::IDE::energy is already MeV
-        fSim_primary_Edep_vec.push_back(totalPrimaryEdep);
 
         fSim_primary_Edep_vec.push_back(totalPrimaryEdep);
 
@@ -1640,55 +1332,8 @@ namespace lar
           new_other_Edep_MeV += totalPrimaryEdep;
         }
 
-        if (hFrac_primary && fGen_numu_E > 0 && primaryKE_MeV > 0)
-        {
-          double frac = totalPrimaryEdep / primaryKE_MeV;
-          hFrac_primary->Fill(fGen_numu_E, frac);
-        }
+        
 
-        if (hFrac_primary_p &&
-            fGen_numu_E > 0 &&
-            primaryKE_MeV > 0 &&
-            primaryParticle->PdgCode() == 2212)
-        {
-          double frac_p = totalPrimaryEdep / primaryKE_MeV;
-          hFrac_primary_p->Fill(fGen_numu_E, frac_p);
-        }
-
-        if (fGen_numu_E > 0 && primaryExitKE_GeV > 0)
-
-        {
-
-          double depOverExit = (totalPrimaryEdep * 1e-3) / primaryExitKE_GeV;
-
-          if (std::abs(primaryPDG) == 13 && hDepOverExit_mu)
-
-            hDepOverExit_mu->Fill(fGen_numu_E, depOverExit);
-
-          else if (primaryPDG == 2212 && hDepOverExit_p)
-
-            hDepOverExit_p->Fill(fGen_numu_E, depOverExit);
-
-          else if (primaryPDG == 2112 && hDepOverExit_n)
-
-            hDepOverExit_n->Fill(fGen_numu_E, depOverExit);
-
-          else if (primaryPDG == 211 && hDepOverExit_pip)
-
-            hDepOverExit_pip->Fill(fGen_numu_E, depOverExit);
-
-          else if (primaryPDG == -211 && hDepOverExit_pim)
-
-            hDepOverExit_pim->Fill(fGen_numu_E, depOverExit);
-
-          else if (primaryPDG == 111 && hDepOverExit_pi0)
-
-            hDepOverExit_pi0->Fill(fGen_numu_E, depOverExit);
-
-          else if (hDepOverExit_other)
-
-            hDepOverExit_other->Fill(fGen_numu_E, depOverExit);
-        }
       }
 
       const double MeV_to_GeV = 1e-3;
@@ -1717,40 +1362,6 @@ namespace lar
         h->Fill(fGen_numu_E, frac);
       };
 
-      auto fillMissingFrac = [&](TH2D *h, double Etrue, double EdepMeV)
-
-      {
-        if (!h)
-
-          return;
-
-        if (fGen_numu_E <= 0)
-
-          return;
-
-        if (Etrue <= 0)
-
-          return;
-
-        double frac = 1.0 - ((EdepMeV * MeV_to_GeV) / Etrue);
-
-        h->Fill(fGen_numu_E, frac);
-      };
-
-      fillFrac(hFrac_mu, fTrue_LepE, fSim_mu_Edep_b2);
-
-      fillFrac(hFrac_p, eP, fSim_p_Edep_b2);
-
-      fillFrac(hFrac_n, eN, fSim_n_Edep_b2);
-
-      fillFrac(hFrac_pip, ePip, fSim_pip_Edep_b2);
-
-      fillFrac(hFrac_pim, ePim, fSim_pim_Edep_b2);
-
-      fillFrac(hFrac_pi0, ePi0, fSim_pi0_Edep_b2);
-
-      fillFrac(hFrac_other, eOther, fSim_Other_Edep_b2);
-
       fillFrac(hFracNew_mu, fTrue_LepE, new_mu_Edep_MeV);
 
       fillFrac(hFracNew_p, eP, new_p_Edep_MeV);
@@ -1764,20 +1375,6 @@ namespace lar
       fillFrac(hFracNew_pi0, ePi0, new_pi0_Edep_MeV);
 
       fillFrac(hFracNew_other, eOther, new_other_Edep_MeV);
-
-      fillMissingFrac(hMissNew_mu, fTrue_LepE, new_mu_Edep_MeV);
-
-      fillMissingFrac(hMissNew_p, eP, new_p_Edep_MeV);
-
-      fillMissingFrac(hMissNew_n, eN, new_n_Edep_MeV);
-
-      fillMissingFrac(hMissNew_pip, ePip, new_pip_Edep_MeV);
-
-      fillMissingFrac(hMissNew_pim, ePim, new_pim_Edep_MeV);
-
-      fillMissingFrac(hMissNew_pi0, ePi0, new_pi0_Edep_MeV);
-
-      fillMissingFrac(hMissNew_other, eOther, new_other_Edep_MeV);
 
       if (false)
       {
@@ -1832,23 +1429,6 @@ namespace lar
         c.SaveAs((base + ".pdf").c_str());
       };
 
-      save1(hExit_mu, "ExitKE_mu");
-      save1(hExit_p, "ExitKE_p");
-      save1(hExit_n, "ExitKE_n");
-      save1(hExit_pip, "ExitKE_pip");
-      save1(hExit_pim, "ExitKE_pim");
-      save1(hExit_other, "ExitKE_other");
-
-      save2(hEnuVsExit, "Enu_vs_Exit");
-
-      save2(hFrac_mu, "Frac_mu");
-      save2(hFrac_p, "Frac_p");
-      save2(hFrac_n, "Frac_n");
-      save2(hFrac_pip, "Frac_pip");
-      save2(hFrac_pim, "Frac_pim");
-      save2(hFrac_pi0, "Frac_pi0");
-      save2(hFrac_other, "Frac_other");
-
       save2(hFracNew_mu, "FracNew_mu");
       save2(hFracNew_p, "FracNew_p");
       save2(hFracNew_n, "FracNew_n");
@@ -1856,32 +1436,6 @@ namespace lar
       save2(hFracNew_pim, "FracNew_pim");
       save2(hFracNew_pi0, "FracNew_pi0");
       save2(hFracNew_other, "FracNew_other");
-
-      save2(hFrac_primary, "Frac_primary");
-      save2(hFrac_primary_p, "Frac_primary_p");
-      save2(hFracExit_mu, "FracExit_mu");
-      save2(hFracExit_p, "FracExit_p");
-      save2(hFracExit_n, "FracExit_n");
-      save2(hFracExit_pip, "FracExit_pip");
-      save2(hFracExit_pim, "FracExit_pim");
-      save2(hFracExit_pi0, "FracExit_pi0");
-      save2(hFracExit_other, "FracExit_other");
-
-      save2(hMissNew_mu, "MissNew_mu");
-      save2(hMissNew_p, "MissNew_p");
-      save2(hMissNew_n, "MissNew_n");
-      save2(hMissNew_pip, "MissNew_pip");
-      save2(hMissNew_pim, "MissNew_pim");
-      save2(hMissNew_pi0, "MissNew_pi0");
-      save2(hMissNew_other, "MissNew_other");
-
-      save2(hDepOverExit_mu, "DepOverExit_mu");
-      save2(hDepOverExit_p, "DepOverExit_p");
-      save2(hDepOverExit_n, "DepOverExit_n");
-      save2(hDepOverExit_pip, "DepOverExit_pip");
-      save2(hDepOverExit_pim, "DepOverExit_pim");
-      save2(hDepOverExit_pi0, "DepOverExit_pi0");
-      save2(hDepOverExit_other, "DepOverExit_other");
     }
 
     // This macro has to be defined for this module to be invoked from a
@@ -3000,3 +2554,4 @@ namespace
 // plot Edep+Eexit vs Etotal
 // compare my Edep part with Milo's Edep (should be the same) (look at the screenshot)
 // printout when KE<0 in my function
+// Look at the points that have Edep/True KE > 1.0 and see if those are cases where the particle is created inside the detector with low KE and then deposits more energy than its initial KE (which can happen if it is created by a decay or interaction of another particle that deposits energy in the detector) (from V2)
