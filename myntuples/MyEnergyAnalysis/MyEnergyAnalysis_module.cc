@@ -229,6 +229,8 @@ namespace lar
 
       TTree *fInteractionTree; // Tree for interaction information
 
+      std::ofstream fFracDebugCsv;
+
       float fInX, fInY, fInZ, fInT;
       float fInPx, fInPy, fInPz, fInE;
       float fInMass;
@@ -501,6 +503,10 @@ namespace lar
 
       hFracNew_other = tfs->make<TH2D>(
           "hFracNew_other", "New per-primary other deposited energy;Primary #nu Energy [GeV];New Other E_{dep}/Other true KE", 200, 0, 10, 200, 0, 2);
+
+      fFracDebugCsv.open("frac_gt_1p05_debug.csv");
+
+      fFracDebugCsv << "run,subrun,event,primaryTrackID,pdg,process,mother,trueKE_MeV,Edep_MeV,frac,nDaughters\n";
 
       fNtuple->Branch("Event", &fEvent, "Event/I");
       fNtuple->Branch("SubRun", &fSubRun, "SubRun/I");
@@ -1299,6 +1305,46 @@ namespace lar
 
         fSim_primary_Edep_vec.push_back(totalPrimaryEdep);
 
+        double debugFrac = -999.0;
+
+        if (primaryKE_MeV > 0)
+
+        {
+
+          debugFrac = totalPrimaryEdep / primaryKE_MeV;
+        }
+
+        if (debugFrac > 1.05 && fFracDebugCsv.is_open())
+
+        {
+
+          fFracDebugCsv
+
+              << event.run() << ","
+
+              << event.subRun() << ","
+
+              << event.event() << ","
+
+              << primaryTrackID << ","
+
+              << primaryPDG << ","
+
+              << primaryParticle->Process() << ","
+
+              << primaryParticle->Mother() << ","
+
+              << primaryKE_MeV << ","
+
+              << totalPrimaryEdep << ","
+
+              << debugFrac << ","
+
+              << primaryParticle->NumberDaughters()
+
+              << "\n";
+        }
+
         if (std::abs(primaryPDG) == 13)
         {
           new_mu_Edep_MeV += totalPrimaryEdep;
@@ -1420,6 +1466,8 @@ namespace lar
       save2(hFracNew_pim, "FracNew_pim");
       save2(hFracNew_pi0, "FracNew_pi0");
       save2(hFracNew_other, "FracNew_other");
+      if (fFracDebugCsv.is_open())
+        fFracDebugCsv.close();
     }
 
     // This macro has to be defined for this module to be invoked from a
