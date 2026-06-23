@@ -1314,7 +1314,7 @@ namespace lar
           primaryTrueMeV = 1000.0 * primaryParticle->E();
         }
 
-        
+        double debugFrac = -999.0;
 
         if (primaryTrueMeV > 0)
 
