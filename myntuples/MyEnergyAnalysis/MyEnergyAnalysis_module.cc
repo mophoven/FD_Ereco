@@ -1189,6 +1189,27 @@ namespace lar
             if (primaryEdepTrackID > 0)
             {
               EDepByPrimaryMap[primaryEdepTrackID] += energyDeposit.energy;
+
+              if (event.event() == 72 && primaryEdepTrackID == 19)
+
+{
+
+std::cout << "DEBUG event 72 primary 19: "
+
+<< "depositTrackID=" << energyDeposit.trackID
+
+<< " edep=" << energyDeposit.energy
+
+<< " x=" << energyDeposit.x
+
+<< " y=" << energyDeposit.y
+
+<< " z=" << energyDeposit.z
+
+<< std::endl;
+
+}
+
               NContribByPrimary[primaryEdepTrackID]++;
             }
 
