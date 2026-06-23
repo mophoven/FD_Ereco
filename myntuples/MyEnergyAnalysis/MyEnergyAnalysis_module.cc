@@ -506,8 +506,7 @@ namespace lar
 
       fFracDebugCsv.open("frac_gt_1p05_debug.csv");
 
-      fFracDebugCsv << "run,subrun,event,primaryTrackID,pdg,process,mother,trueEnergyForDenom_MeV,Edep_MeV,frac,nDaughters\n";
-
+      fFracDebugCsv << "run,subrun,event,primaryTrackID,pdg,process,mother,trueEnergyForDenom_MeV,Edep_MeV,frac,nDaughters,nContrib\n";
       fNtuple->Branch("Event", &fEvent, "Event/I");
       fNtuple->Branch("SubRun", &fSubRun, "SubRun/I");
       fNtuple->Branch("Run", &fRun, "Run/I");
@@ -1351,7 +1350,7 @@ namespace lar
 
               << debugFrac << ","
 
-              << primaryParticle->NumberDaughters()
+              << primaryParticle->NumberDaughters() << ","
 
               << NContribByPrimary[primaryTrackID]
 
