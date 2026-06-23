@@ -1189,6 +1189,8 @@ namespace lar
             if (primaryEdepTrackID > 0)
             {
               EDepByPrimaryMap[primaryEdepTrackID] += energyDeposit.energy;
+              std::map<int,int> NContribByPrimary;
+              NContribByPrimary[primaryID]++;
             }
 
             if (search != particleMap.end())
@@ -1325,35 +1327,36 @@ namespace lar
 
         if (debugFrac > 1.05 && fFracDebugCsv.is_open())
 
-{
+        {
 
-fFracDebugCsv
+          fFracDebugCsv
 
-<< event.run() << ","
+              << event.run() << ","
 
-<< event.subRun() << ","
+              << event.subRun() << ","
 
-<< event.event() << ","
+              << event.event() << ","
 
-<< primaryTrackID << ","
+              << primaryTrackID << ","
 
-<< primaryPDG << ","
+              << primaryPDG << ","
 
-<< primaryParticle->Process() << ","
+              << primaryParticle->Process() << ","
 
-<< primaryParticle->Mother() << ","
+              << primaryParticle->Mother() << ","
 
-<< primaryTrueMeV << ","
+              << primaryTrueMeV << ","
 
-<< totalPrimaryEdep << ","
+              << totalPrimaryEdep << ","
 
-<< debugFrac << ","
+              << debugFrac << ","
 
-<< primaryParticle->NumberDaughters()
+              << primaryParticle->NumberDaughters()
 
-<< "\n";
+              << NContribByPrimary[primaryTrackID]
 
-}
+              << "\n";
+        }
 
         if (std::abs(primaryPDG) == 13)
         {
