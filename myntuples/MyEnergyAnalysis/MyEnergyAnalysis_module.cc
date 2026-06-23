@@ -946,6 +946,7 @@ namespace lar
       // Create a map of energy deposits to its track ID
       std::map<int, double> EDepMap;
       std::map<int, double> EDepByPrimaryMap;
+      std::map<int, int> NContribByPrimary;
 
       //
       // Process Sim MCparticles info
@@ -1189,8 +1190,7 @@ namespace lar
             if (primaryEdepTrackID > 0)
             {
               EDepByPrimaryMap[primaryEdepTrackID] += energyDeposit.energy;
-              std::map<int,int> NContribByPrimary;
-              NContribByPrimary[primaryID]++;
+              NContribByPrimary[primaryEdepTrackID]++;
             }
 
             if (search != particleMap.end())
