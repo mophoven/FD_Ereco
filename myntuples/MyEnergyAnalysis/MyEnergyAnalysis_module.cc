@@ -1192,23 +1192,22 @@ namespace lar
 
               if (event.event() == 72 && primaryEdepTrackID == 19)
 
-{
+              {
 
-std::cout << "DEBUG event 72 primary 19: "
+                std::cout << "DEBUG event 72 primary 19: "
 
-<< "depositTrackID=" << energyDeposit.trackID
+                          << "depositTrackID=" << energyDeposit.trackID
 
-<< " edep=" << energyDeposit.energy
+                          << " edep=" << energyDeposit.energy
 
-<< " x=" << energyDeposit.x
+                          << " x=" << energyDeposit.x
 
-<< " y=" << energyDeposit.y
+                          << " y=" << energyDeposit.y
 
-<< " z=" << energyDeposit.z
+                          << " z=" << energyDeposit.z
 
-<< std::endl;
-
-}
+                          << std::endl;
+              }
 
               NContribByPrimary[primaryEdepTrackID]++;
             }
@@ -1312,6 +1311,40 @@ std::cout << "DEBUG event 72 primary 19: "
         }
 
         const simb::MCParticle *primaryParticle = primarySearch->second;
+
+        if (event.event() == 72 && primaryTrackID == 19)
+
+{
+
+std::cout << "DEBUG proton19 E0=" << primaryParticle->E()
+
+<< " M=" << primaryParticle->Mass()
+
+<< " KE0=" << primaryParticle->E() - primaryParticle->Mass()
+
+<< " Ntraj=" << primaryParticle->NumberTrajectoryPoints()
+
+<< std::endl;
+
+for (size_t i = 0; i < primaryParticle->NumberTrajectoryPoints(); ++i)
+
+{
+
+std::cout << "DEBUG proton19 traj " << i
+
+<< " KE=" << primaryParticle->Momentum(i).E() - primaryParticle->Mass()
+
+<< " x=" << primaryParticle->Position(i).X()
+
+<< " y=" << primaryParticle->Position(i).Y()
+
+<< " z=" << primaryParticle->Position(i).Z()
+
+<< std::endl;
+
+}
+
+}
 
         int primaryPDG = primaryParticle->PdgCode();
 
