@@ -506,7 +506,7 @@ namespace lar
 
       fFracDebugCsv.open("frac_gt_1p05_debug.csv");
 
-      fFracDebugCsv << "run,subrun,event,primaryTrackID,pdg,process,mother,trueKE_MeV,Edep_MeV,frac,nDaughters\n";
+      fFracDebugCsv << "run,subrun,event,primaryTrackID,pdg,process,mother,trueEnergyForDenom_MeV,Edep_MeV,frac,nDaughters\n";
 
       fNtuple->Branch("Event", &fEvent, "Event/I");
       fNtuple->Branch("SubRun", &fSubRun, "SubRun/I");
@@ -1305,44 +1305,22 @@ namespace lar
 
         fSim_primary_Edep_vec.push_back(totalPrimaryEdep);
 
-        double debugFrac = -999.0;
+        double primaryTrueMeV = primaryKE_MeV;
 
-        if (primaryKE_MeV > 0)
+        if (std::abs(primaryPDG) == 13 || std::abs(primaryPDG) == 211 || primaryPDG == 111 || primaryPDG == 22)
 
         {
 
-          debugFrac = totalPrimaryEdep / primaryKE_MeV;
+          primaryTrueMeV = 1000.0 * primaryParticle->E();
         }
 
-        if (debugFrac > 1.05 && fFracDebugCsv.is_open())
+        double debugFrac = -999.0;
+
+        if (primaryTrueMeV > 0)
 
         {
 
-          fFracDebugCsv
-
-              << event.run() << ","
-
-              << event.subRun() << ","
-
-              << event.event() << ","
-
-              << primaryTrackID << ","
-
-              << primaryPDG << ","
-
-              << primaryParticle->Process() << ","
-
-              << primaryParticle->Mother() << ","
-
-              << primaryKE_MeV << ","
-
-              << totalPrimaryEdep << ","
-
-              << debugFrac << ","
-
-              << primaryParticle->NumberDaughters()
-
-              << "\n";
+          debugFrac = totalPrimaryEdep / primaryTrueMeV;
         }
 
         if (std::abs(primaryPDG) == 13)
