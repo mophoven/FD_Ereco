@@ -1323,6 +1323,38 @@ namespace lar
           debugFrac = totalPrimaryEdep / primaryTrueMeV;
         }
 
+        if (debugFrac > 1.05 && fFracDebugCsv.is_open())
+
+{
+
+fFracDebugCsv
+
+<< event.run() << ","
+
+<< event.subRun() << ","
+
+<< event.event() << ","
+
+<< primaryTrackID << ","
+
+<< primaryPDG << ","
+
+<< primaryParticle->Process() << ","
+
+<< primaryParticle->Mother() << ","
+
+<< primaryTrueMeV << ","
+
+<< totalPrimaryEdep << ","
+
+<< debugFrac << ","
+
+<< primaryParticle->NumberDaughters()
+
+<< "\n";
+
+}
+
         if (std::abs(primaryPDG) == 13)
         {
           new_mu_Edep_MeV += totalPrimaryEdep;
