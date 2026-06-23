@@ -1200,6 +1200,8 @@ namespace lar
 
                           << " edep=" << energyDeposit.energy
 
+                          << " numElectrons=" << energyDeposit.numElectrons
+
                           << " x=" << energyDeposit.x
 
                           << " y=" << energyDeposit.y
@@ -1314,37 +1316,35 @@ namespace lar
 
         if (event.event() == 72 && primaryTrackID == 19)
 
-{
+        {
 
-std::cout << "DEBUG proton19 E0=" << primaryParticle->E()
+          std::cout << "DEBUG proton19 E0=" << primaryParticle->E()
 
-<< " M=" << primaryParticle->Mass()
+                    << " M=" << primaryParticle->Mass()
 
-<< " KE0=" << primaryParticle->E() - primaryParticle->Mass()
+                    << " KE0=" << primaryParticle->E() - primaryParticle->Mass()
 
-<< " Ntraj=" << primaryParticle->NumberTrajectoryPoints()
+                    << " Ntraj=" << primaryParticle->NumberTrajectoryPoints()
 
-<< std::endl;
+                    << std::endl;
 
-for (size_t i = 0; i < primaryParticle->NumberTrajectoryPoints(); ++i)
+          for (size_t i = 0; i < primaryParticle->NumberTrajectoryPoints(); ++i)
 
-{
+          {
 
-std::cout << "DEBUG proton19 traj " << i
+            std::cout << "DEBUG proton19 traj " << i
 
-<< " KE=" << primaryParticle->Momentum(i).E() - primaryParticle->Mass()
+                      << " KE=" << primaryParticle->Momentum(i).E() - primaryParticle->Mass()
 
-<< " x=" << primaryParticle->Position(i).X()
+                      << " x=" << primaryParticle->Position(i).X()
 
-<< " y=" << primaryParticle->Position(i).Y()
+                      << " y=" << primaryParticle->Position(i).Y()
 
-<< " z=" << primaryParticle->Position(i).Z()
+                      << " z=" << primaryParticle->Position(i).Z()
 
-<< std::endl;
-
-}
-
-}
+                      << std::endl;
+          }
+        }
 
         int primaryPDG = primaryParticle->PdgCode();
 
