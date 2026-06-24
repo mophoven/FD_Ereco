@@ -1186,20 +1186,25 @@ namespace lar
             int primaryEdepTrackID =
                 GetPrimaryAncestorTrackID(energyDeposit.trackID, particleMap);
 
-            double edepFromElectronsMeV = energyDeposit.numElectrons * fElectronsToGeV * 1000.0;
-
             if (primaryEdepTrackID > 0)
             {
-EDepByPrimaryMap[primaryEdepTrackID] += edepFromElectronsMeV;
+              EDepByPrimaryMap[primaryEdepTrackID] += energyDeposit.energy;
+
               if (event.event() == 72 && primaryEdepTrackID == 19)
 
               {
+
+                double edepFromElectronsMeV = energyDeposit.numElectrons * fElectronsToGeV * 1000.0;
 
                 std::cout << "DEBUG event 72 primary 19: "
 
                           << "depositTrackID=" << energyDeposit.trackID
 
-                          << " edep=" << energyDeposit.energy
+                          
+
+                          << " rawEdep=" << energyDeposit.energy
+
+                          << " electronEdep=" << edepFromElectronsMeV
 
                           << " numElectrons=" << energyDeposit.numElectrons
 
