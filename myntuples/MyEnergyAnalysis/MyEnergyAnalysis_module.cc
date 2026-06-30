@@ -2659,3 +2659,4 @@ namespace
 // compare my Edep part with Milo's Edep (should be the same) (look at the screenshot)
 // printout when KE<0 in my function
 // Look at the points that have Edep/True KE > 1.0 and see if those are cases where the particle is created inside the detector with low KE and then deposits more energy than its initial KE (which can happen if it is created by a decay or interaction of another particle that deposits energy in the detector) (from V2)
+// Try to get position of each energy deposit (IDE)
