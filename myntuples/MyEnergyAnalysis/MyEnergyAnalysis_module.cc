@@ -1194,23 +1194,56 @@ namespace lar
 
               {
 
-                const simb::MCParticle *p13 = particleMap[13];
+                auto p13Search = particleMap.find(13);
 
                 double minDist = 1e9;
 
                 for (size_t i = 0; i < p13->NumberTrajectoryPoints(); ++i)
                 {
 
-                  double dx = energyDeposit.x - p13->Position(i).X();
+                  double ax = p13->Position(j).X();
+                  double ay = p13->Position(j).Y();
+                  double az = p13->Position(j).Z();
 
-                  double dy = energyDeposit.y - p13->Position(i).Y();
+                  double bx = p13->Position(j + 1).X();
+                  double by = p13->Position(j + 1).Y();
+                  double bz = p13->Position(j + 1).Z();
 
-                  double dz = energyDeposit.z - p13->Position(i).Z();
+                  double px = energyDeposit.x;
+                  double py = energyDeposit.y;
+                  double pz = energyDeposit.z;
+
+                  double abx = bx - ax;
+                  double aby = by - ay;
+                  double abz = bz - az;
+
+                  double apx = px - ax;
+                  double apy = py - ay;
+                  double apz = pz - az;
+
+                  double ab2 = abx * abx + aby * aby + abz * abz;
+
+                  double t = 0.0;
+                  if (ab2 > 0)
+                    t = (apx * abx + apy * aby + apz * abz) / ab2;
+
+                  if (t < 0.0)
+                    t = 0.0;
+                  if (t > 1.0)
+                    t = 1.0;
+
+                  double cx = ax + t * abx;
+                  double cy = ay + t * aby;
+                  double cz = az + t * abz;
+
+                  double dx = px - cx;
+                  double dy = py - cy;
+                  double dz = pz - cz;
 
                   double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
 
-                  if (dist < minDist)
-                    minDist = dist;
+                  if (dist < minDistSeg)
+                    minDistSeg = dist;
                 }
 
                 std::cout << "DEBUG event 72 primary 13: "
@@ -1225,7 +1258,7 @@ namespace lar
 
                           << " z=" << energyDeposit.z
 
-                          << " minDistToTrajPoint=" << minDist
+                          << " minDistToTrajSegment=" << minDistSeg
 
                           << std::endl;
               }
