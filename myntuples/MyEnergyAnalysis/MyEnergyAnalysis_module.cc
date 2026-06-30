@@ -1194,12 +1194,10 @@ namespace lar
 
               {
 
-                double edepFromElectronsMeV = energyDeposit.numElectrons * fElectronsToGeV * 1000.0;
-
                 std::cout << "DEBUG event 72 primary 13: "
 
                           << "depositTrackID=" << energyDeposit.trackID
-                          
+
                           << " rawEdep=" << energyDeposit.energy
 
                           << " x=" << energyDeposit.x
