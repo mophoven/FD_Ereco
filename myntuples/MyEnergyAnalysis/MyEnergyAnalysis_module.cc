@@ -1196,71 +1196,93 @@ namespace lar
 
                 auto p13Search = particleMap.find(13);
 
-                double minDist = 1e9;
+if (p13Search != particleMap.end())
 
-                for (size_t i = 0; i < p13->NumberTrajectoryPoints(); ++i)
-                {
+{
 
-                  double ax = p13->Position(j).X();
-                  double ay = p13->Position(j).Y();
-                  double az = p13->Position(j).Z();
+const simb::MCParticle *p13 = p13Search->second;
 
-                  double bx = p13->Position(j + 1).X();
-                  double by = p13->Position(j + 1).Y();
-                  double bz = p13->Position(j + 1).Z();
+double minDistSeg = 1e9;
 
-                  double px = energyDeposit.x;
-                  double py = energyDeposit.y;
-                  double pz = energyDeposit.z;
+for (size_t j = 0; j + 1 < p13->NumberTrajectoryPoints(); ++j)
 
-                  double abx = bx - ax;
-                  double aby = by - ay;
-                  double abz = bz - az;
+{
 
-                  double apx = px - ax;
-                  double apy = py - ay;
-                  double apz = pz - az;
+double ax = p13->Position(j).X();
 
-                  double ab2 = abx * abx + aby * aby + abz * abz;
+double ay = p13->Position(j).Y();
 
-                  double t = 0.0;
-                  if (ab2 > 0)
-                    t = (apx * abx + apy * aby + apz * abz) / ab2;
+double az = p13->Position(j).Z();
 
-                  if (t < 0.0)
-                    t = 0.0;
-                  if (t > 1.0)
-                    t = 1.0;
+double bx = p13->Position(j + 1).X();
 
-                  double cx = ax + t * abx;
-                  double cy = ay + t * aby;
-                  double cz = az + t * abz;
+double by = p13->Position(j + 1).Y();
 
-                  double dx = px - cx;
-                  double dy = py - cy;
-                  double dz = pz - cz;
+double bz = p13->Position(j + 1).Z();
 
-                  double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+double px = energyDeposit.x;
 
-                  if (dist < minDistSeg)
-                    minDistSeg = dist;
-                }
+double py = energyDeposit.y;
 
-                std::cout << "DEBUG event 72 primary 13: "
+double pz = energyDeposit.z;
 
-                          << "depositTrackID=" << energyDeposit.trackID
+double abx = bx - ax;
 
-                          << " rawEdep=" << energyDeposit.energy
+double aby = by - ay;
 
-                          << " x=" << energyDeposit.x
+double abz = bz - az;
 
-                          << " y=" << energyDeposit.y
+double apx = px - ax;
 
-                          << " z=" << energyDeposit.z
+double apy = py - ay;
 
-                          << " minDistToTrajSegment=" << minDistSeg
+double apz = pz - az;
 
-                          << std::endl;
+double ab2 = abx*abx + aby*aby + abz*abz;
+
+double t = 0.0;
+
+if (ab2 > 0.0) t = (apx*abx + apy*aby + apz*abz) / ab2;
+
+if (t < 0.0) t = 0.0;
+
+if (t > 1.0) t = 1.0;
+
+double cx = ax + t * abx;
+
+double cy = ay + t * aby;
+
+double cz = az + t * abz;
+
+double dx = px - cx;
+
+double dy = py - cy;
+
+double dz = pz - cz;
+
+double dist = std::sqrt(dx*dx + dy*dy + dz*dz);
+
+if (dist < minDistSeg) minDistSeg = dist;
+
+}
+
+std::cout << "DEBUG event 72 primary 13: "
+
+<< "depositTrackID=" << energyDeposit.trackID
+
+<< " rawEdep=" << energyDeposit.energy
+
+<< " x=" << energyDeposit.x
+
+<< " y=" << energyDeposit.y
+
+<< " z=" << energyDeposit.z
+
+<< " minDistToTrajSegment=" << minDistSeg
+
+<< std::endl;
+
+}
               }
 
               NContribByPrimary[primaryEdepTrackID]++;
