@@ -1194,6 +1194,25 @@ namespace lar
 
               {
 
+                const simb::MCParticle *p13 = particleMap[13];
+
+                double minDist = 1e9;
+
+                for (size_t i = 0; i < p13->NumberTrajectoryPoints(); ++i)
+                {
+
+                  double dx = energyDeposit.x - p13->Position(i).X();
+
+                  double dy = energyDeposit.y - p13->Position(i).Y();
+
+                  double dz = energyDeposit.z - p13->Position(i).Z();
+
+                  double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+
+                  if (dist < minDist)
+                    minDist = dist;
+                }
+
                 std::cout << "DEBUG event 72 primary 13: "
 
                           << "depositTrackID=" << energyDeposit.trackID
@@ -1206,13 +1225,13 @@ namespace lar
 
                           << " z=" << energyDeposit.z
 
+                          << " minDistToTrajPoint=" << minDist
+
                           << std::endl;
               }
 
               NContribByPrimary[primaryEdepTrackID]++;
             }
-
-            
 
             if (search != particleMap.end())
             {
@@ -1315,23 +1334,23 @@ namespace lar
         const simb::MCParticle *primaryParticle = primarySearch->second;
 
         if (event.event() == 72 && primaryTrackID == 13)
-{
-    std::cout << "DEBUG proton13 E0=" << primaryParticle->E()
-              << " M=" << primaryParticle->Mass()
-              << " KE0=" << primaryParticle->E() - primaryParticle->Mass()
-              << " Ntraj=" << primaryParticle->NumberTrajectoryPoints()
-              << std::endl;
+        {
+          std::cout << "DEBUG proton13 E0=" << primaryParticle->E()
+                    << " M=" << primaryParticle->Mass()
+                    << " KE0=" << primaryParticle->E() - primaryParticle->Mass()
+                    << " Ntraj=" << primaryParticle->NumberTrajectoryPoints()
+                    << std::endl;
 
-    for (size_t i = 0; i < primaryParticle->NumberTrajectoryPoints(); ++i)
-    {
-        std::cout << "DEBUG proton13 traj " << i
-                  << " KE=" << primaryParticle->Momentum(i).E() - primaryParticle->Mass()
-                  << " x=" << primaryParticle->Position(i).X()
-                  << " y=" << primaryParticle->Position(i).Y()
-                  << " z=" << primaryParticle->Position(i).Z()
-                  << std::endl;
-    }
-}
+          for (size_t i = 0; i < primaryParticle->NumberTrajectoryPoints(); ++i)
+          {
+            std::cout << "DEBUG proton13 traj " << i
+                      << " KE=" << primaryParticle->Momentum(i).E() - primaryParticle->Mass()
+                      << " x=" << primaryParticle->Position(i).X()
+                      << " y=" << primaryParticle->Position(i).Y()
+                      << " z=" << primaryParticle->Position(i).Z()
+                      << std::endl;
+          }
+        }
 
         if (event.event() == 72 && primaryTrackID == 19)
 
