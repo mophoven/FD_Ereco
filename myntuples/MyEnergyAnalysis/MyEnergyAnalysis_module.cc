@@ -1212,6 +1212,8 @@ namespace lar
               NContribByPrimary[primaryEdepTrackID]++;
             }
 
+            
+
             if (search != particleMap.end())
             {
               const simb::MCParticle &particle = *((*search).second);
@@ -1311,6 +1313,25 @@ namespace lar
         }
 
         const simb::MCParticle *primaryParticle = primarySearch->second;
+
+        if (event.event() == 72 && primaryTrackID == 13)
+{
+    std::cout << "DEBUG proton13 E0=" << primaryParticle->E()
+              << " M=" << primaryParticle->Mass()
+              << " KE0=" << primaryParticle->E() - primaryParticle->Mass()
+              << " Ntraj=" << primaryParticle->NumberTrajectoryPoints()
+              << std::endl;
+
+    for (size_t i = 0; i < primaryParticle->NumberTrajectoryPoints(); ++i)
+    {
+        std::cout << "DEBUG proton13 traj " << i
+                  << " KE=" << primaryParticle->Momentum(i).E() - primaryParticle->Mass()
+                  << " x=" << primaryParticle->Position(i).X()
+                  << " y=" << primaryParticle->Position(i).Y()
+                  << " z=" << primaryParticle->Position(i).Z()
+                  << std::endl;
+    }
+}
 
         if (event.event() == 72 && primaryTrackID == 19)
 
