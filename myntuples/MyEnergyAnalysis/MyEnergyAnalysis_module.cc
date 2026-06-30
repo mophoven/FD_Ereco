@@ -1190,23 +1190,17 @@ namespace lar
             {
               EDepByPrimaryMap[primaryEdepTrackID] += energyDeposit.energy;
 
-              if (event.event() == 72 && primaryEdepTrackID == 19)
+              if (event.event() == 72 && primaryEdepTrackID == 13)
 
               {
 
                 double edepFromElectronsMeV = energyDeposit.numElectrons * fElectronsToGeV * 1000.0;
 
-                std::cout << "DEBUG event 72 primary 19: "
+                std::cout << "DEBUG event 72 primary 13: "
 
                           << "depositTrackID=" << energyDeposit.trackID
-
                           
-
                           << " rawEdep=" << energyDeposit.energy
-
-                          << " electronEdep=" << edepFromElectronsMeV
-
-                          << " numElectrons=" << energyDeposit.numElectrons
 
                           << " x=" << energyDeposit.x
 
