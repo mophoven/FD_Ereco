@@ -59,6 +59,10 @@
 #include <set>
 #include <fstream>
 
+#include "TGraph.h"
+#include "TLegend.h"
+#include "TSystem.h"
+
 namespace
 {
 
@@ -298,6 +302,17 @@ namespace lar
       std::vector<int> pi0_trkID;
       // Next is to code it in vectors
       // std::vector<int> pi0_trkID;
+
+      std::vector<float> debug_traj_x;
+      std::vector<float> debug_traj_y;
+      std::vector<float> debug_traj_z;
+
+      std::vector<float> debug_ide_x;
+      std::vector<float> debug_ide_y;
+      std::vector<float> debug_ide_z;
+      std::vector<float> debug_ide_e;
+
+      void SaveTrajVsIDEPlot(int event, int trackID);
 
       int fSim_nEle;         // No. of Sim electrons (e+/e-)
       int fSim_nNue;         // No. of Sim electron neutrinos (nue and nuebar)
@@ -766,6 +781,15 @@ namespace lar
 
       fSim_hadronic_hit_Edep_b2.clear();
 
+      debug_traj_x.clear();
+      debug_traj_y.clear();
+      debug_traj_z.clear();
+
+      debug_ide_x.clear();
+      debug_ide_y.clear();
+      debug_ide_z.clear();
+      debug_ide_e.clear();
+
       // LArSoft data products: https://larsoft.org/important-concepts-in-larsoft/data-products/
 
       //
@@ -1200,74 +1224,63 @@ namespace lar
 
                 {
 
-                  const simb::MCParticle *p13 = p13Search->second;
+           const simb::MCParticle *p13 = p13Search->second;
 
-                  double minDistSeg = 1e9;
+double minDistSeg = 1e9;
 
-                  for (size_t j = 0; j + 1 < p13->NumberTrajectoryPoints(); ++j)
+double px = energyDeposit.x;
+double py = energyDeposit.y;
+double pz = energyDeposit.z;
 
-                  {
+for (size_t j = 0; j + 1 < p13->NumberTrajectoryPoints(); ++j)
+{
+  double ax = p13->Position(j).X();
+  double ay = p13->Position(j).Y();
+  double az = p13->Position(j).Z();
 
-                    double ax = p13->Position(j).X();
+  double bx = p13->Position(j + 1).X();
+  double by = p13->Position(j + 1).Y();
+  double bz = p13->Position(j + 1).Z();
 
-                    double ay = p13->Position(j).Y();
+  double abx = bx - ax;
+  double aby = by - ay;
+  double abz = bz - az;
 
-                    double az = p13->Position(j).Z();
+  double apx = px - ax;
+  double apy = py - ay;
+  double apz = pz - az;
 
-                    double bx = p13->Position(j + 1).X();
+  double ab2 = abx * abx + aby * aby + abz * abz;
 
-                    double by = p13->Position(j + 1).Y();
+  double t = 0.0;
 
-                    double bz = p13->Position(j + 1).Z();
+  if (ab2 > 0.0)
+    t = (apx * abx + apy * aby + apz * abz) / ab2;
 
-                    double px = energyDeposit.x;
+  if (t < 0.0)
+    t = 0.0;
 
-                    double py = energyDeposit.y;
+  if (t > 1.0)
+    t = 1.0;
 
-                    double pz = energyDeposit.z;
+  double cx = ax + t * abx;
+  double cy = ay + t * aby;
+  double cz = az + t * abz;
 
-                    double abx = bx - ax;
+  double dx = px - cx;
+  double dy = py - cy;
+  double dz = pz - cz;
 
-                    double aby = by - ay;
+  double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
 
-                    double abz = bz - az;
+  if (dist < minDistSeg)
+    minDistSeg = dist;
+}
 
-                    double apx = px - ax;
-
-                    double apy = py - ay;
-
-                    double apz = pz - az;
-
-                    double ab2 = abx * abx + aby * aby + abz * abz;
-
-                    double t = 0.0;
-
-                    if (ab2 > 0.0)
-                      t = (apx * abx + apy * aby + apz * abz) / ab2;
-
-                    if (t < 0.0)
-                      t = 0.0;
-
-                    if (t > 1.0)
-                      t = 1.0;
-
-                    double cx = ax + t * abx;
-
-                    double cy = ay + t * aby;
-
-                    double cz = az + t * abz;
-
-                    double dx = px - cx;
-
-                    double dy = py - cy;
-
-                    double dz = pz - cz;
-
-                    double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
-
-                    if (dist < minDistSeg)
-                      minDistSeg = dist;
-                  }
+debug_ide_x.push_back(px);
+debug_ide_y.push_back(py);
+debug_ide_z.push_back(pz);
+debug_ide_e.push_back(energyDeposit.energy);
 
                   std::cout << "DEBUG event 72 primary 13: "
 
@@ -1406,6 +1419,12 @@ namespace lar
                       << " y=" << primaryParticle->Position(i).Y()
                       << " z=" << primaryParticle->Position(i).Z()
                       << std::endl;
+
+            debug_traj_x.push_back(primaryParticle->Position(i).X());
+
+            debug_traj_y.push_back(primaryParticle->Position(i).Y());
+
+            debug_traj_z.push_back(primaryParticle->Position(i).Z());
           }
         }
 
@@ -1603,6 +1622,12 @@ namespace lar
         std::cout << "Particle ID=" << particleHandle->at(particle_index).TrackId() << " has no primary!" << std::endl;
       }
 
+      if (event.event() == 72 && !debug_traj_x.empty() && !debug_ide_x.empty())
+      {
+
+        SaveTrajVsIDEPlot(event.event(), 13);
+      }
+
       fNtuple->Fill();
 
     } // MyEnergyAnalysis::analyze()
@@ -1629,6 +1654,85 @@ namespace lar
       save2(hFracNew_other, "FracNew_other");
       if (fFracDebugCsv.is_open())
         fFracDebugCsv.close();
+    }
+
+    void MyEnergyAnalysis::SaveTrajVsIDEPlot(int event, int trackID)
+
+    {
+
+      if (debug_traj_x.empty())
+        return;
+
+      if (debug_ide_x.empty())
+        return;
+
+      gROOT->SetBatch(kTRUE);
+
+      gSystem->mkdir("traj_ide_plots", kTRUE);
+
+      gStyle->SetOptStat(0);
+
+      TGraph *gTrajXZ = new TGraph();
+
+      TGraph *gIDEXZ = new TGraph();
+
+      for (size_t i = 0; i < debug_traj_x.size(); i++)
+      {
+
+        gTrajXZ->SetPoint(gTrajXZ->GetN(), debug_traj_z[i], debug_traj_x[i]);
+      }
+
+      for (size_t i = 0; i < debug_ide_x.size(); i++)
+      {
+
+        gIDEXZ->SetPoint(gIDEXZ->GetN(), debug_ide_z[i], debug_ide_x[i]);
+      }
+
+      gTrajXZ->SetTitle("Traj points vs IDE points;Z [cm];X [cm]");
+
+      gTrajXZ->SetMarkerStyle(20);
+
+      gTrajXZ->SetMarkerSize(0.9);
+
+      gTrajXZ->SetMarkerColor(kBlack);
+
+      gTrajXZ->SetLineColor(kBlack);
+
+      gTrajXZ->SetLineWidth(2);
+
+      gIDEXZ->SetMarkerStyle(21);
+
+      gIDEXZ->SetMarkerSize(1.3);
+
+      gIDEXZ->SetMarkerColor(kRed);
+
+      TCanvas *c = new TCanvas("c_traj_ide_xz", "Traj points vs IDE points", 1000, 800);
+
+      gTrajXZ->Draw("ALP");
+
+      gIDEXZ->Draw("P SAME");
+
+      TLegend *leg = new TLegend(0.13, 0.78, 0.42, 0.88);
+
+      leg->AddEntry(gTrajXZ, "Traj points", "lp");
+
+      leg->AddEntry(gIDEXZ, "IDE points", "p");
+
+      leg->Draw();
+
+      std::string outname = "traj_ide_plots/Traj_vs_IDE_Event" + std::to_string(event) + "_Track" + std::to_string(trackID) + ".png";
+
+      c->SaveAs(outname.c_str());
+
+      std::cout << "Saved " << outname << std::endl;
+
+      delete c;
+
+      delete leg;
+
+      delete gTrajXZ;
+
+      delete gIDEXZ;
     }
 
     // This macro has to be defined for this module to be invoked from a
@@ -2749,3 +2853,4 @@ namespace
 // printout when KE<0 in my function
 // Look at the points that have Edep/True KE > 1.0 and see if those are cases where the particle is created inside the detector with low KE and then deposits more energy than its initial KE (which can happen if it is created by a decay or interaction of another particle that deposits energy in the detector) (from V2)
 // Try to get position of each energy deposit (IDE)
+// Make 2D plot Traj points vs IDE points (positions)
