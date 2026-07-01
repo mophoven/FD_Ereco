@@ -63,6 +63,10 @@
 #include "TLegend.h"
 #include "TSystem.h"
 
+#include "TH3F.h"
+#include "TPolyLine3D.h"
+#include "TPolyMarker3D.h"
+
 namespace
 {
 
@@ -1224,63 +1228,63 @@ namespace lar
 
                 {
 
-           const simb::MCParticle *p13 = p13Search->second;
+                  const simb::MCParticle *p13 = p13Search->second;
 
-double minDistSeg = 1e9;
+                  double minDistSeg = 1e9;
 
-double px = energyDeposit.x;
-double py = energyDeposit.y;
-double pz = energyDeposit.z;
+                  double px = energyDeposit.x;
+                  double py = energyDeposit.y;
+                  double pz = energyDeposit.z;
 
-for (size_t j = 0; j + 1 < p13->NumberTrajectoryPoints(); ++j)
-{
-  double ax = p13->Position(j).X();
-  double ay = p13->Position(j).Y();
-  double az = p13->Position(j).Z();
+                  for (size_t j = 0; j + 1 < p13->NumberTrajectoryPoints(); ++j)
+                  {
+                    double ax = p13->Position(j).X();
+                    double ay = p13->Position(j).Y();
+                    double az = p13->Position(j).Z();
 
-  double bx = p13->Position(j + 1).X();
-  double by = p13->Position(j + 1).Y();
-  double bz = p13->Position(j + 1).Z();
+                    double bx = p13->Position(j + 1).X();
+                    double by = p13->Position(j + 1).Y();
+                    double bz = p13->Position(j + 1).Z();
 
-  double abx = bx - ax;
-  double aby = by - ay;
-  double abz = bz - az;
+                    double abx = bx - ax;
+                    double aby = by - ay;
+                    double abz = bz - az;
 
-  double apx = px - ax;
-  double apy = py - ay;
-  double apz = pz - az;
+                    double apx = px - ax;
+                    double apy = py - ay;
+                    double apz = pz - az;
 
-  double ab2 = abx * abx + aby * aby + abz * abz;
+                    double ab2 = abx * abx + aby * aby + abz * abz;
 
-  double t = 0.0;
+                    double t = 0.0;
 
-  if (ab2 > 0.0)
-    t = (apx * abx + apy * aby + apz * abz) / ab2;
+                    if (ab2 > 0.0)
+                      t = (apx * abx + apy * aby + apz * abz) / ab2;
 
-  if (t < 0.0)
-    t = 0.0;
+                    if (t < 0.0)
+                      t = 0.0;
 
-  if (t > 1.0)
-    t = 1.0;
+                    if (t > 1.0)
+                      t = 1.0;
 
-  double cx = ax + t * abx;
-  double cy = ay + t * aby;
-  double cz = az + t * abz;
+                    double cx = ax + t * abx;
+                    double cy = ay + t * aby;
+                    double cz = az + t * abz;
 
-  double dx = px - cx;
-  double dy = py - cy;
-  double dz = pz - cz;
+                    double dx = px - cx;
+                    double dy = py - cy;
+                    double dz = pz - cz;
 
-  double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+                    double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
 
-  if (dist < minDistSeg)
-    minDistSeg = dist;
-}
+                    if (dist < minDistSeg)
+                      minDistSeg = dist;
+                  }
 
-debug_ide_x.push_back(px);
-debug_ide_y.push_back(py);
-debug_ide_z.push_back(pz);
-debug_ide_e.push_back(energyDeposit.energy);
+                  debug_ide_x.push_back(px);
+                  debug_ide_y.push_back(py);
+                  debug_ide_z.push_back(pz);
+                  debug_ide_e.push_back(energyDeposit.energy);
 
                   std::cout << "DEBUG event 72 primary 13: "
 
@@ -1657,83 +1661,107 @@ debug_ide_e.push_back(energyDeposit.energy);
     }
 
     void MyEnergyAnalysis::SaveTrajVsIDEPlot(int event, int trackID)
+{
+  if (debug_traj_x.empty()) return;
+  if (debug_ide_x.empty()) return;
 
-    {
+  gROOT->SetBatch(kTRUE);
+  gSystem->mkdir("traj_ide_plots", kTRUE);
+  gStyle->SetOptStat(0);
 
-      if (debug_traj_x.empty())
-        return;
+  std::cout << "3D PLOT DEBUG: event=" << event
+            << " trackID=" << trackID
+            << " Ntraj=" << debug_traj_x.size()
+            << " Nide=" << debug_ide_x.size()
+            << std::endl;
 
-      if (debug_ide_x.empty())
-        return;
+  double minX = 1e9, maxX = -1e9;
+  double minY = 1e9, maxY = -1e9;
+  double minZ = 1e9, maxZ = -1e9;
 
-      gROOT->SetBatch(kTRUE);
+  // include trajectory points in axis range
+  for (size_t i = 0; i < debug_traj_x.size(); i++)
+  {
+    minX = std::min(minX, (double)debug_traj_x[i]);
+    maxX = std::max(maxX, (double)debug_traj_x[i]);
 
-      gSystem->mkdir("traj_ide_plots", kTRUE);
+    minY = std::min(minY, (double)debug_traj_y[i]);
+    maxY = std::max(maxY, (double)debug_traj_y[i]);
 
-      gStyle->SetOptStat(0);
+    minZ = std::min(minZ, (double)debug_traj_z[i]);
+    maxZ = std::max(maxZ, (double)debug_traj_z[i]);
+  }
 
-      TGraph *gTrajXZ = new TGraph();
+  // include IDE points in axis range
+  for (size_t i = 0; i < debug_ide_x.size(); i++)
+  {
+    minX = std::min(minX, (double)debug_ide_x[i]);
+    maxX = std::max(maxX, (double)debug_ide_x[i]);
 
-      TGraph *gIDEXZ = new TGraph();
+    minY = std::min(minY, (double)debug_ide_y[i]);
+    maxY = std::max(maxY, (double)debug_ide_y[i]);
 
-      for (size_t i = 0; i < debug_traj_x.size(); i++)
-      {
+    minZ = std::min(minZ, (double)debug_ide_z[i]);
+    maxZ = std::max(maxZ, (double)debug_ide_z[i]);
+  }
 
-        gTrajXZ->SetPoint(gTrajXZ->GetN(), debug_traj_z[i], debug_traj_x[i]);
-      }
+  double marginX = 0.10 * (maxX - minX);
+  double marginY = 0.10 * (maxY - minY);
+  double marginZ = 0.10 * (maxZ - minZ);
 
-      for (size_t i = 0; i < debug_ide_x.size(); i++)
-      {
+  if (marginX <= 0) marginX = 1.0;
+  if (marginY <= 0) marginY = 1.0;
+  if (marginZ <= 0) marginZ = 1.0;
 
-        gIDEXZ->SetPoint(gIDEXZ->GetN(), debug_ide_z[i], debug_ide_x[i]);
-      }
+  TCanvas *c = new TCanvas("c_traj_ide_3d", "Traj points vs IDE points 3D", 1100, 900);
 
-      gTrajXZ->SetTitle("Traj points vs IDE points;Z [cm];X [cm]");
+  TH3F *frame = new TH3F(
+      "frame3d",
+      "Traj points vs IDE points;X [cm];Y [cm];Z [cm]",
+      10, minX - marginX, maxX + marginX,
+      10, minY - marginY, maxY + marginY,
+      10, minZ - marginZ, maxZ + marginZ);
 
-      gTrajXZ->SetMarkerStyle(20);
+  frame->SetStats(0);
+  frame->Draw();
 
-      gTrajXZ->SetMarkerSize(0.9);
+  // trajectory as connected 3D line
+  TPolyLine3D *trajLine = new TPolyLine3D(debug_traj_x.size());
+  for (size_t i = 0; i < debug_traj_x.size(); i++)
+  {
+    trajLine->SetPoint(i, debug_traj_x[i], debug_traj_y[i], debug_traj_z[i]);
+  }
+  trajLine->SetLineColor(kBlack);
+  trajLine->SetLineWidth(3);
+  trajLine->Draw("same");
 
-      gTrajXZ->SetMarkerColor(kBlack);
+  // IDE points as red 3D markers
+  TPolyMarker3D *ideMarkers = new TPolyMarker3D(debug_ide_x.size());
+  for (size_t i = 0; i < debug_ide_x.size(); i++)
+  {
+    ideMarkers->SetPoint(i, debug_ide_x[i], debug_ide_y[i], debug_ide_z[i]);
+  }
+  ideMarkers->SetMarkerColor(kRed);
+  ideMarkers->SetMarkerStyle(20);
+  ideMarkers->SetMarkerSize(1.6);
+  ideMarkers->Draw("same");
 
-      gTrajXZ->SetLineColor(kBlack);
+  std::string outname =
+      "traj_ide_plots/Traj_vs_IDE_3D_Event" +
+      std::to_string(event) +
+      "_Track" +
+      std::to_string(trackID) +
+      ".png";
 
-      gTrajXZ->SetLineWidth(2);
+  c->SaveAs(outname.c_str());
 
-      gIDEXZ->SetMarkerStyle(21);
+  std::cout << "Saved " << outname << std::endl;
 
-      gIDEXZ->SetMarkerSize(1.3);
-
-      gIDEXZ->SetMarkerColor(kRed);
-
-      TCanvas *c = new TCanvas("c_traj_ide_xz", "Traj points vs IDE points", 1000, 800);
-
-      gTrajXZ->Draw("ALP");
-
-      gIDEXZ->Draw("P SAME");
-
-      TLegend *leg = new TLegend(0.13, 0.78, 0.42, 0.88);
-
-      leg->AddEntry(gTrajXZ, "Traj points", "lp");
-
-      leg->AddEntry(gIDEXZ, "IDE points", "p");
-
-      leg->Draw();
-
-      std::string outname = "traj_ide_plots/Traj_vs_IDE_Event" + std::to_string(event) + "_Track" + std::to_string(trackID) + ".png";
-
-      c->SaveAs(outname.c_str());
-
-      std::cout << "Saved " << outname << std::endl;
-
-      delete c;
-
-      delete leg;
-
-      delete gTrajXZ;
-
-      delete gIDEXZ;
-    }
+  delete ideMarkers;
+  delete trajLine;
+  delete frame;
+  delete c;
+}
 
     // This macro has to be defined for this module to be invoked from a
     // .fcl file; see MyEnergyAnalysis.fcl for more information.
