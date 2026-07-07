@@ -66,6 +66,7 @@
 #include "TH3F.h"
 #include "TPolyLine3D.h"
 #include "TPolyMarker3D.h"
+#include "lardataobj/Simulation/SimEnergyDeposit.h"
 
 namespace
 {
@@ -197,6 +198,10 @@ namespace lar
             Comment("tag of the input data product with the SimChannels, "
                     "e.g. tpcrawdecoder:simpleSC")};
 
+        fhicl::Atom<art::InputTag> SimEnergyDepositLabel{
+            Name("SimEnergyDepositLabel"),
+            Comment("tag of the input data product with SimEnergyDeposit")};
+
       }; // Config
 
       using Parameters = art::EDAnalyzer::Table<Config>;
@@ -226,6 +231,7 @@ namespace lar
       art::InputTag fGenieGenModuleLabel;     // The name of the producer that generated particles e.g. GENIE
       art::InputTag fSimulationProducerLabel; // The name of the producer that tracked simulated particles through the detector
       art::InputTag fSimChannelLabel;
+      art::InputTag fSimEnergyDepositLabel;
 
       TH2D *hFracNew_mu = nullptr;
       TH2D *hFracNew_p = nullptr;
@@ -432,7 +438,11 @@ namespace lar
     // Constructor
 
     MyEnergyAnalysis::MyEnergyAnalysis(Parameters const &config)
-        : EDAnalyzer(config), fGenieGenModuleLabel(config().GenieGenModuleLabel()), fSimulationProducerLabel(config().SimulationLabel()), fSimChannelLabel(config().SimChannelLabel())
+        : EDAnalyzer(config),
+          fGenieGenModuleLabel(config().GenieGenModuleLabel()),
+          fSimulationProducerLabel(config().SimulationLabel()),
+          fSimChannelLabel(config().SimChannelLabel()),
+          fSimEnergyDepositLabel(config().SimEnergyDepositLabel())
     {
       // Get a pointer to the geometry service provider.
       fGeometryService = &*art::ServiceHandle<geo::Geometry>();
@@ -443,6 +453,7 @@ namespace lar
       consumes<std::vector<simb::MCParticle>>(fSimulationProducerLabel);
       consumes<std::vector<sim::SimChannel>>(fSimulationProducerLabel);
       consumes<art::Assns<simb::MCTruth, simb::MCParticle>>(fSimulationProducerLabel);
+      consumes<std::vector<sim::SimEnergyDeposit>>(fSimEnergyDepositLabel);
     }
 
     //-----------------------------------------------------------------------
@@ -1386,6 +1397,54 @@ namespace lar
       } // end SimChannel loop
       fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
 
+      double simChannelIDE_primary13_Edep = 0.0;
+double simEnergyDeposit_primary13_Edep = 0.0;
+
+int simChannelIDE_primary13_N = 0;
+int simEnergyDeposit_primary13_N = 0;
+
+// SimChannel IDE energy for primary 13
+auto ideSearch13 = EDepByPrimaryMap.find(13);
+if (ideSearch13 != EDepByPrimaryMap.end())
+{
+  simChannelIDE_primary13_Edep = ideSearch13->second;
+  simChannelIDE_primary13_N = NContribByPrimary[13];
+}
+
+// SimEnergyDeposit energy for primary 13
+auto simEDepHandle =
+    event.getValidHandle<std::vector<sim::SimEnergyDeposit>>(fSimEnergyDepositLabel);
+
+for (auto const &edep : (*simEDepHandle))
+{
+  int trackID = std::abs(edep.TrackID());
+
+  int primaryTrackID = GetPrimaryAncestorTrackID(trackID, particleMap);
+
+  if (primaryTrackID != 13)
+    continue;
+
+  simEnergyDeposit_primary13_Edep += edep.Energy();
+  simEnergyDeposit_primary13_N++;
+}
+
+if (event.event() == 72)
+{
+  std::cout << "COMPARE EDEP event 72 primary 13: "
+            << "SimChannelIDE_Edep_MeV=" << simChannelIDE_primary13_Edep
+            << " N_IDE=" << simChannelIDE_primary13_N
+            << " SimEnergyDeposit_Edep_MeV=" << simEnergyDeposit_primary13_Edep
+            << " N_SimEnergyDeposit=" << simEnergyDeposit_primary13_N;
+
+  if (simEnergyDeposit_primary13_Edep > 0.0)
+  {
+    std::cout << " ratio_IDE_over_SimEnergyDeposit="
+              << simChannelIDE_primary13_Edep / simEnergyDeposit_primary13_Edep;
+  }
+
+  std::cout << std::endl;
+}
+
       double new_mu_Edep_MeV = 0.;
       double new_p_Edep_MeV = 0.;
       double new_n_Edep_MeV = 0.;
@@ -1661,107 +1720,112 @@ namespace lar
     }
 
     void MyEnergyAnalysis::SaveTrajVsIDEPlot(int event, int trackID)
-{
-  if (debug_traj_x.empty()) return;
-  if (debug_ide_x.empty()) return;
+    {
+      if (debug_traj_x.empty())
+        return;
+      if (debug_ide_x.empty())
+        return;
 
-  gROOT->SetBatch(kTRUE);
-  gSystem->mkdir("traj_ide_plots", kTRUE);
-  gStyle->SetOptStat(0);
+      gROOT->SetBatch(kTRUE);
+      gSystem->mkdir("traj_ide_plots", kTRUE);
+      gStyle->SetOptStat(0);
 
-  std::cout << "3D PLOT DEBUG: event=" << event
-            << " trackID=" << trackID
-            << " Ntraj=" << debug_traj_x.size()
-            << " Nide=" << debug_ide_x.size()
-            << std::endl;
+      std::cout << "3D PLOT DEBUG: event=" << event
+                << " trackID=" << trackID
+                << " Ntraj=" << debug_traj_x.size()
+                << " Nide=" << debug_ide_x.size()
+                << std::endl;
 
-  double minX = 1e9, maxX = -1e9;
-  double minY = 1e9, maxY = -1e9;
-  double minZ = 1e9, maxZ = -1e9;
+      double minX = 1e9, maxX = -1e9;
+      double minY = 1e9, maxY = -1e9;
+      double minZ = 1e9, maxZ = -1e9;
 
-  // include trajectory points in axis range
-  for (size_t i = 0; i < debug_traj_x.size(); i++)
-  {
-    minX = std::min(minX, (double)debug_traj_x[i]);
-    maxX = std::max(maxX, (double)debug_traj_x[i]);
+      // include trajectory points in axis range
+      for (size_t i = 0; i < debug_traj_x.size(); i++)
+      {
+        minX = std::min(minX, (double)debug_traj_x[i]);
+        maxX = std::max(maxX, (double)debug_traj_x[i]);
 
-    minY = std::min(minY, (double)debug_traj_y[i]);
-    maxY = std::max(maxY, (double)debug_traj_y[i]);
+        minY = std::min(minY, (double)debug_traj_y[i]);
+        maxY = std::max(maxY, (double)debug_traj_y[i]);
 
-    minZ = std::min(minZ, (double)debug_traj_z[i]);
-    maxZ = std::max(maxZ, (double)debug_traj_z[i]);
-  }
+        minZ = std::min(minZ, (double)debug_traj_z[i]);
+        maxZ = std::max(maxZ, (double)debug_traj_z[i]);
+      }
 
-  // include IDE points in axis range
-  for (size_t i = 0; i < debug_ide_x.size(); i++)
-  {
-    minX = std::min(minX, (double)debug_ide_x[i]);
-    maxX = std::max(maxX, (double)debug_ide_x[i]);
+      // include IDE points in axis range
+      for (size_t i = 0; i < debug_ide_x.size(); i++)
+      {
+        minX = std::min(minX, (double)debug_ide_x[i]);
+        maxX = std::max(maxX, (double)debug_ide_x[i]);
 
-    minY = std::min(minY, (double)debug_ide_y[i]);
-    maxY = std::max(maxY, (double)debug_ide_y[i]);
+        minY = std::min(minY, (double)debug_ide_y[i]);
+        maxY = std::max(maxY, (double)debug_ide_y[i]);
 
-    minZ = std::min(minZ, (double)debug_ide_z[i]);
-    maxZ = std::max(maxZ, (double)debug_ide_z[i]);
-  }
+        minZ = std::min(minZ, (double)debug_ide_z[i]);
+        maxZ = std::max(maxZ, (double)debug_ide_z[i]);
+      }
 
-  double marginX = 0.10 * (maxX - minX);
-  double marginY = 0.10 * (maxY - minY);
-  double marginZ = 0.10 * (maxZ - minZ);
+      double marginX = 0.10 * (maxX - minX);
+      double marginY = 0.10 * (maxY - minY);
+      double marginZ = 0.10 * (maxZ - minZ);
 
-  if (marginX <= 0) marginX = 1.0;
-  if (marginY <= 0) marginY = 1.0;
-  if (marginZ <= 0) marginZ = 1.0;
+      if (marginX <= 0)
+        marginX = 1.0;
+      if (marginY <= 0)
+        marginY = 1.0;
+      if (marginZ <= 0)
+        marginZ = 1.0;
 
-  TCanvas *c = new TCanvas("c_traj_ide_3d", "Traj points vs IDE points 3D", 1100, 900);
+      TCanvas *c = new TCanvas("c_traj_ide_3d", "Traj points vs IDE points 3D", 1100, 900);
 
-  TH3F *frame = new TH3F(
-      "frame3d",
-      "Traj points vs IDE points;X [cm];Y [cm];Z [cm]",
-      10, minX - marginX, maxX + marginX,
-      10, minY - marginY, maxY + marginY,
-      10, minZ - marginZ, maxZ + marginZ);
+      TH3F *frame = new TH3F(
+          "frame3d",
+          "Traj points vs IDE points;X [cm];Y [cm];Z [cm]",
+          10, minX - marginX, maxX + marginX,
+          10, minY - marginY, maxY + marginY,
+          10, minZ - marginZ, maxZ + marginZ);
 
-  frame->SetStats(0);
-  frame->Draw();
+      frame->SetStats(0);
+      frame->Draw();
 
-  // trajectory as connected 3D line
-  TPolyLine3D *trajLine = new TPolyLine3D(debug_traj_x.size());
-  for (size_t i = 0; i < debug_traj_x.size(); i++)
-  {
-    trajLine->SetPoint(i, debug_traj_x[i], debug_traj_y[i], debug_traj_z[i]);
-  }
-  trajLine->SetLineColor(kBlack);
-  trajLine->SetLineWidth(3);
-  trajLine->Draw("same");
+      // trajectory as connected 3D line
+      TPolyLine3D *trajLine = new TPolyLine3D(debug_traj_x.size());
+      for (size_t i = 0; i < debug_traj_x.size(); i++)
+      {
+        trajLine->SetPoint(i, debug_traj_x[i], debug_traj_y[i], debug_traj_z[i]);
+      }
+      trajLine->SetLineColor(kBlack);
+      trajLine->SetLineWidth(3);
+      trajLine->Draw("same");
 
-  // IDE points as red 3D markers
-  TPolyMarker3D *ideMarkers = new TPolyMarker3D(debug_ide_x.size());
-  for (size_t i = 0; i < debug_ide_x.size(); i++)
-  {
-    ideMarkers->SetPoint(i, debug_ide_x[i], debug_ide_y[i], debug_ide_z[i]);
-  }
-  ideMarkers->SetMarkerColor(kRed);
-  ideMarkers->SetMarkerStyle(20);
-  ideMarkers->SetMarkerSize(1.6);
-  ideMarkers->Draw("same");
+      // IDE points as red 3D markers
+      TPolyMarker3D *ideMarkers = new TPolyMarker3D(debug_ide_x.size());
+      for (size_t i = 0; i < debug_ide_x.size(); i++)
+      {
+        ideMarkers->SetPoint(i, debug_ide_x[i], debug_ide_y[i], debug_ide_z[i]);
+      }
+      ideMarkers->SetMarkerColor(kRed);
+      ideMarkers->SetMarkerStyle(20);
+      ideMarkers->SetMarkerSize(1.6);
+      ideMarkers->Draw("same");
 
-  std::string outname =
-      "traj_ide_plots/Traj_vs_IDE_3D_Event" +
-      std::to_string(event) +
-      "_Track" +
-      std::to_string(trackID) +
-      ".png";
+      std::string outname =
+          "traj_ide_plots/Traj_vs_IDE_3D_Event" +
+          std::to_string(event) +
+          "_Track" +
+          std::to_string(trackID) +
+          ".png";
 
-  c->SaveAs(outname.c_str());
+      c->SaveAs(outname.c_str());
 
-  std::cout << "Saved " << outname << std::endl;
+      std::cout << "Saved " << outname << std::endl;
 
-  delete ideMarkers;
-  delete trajLine;
-  delete frame;
-  delete c;
-}
+      delete ideMarkers;
+      delete trajLine;
+      delete frame;
+      delete c;
+    }
 
     // This macro has to be defined for this module to be invoked from a
     // .fcl file; see MyEnergyAnalysis.fcl for more information.
@@ -2882,3 +2946,4 @@ namespace
 // Look at the points that have Edep/True KE > 1.0 and see if those are cases where the particle is created inside the detector with low KE and then deposits more energy than its initial KE (which can happen if it is created by a decay or interaction of another particle that deposits energy in the detector) (from V2)
 // Try to get position of each energy deposit (IDE)
 // Make 2D plot Traj points vs IDE points (positions)
+// Look at simplest event with least number of particles and look at the all particles maybe they are assigning wrong KE or Edep to the wrong particle
