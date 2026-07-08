@@ -1398,52 +1398,52 @@ namespace lar
       fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
 
       double simChannelIDE_primary13_Edep = 0.0;
-double simEnergyDeposit_primary13_Edep = 0.0;
+      double simEnergyDeposit_primary13_Edep = 0.0;
 
-int simChannelIDE_primary13_N = 0;
-int simEnergyDeposit_primary13_N = 0;
+      int simChannelIDE_primary13_N = 0;
+      int simEnergyDeposit_primary13_N = 0;
 
-// SimChannel IDE energy for primary 13
-auto ideSearch13 = EDepByPrimaryMap.find(13);
-if (ideSearch13 != EDepByPrimaryMap.end())
-{
-  simChannelIDE_primary13_Edep = ideSearch13->second;
-  simChannelIDE_primary13_N = NContribByPrimary[13];
-}
+      // SimChannel IDE energy for primary 13
+      auto ideSearch13 = EDepByPrimaryMap.find(13);
+      if (ideSearch13 != EDepByPrimaryMap.end())
+      {
+        simChannelIDE_primary13_Edep = ideSearch13->second;
+        simChannelIDE_primary13_N = NContribByPrimary[13];
+      }
 
-// SimEnergyDeposit energy for primary 13
-auto simEDepHandle =
-    event.getValidHandle<std::vector<sim::SimEnergyDeposit>>(fSimEnergyDepositLabel);
+      // SimEnergyDeposit energy for primary 13
+      auto simEDepHandle =
+          event.getValidHandle<std::vector<sim::SimEnergyDeposit>>(fSimEnergyDepositLabel);
 
-for (auto const &edep : (*simEDepHandle))
-{
-  int trackID = std::abs(edep.TrackID());
+      for (auto const &edep : (*simEDepHandle))
+      {
+        int trackID = std::abs(edep.TrackID());
 
-  int primaryTrackID = GetPrimaryAncestorTrackID(trackID, particleMap);
+        int primaryTrackID = GetPrimaryAncestorTrackID(trackID, particleMap);
 
-  if (primaryTrackID != 13)
-    continue;
+        if (primaryTrackID != 13)
+          continue;
 
-  simEnergyDeposit_primary13_Edep += edep.Energy();
-  simEnergyDeposit_primary13_N++;
-}
+        simEnergyDeposit_primary13_Edep += edep.Energy();
+        simEnergyDeposit_primary13_N++;
+      }
 
-if (event.event() == 72)
-{
-  std::cout << "COMPARE EDEP event 72 primary 13: "
-            << "SimChannelIDE_Edep_MeV=" << simChannelIDE_primary13_Edep
-            << " N_IDE=" << simChannelIDE_primary13_N
-            << " SimEnergyDeposit_Edep_MeV=" << simEnergyDeposit_primary13_Edep
-            << " N_SimEnergyDeposit=" << simEnergyDeposit_primary13_N;
+      if (event.event() == 72)
+      {
+        std::cout << "COMPARE EDEP event 72 primary 13: "
+                  << "SimChannelIDE_Edep_MeV=" << simChannelIDE_primary13_Edep
+                  << " N_IDE=" << simChannelIDE_primary13_N
+                  << " SimEnergyDeposit_Edep_MeV=" << simEnergyDeposit_primary13_Edep
+                  << " N_SimEnergyDeposit=" << simEnergyDeposit_primary13_N;
 
-  if (simEnergyDeposit_primary13_Edep > 0.0)
-  {
-    std::cout << " ratio_IDE_over_SimEnergyDeposit="
-              << simChannelIDE_primary13_Edep / simEnergyDeposit_primary13_Edep;
-  }
+        if (simEnergyDeposit_primary13_Edep > 0.0)
+        {
+          std::cout << " ratio_IDE_over_SimEnergyDeposit="
+                    << simChannelIDE_primary13_Edep / simEnergyDeposit_primary13_Edep;
+        }
 
-  std::cout << std::endl;
-}
+        std::cout << std::endl;
+      }
 
       double new_mu_Edep_MeV = 0.;
       double new_p_Edep_MeV = 0.;
