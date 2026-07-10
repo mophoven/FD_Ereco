@@ -2947,3 +2947,4 @@ namespace
 // Try to get position of each energy deposit (IDE)
 // Make 2D plot Traj points vs IDE points (positions)
 // Look at simplest event with least number of particles and look at the all particles maybe they are assigning wrong KE or Edep to the wrong particle
+// Look at colleting chanels(oversuming)
