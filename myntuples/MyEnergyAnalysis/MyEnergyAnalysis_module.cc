@@ -1436,37 +1436,37 @@ namespace lar
       } // end SimChannel loop
 
       if (event.event() == 72)
-{
-  std::cout << "\n========== COLLECTION CHANNEL CHECK event 72 primary 13 ==========\n";
+      {
+        std::cout << "\n========== COLLECTION CHANNEL CHECK event 72 primary 13 ==========\n";
 
-  std::cout << "IDE total Edep MeV = " << ideTotal_p13 << "\n";
-  std::cout << "N IDE entries      = " << ideN_p13 << "\n";
-  std::cout << "unique channels    = " << ideEByChannel_p13.size() << "\n";
-  std::cout << "unique TDCs        = " << ideEByTDC_p13.size() << "\n";
-  std::cout << "unique rounded xyz = " << ideEByRoundedXYZ_p13.size() << "\n\n";
+        std::cout << "IDE total Edep MeV = " << ideTotal_p13 << "\n";
+        std::cout << "N IDE entries      = " << ideN_p13 << "\n";
+        std::cout << "unique channels    = " << ideEByChannel_p13.size() << "\n";
+        std::cout << "unique TDCs        = " << ideEByTDC_p13.size() << "\n";
+        std::cout << "unique rounded xyz = " << ideEByRoundedXYZ_p13.size() << "\n\n";
 
-  std::cout << "--- Energy by channel ---\n";
-  for (auto const &entry : ideEByChannel_p13)
-  {
-    unsigned int ch = entry.first;
-    std::cout << "channel=" << ch
-              << " E_MeV=" << entry.second
-              << " N=" << ideNByChannel_p13[ch]
-              << "\n";
-  }
+        std::cout << "--- Energy by channel ---\n";
+        for (auto const &entry : ideEByChannel_p13)
+        {
+          unsigned int ch = entry.first;
+          std::cout << "channel=" << ch
+                    << " E_MeV=" << entry.second
+                    << " N=" << ideNByChannel_p13[ch]
+                    << "\n";
+        }
 
-  std::cout << "--- Energy by rounded XYZ position ---\n";
-  for (auto const &entry : ideEByRoundedXYZ_p13)
-  {
-    std::string key = entry.first;
-    std::cout << "xyzKey=" << key
-              << " E_MeV=" << entry.second
-              << " N=" << ideNByRoundedXYZ_p13[key]
-              << "\n";
-  }
+        std::cout << "--- Energy by rounded XYZ position ---\n";
+        for (auto const &entry : ideEByRoundedXYZ_p13)
+        {
+          std::string key = entry.first;
+          std::cout << "xyzKey=" << key
+                    << " E_MeV=" << entry.second
+                    << " N=" << ideNByRoundedXYZ_p13[key]
+                    << "\n";
+        }
 
-  std::cout << "========== END COLLECTION CHANNEL CHECK ==========\n\n";
-}
+        std::cout << "========== END COLLECTION CHANNEL CHECK ==========\n\n";
+      }
 
       fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
 
@@ -1558,6 +1558,17 @@ namespace lar
 
         if (primaryTrackID != 13)
           continue;
+
+        if (event.event() == 72 && primaryTrackID == 13)
+        {
+          std::cout << "SIM_EDEP_DETAIL event=72 primary=13"
+                    << " trackID=" << edep.TrackID()
+                    << " E_MeV=" << edep.Energy()
+                    << " x=" << edep.MidPointX()
+                    << " y=" << edep.MidPointY()
+                    << " z=" << edep.MidPointZ()
+                    << std::endl;
+        }
 
         simEnergyDeposit_primary13_Edep += edep.Energy();
         simEnergyDeposit_primary13_N++;
