@@ -1260,6 +1260,20 @@ namespace lar
                 GetPrimaryAncestorTrackID(energyDeposit.trackID, particleMap);
 
             if (event.event() == 72 && primaryEdepTrackID == 13)
+{
+  std::cout << "IDE_PLANE_CHECK event=72 primary=13"
+            << " channel=" << channelNumber
+            << " plane=" << Wires[0].planeID().Plane
+            << " wire=" << Wires[0].Wire
+            << " tpc=" << Wires[0].TPC
+            << " cryostat=" << Wires[0].Cryostat
+            << " tdc=" << timeSlice.first
+            << " depositTrackID=" << energyDeposit.trackID
+            << " E_MeV=" << energyDeposit.energy
+            << std::endl;
+}
+
+            if (event.event() == 72 && primaryEdepTrackID == 13)
             {
               ideTotal_p13 += energyDeposit.energy;
               ideN_p13++;
