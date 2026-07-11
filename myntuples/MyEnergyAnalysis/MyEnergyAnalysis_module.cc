@@ -451,8 +451,7 @@ namespace lar
       // might read ("may_consume").
       consumes<std::vector<simb::MCTruth>>(fGenieGenModuleLabel);
       consumes<std::vector<simb::MCParticle>>(fSimulationProducerLabel);
-      consumes<std::vector<sim::SimChannel>>(fSimulationProducerLabel);
-      consumes<art::Assns<simb::MCTruth, simb::MCParticle>>(fSimulationProducerLabel);
+consumes<std::vector<sim::SimChannel>>(fSimChannelLabel);      consumes<art::Assns<simb::MCTruth, simb::MCParticle>>(fSimulationProducerLabel);
       consumes<std::vector<sim::SimEnergyDeposit>>(fSimEnergyDepositLabel);
     }
 
@@ -1221,6 +1220,27 @@ namespace lar
           {
             // Method b: collect deposited energy from collection-plane channels
 
+            fSim_hadronic_Edep_b2 += energyDeposit.energy;
+            fSim_hadronic_hit_x_b.push_back(energyDeposit.x);
+            fSim_hadronic_hit_y_b.push_back(energyDeposit.y);
+            fSim_hadronic_hit_z_b.push_back(energyDeposit.z);
+            fSim_hadronic_hit_Edep_b2.push_back(energyDeposit.energy);
+
+            EDepTrackID = std::abs(energyDeposit.trackID);
+            auto exist = EDepMap.find(EDepTrackID);
+
+            if (exist == EDepMap.end())
+            {
+              EDep_TrackID_vec.push_back(EDepTrackID);
+              EDepMap[EDepTrackID] = energyDeposit.energy;
+            }
+            else
+            {
+              EDepMap[EDepTrackID] += energyDeposit.energy;
+            }
+
+            NDirectContribByTrack[EDepTrackID]++;
+
             auto search = particleMap.find(abs(energyDeposit.trackID));
 
             int primaryEdepTrackID =
@@ -1373,27 +1393,6 @@ namespace lar
                 fSim_nuclei_Edep_b2 += energyDeposit.energy;
               }
             } // end found match
-
-            fSim_hadronic_Edep_b2 += energyDeposit.energy;
-            fSim_hadronic_hit_x_b.push_back(energyDeposit.x);
-            fSim_hadronic_hit_y_b.push_back(energyDeposit.y);
-            fSim_hadronic_hit_z_b.push_back(energyDeposit.z);
-            fSim_hadronic_hit_Edep_b2.push_back(energyDeposit.energy);
-
-            EDepTrackID = std::abs(energyDeposit.trackID);
-auto exist = EDepMap.find(EDepTrackID);
-
-if (exist == EDepMap.end())
-{
-  EDep_TrackID_vec.push_back(EDepTrackID);
-  EDepMap[EDepTrackID] = energyDeposit.energy;
-}
-else
-{
-  EDepMap[EDepTrackID] += energyDeposit.energy;
-}
-
-NDirectContribByTrack[EDepTrackID]++;
 
           } // end energy deposit loop
         } // end time slice loop
