@@ -1218,6 +1218,36 @@ namespace lar
           continue;
         }
 
+        if (event.event() == 72)
+{
+  int plane = Wires[0].planeID().Plane;
+
+  auto const &timeSlices_debug = channel.TDCIDEMap();
+
+  for (auto const &timeSlice_debug : timeSlices_debug)
+  {
+    auto const &energyDeposits_debug = timeSlice_debug.second;
+
+    for (auto const &energyDeposit_debug : energyDeposits_debug)
+    {
+      int primaryDebugID =
+          GetPrimaryAncestorTrackID(energyDeposit_debug.trackID, particleMap);
+
+      if (primaryDebugID != 13)
+        continue;
+
+      std::cout << "IDE_ALL_PLANES event=72 primary=13"
+                << " plane=" << plane
+                << " channel=" << channelNumber
+                << " wire=" << Wires[0].Wire
+                << " tdc=" << timeSlice_debug.first
+                << " trackID=" << energyDeposit_debug.trackID
+                << " E_MeV=" << energyDeposit_debug.energy
+                << std::endl;
+    }
+  }
+}
+
         if (Wires[0].planeID().Plane != 0)
         {
           continue;
@@ -1260,18 +1290,18 @@ namespace lar
                 GetPrimaryAncestorTrackID(energyDeposit.trackID, particleMap);
 
             if (event.event() == 72 && primaryEdepTrackID == 13)
-{
-  std::cout << "IDE_PLANE_CHECK event=72 primary=13"
-            << " channel=" << channelNumber
-            << " plane=" << Wires[0].planeID().Plane
-            << " wire=" << Wires[0].Wire
-            << " tpc=" << Wires[0].TPC
-            << " cryostat=" << Wires[0].Cryostat
-            << " tdc=" << timeSlice.first
-            << " depositTrackID=" << energyDeposit.trackID
-            << " E_MeV=" << energyDeposit.energy
-            << std::endl;
-}
+            {
+              std::cout << "IDE_PLANE_CHECK event=72 primary=13"
+                        << " channel=" << channelNumber
+                        << " plane=" << Wires[0].planeID().Plane
+                        << " wire=" << Wires[0].Wire
+                        << " tpc=" << Wires[0].TPC
+                        << " cryostat=" << Wires[0].Cryostat
+                        << " tdc=" << timeSlice.first
+                        << " depositTrackID=" << energyDeposit.trackID
+                        << " E_MeV=" << energyDeposit.energy
+                        << std::endl;
+            }
 
             if (event.event() == 72 && primaryEdepTrackID == 13)
             {
