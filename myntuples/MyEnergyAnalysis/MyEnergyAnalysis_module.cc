@@ -985,6 +985,7 @@ namespace lar
       std::map<int, double> EDepMap;
       std::map<int, double> EDepByPrimaryMap;
       std::map<int, int> NContribByPrimary;
+      std::map<int, int> NDirectContribByTrack;
 
       //
       // Process Sim MCparticles info
@@ -1391,11 +1392,74 @@ namespace lar
             {
               EDepMap[EDepTrackID] += energyDeposit.energy;
             }
+            NDirectContribByTrack[std::abs(EDepTrackID)]++;
 
           } // end energy deposit loop
         } // end time slice loop
       } // end SimChannel loop
       fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
+
+      if (SimParticles.size() < 20)
+{
+  std::cout << "\n========== SIMPLE EVENT DUMP ==========\n";
+  std::cout << "run=" << event.run()
+            << " subrun=" << event.subRun()
+            << " event=" << event.event()
+            << " N_MCParticles=" << SimParticles.size()
+            << " N_IDE_hits=" << fSim_hadronic_hit_x_b.size()
+            << "\n";
+
+  std::cout << "trackID,pdg,mother,process,endProcess,startKE_MeV,"
+            << "x0,y0,z0,nDaughters,directIDE_Edep_MeV,nDirectIDE,"
+            << "primaryAncestorID,primaryAssignedIDE_Edep_MeV,nPrimaryIDE\n";
+
+  for (const simb::MCParticle *p : SimParticles)
+  {
+    int trackID = std::abs(p->TrackId());
+    int primaryID = GetPrimaryAncestorTrackID(trackID, particleMap);
+
+    double startKE_MeV = 1000.0 * (p->E() - p->Mass());
+
+    double directEdep = 0.0;
+    auto directSearch = EDepMap.find(trackID);
+    if (directSearch != EDepMap.end())
+      directEdep = directSearch->second;
+
+    int nDirect = 0;
+    auto nDirectSearch = NDirectContribByTrack.find(trackID);
+    if (nDirectSearch != NDirectContribByTrack.end())
+      nDirect = nDirectSearch->second;
+
+    double primaryAssignedEdep = 0.0;
+    auto primarySearch = EDepByPrimaryMap.find(primaryID);
+    if (primarySearch != EDepByPrimaryMap.end())
+      primaryAssignedEdep = primarySearch->second;
+
+    int nPrimary = 0;
+    auto nPrimarySearch = NContribByPrimary.find(primaryID);
+    if (nPrimarySearch != NContribByPrimary.end())
+      nPrimary = nPrimarySearch->second;
+
+    std::cout << trackID << ","
+              << p->PdgCode() << ","
+              << p->Mother() << ","
+              << p->Process() << ","
+              << p->EndProcess() << ","
+              << startKE_MeV << ","
+              << p->Vx() << ","
+              << p->Vy() << ","
+              << p->Vz() << ","
+              << p->NumberDaughters() << ","
+              << directEdep << ","
+              << nDirect << ","
+              << primaryID << ","
+              << primaryAssignedEdep << ","
+              << nPrimary
+              << "\n";
+  }
+
+  std::cout << "========== END SIMPLE EVENT DUMP ==========\n\n";
+}
 
       double simChannelIDE_primary13_Edep = 0.0;
       double simEnergyDeposit_primary13_Edep = 0.0;
