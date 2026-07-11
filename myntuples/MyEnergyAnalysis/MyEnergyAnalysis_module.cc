@@ -451,7 +451,8 @@ namespace lar
       // might read ("may_consume").
       consumes<std::vector<simb::MCTruth>>(fGenieGenModuleLabel);
       consumes<std::vector<simb::MCParticle>>(fSimulationProducerLabel);
-consumes<std::vector<sim::SimChannel>>(fSimChannelLabel);      consumes<art::Assns<simb::MCTruth, simb::MCParticle>>(fSimulationProducerLabel);
+      consumes<std::vector<sim::SimChannel>>(fSimChannelLabel);
+      consumes<art::Assns<simb::MCTruth, simb::MCParticle>>(fSimulationProducerLabel);
       consumes<std::vector<sim::SimEnergyDeposit>>(fSimEnergyDepositLabel);
     }
 
@@ -1192,6 +1193,18 @@ consumes<std::vector<sim::SimChannel>>(fSimChannelLabel);      consumes<art::Ass
       // Calculate sim hadronic deposit energy
       //
 
+      std::map<unsigned int, double> ideEByChannel_p13;
+      std::map<unsigned int, int> ideNByChannel_p13;
+
+      std::map<unsigned int, double> ideEByTDC_p13;
+      std::map<unsigned int, int> ideNByTDC_p13;
+
+      std::map<std::string, double> ideEByRoundedXYZ_p13;
+      std::map<std::string, int> ideNByRoundedXYZ_p13;
+
+      double ideTotal_p13 = 0.0;
+      int ideN_p13 = 0;
+
       // Loop over the SimChannel objects in the event to look at the energy deposited by particle's track.
       for (auto const &channel : (*simChannelHandle))
       {
@@ -1245,6 +1258,30 @@ consumes<std::vector<sim::SimChannel>>(fSimChannelLabel);      consumes<art::Ass
 
             int primaryEdepTrackID =
                 GetPrimaryAncestorTrackID(energyDeposit.trackID, particleMap);
+
+            if (event.event() == 72 && primaryEdepTrackID == 13)
+            {
+              ideTotal_p13 += energyDeposit.energy;
+              ideN_p13++;
+
+              ideEByChannel_p13[channelNumber] += energyDeposit.energy;
+              ideNByChannel_p13[channelNumber]++;
+
+              ideEByTDC_p13[timeSlice.first] += energyDeposit.energy;
+              ideNByTDC_p13[timeSlice.first]++;
+
+              int rx = std::lround(energyDeposit.x * 10.0); // 0.1 cm bin
+              int ry = std::lround(energyDeposit.y * 10.0);
+              int rz = std::lround(energyDeposit.z * 10.0);
+
+              std::string xyzKey =
+                  std::to_string(rx) + "_" +
+                  std::to_string(ry) + "_" +
+                  std::to_string(rz);
+
+              ideEByRoundedXYZ_p13[xyzKey] += energyDeposit.energy;
+              ideNByRoundedXYZ_p13[xyzKey]++;
+            }
 
             if (primaryEdepTrackID > 0)
             {
@@ -1397,6 +1434,40 @@ consumes<std::vector<sim::SimChannel>>(fSimChannelLabel);      consumes<art::Ass
           } // end energy deposit loop
         } // end time slice loop
       } // end SimChannel loop
+
+      if (event.event() == 72)
+{
+  std::cout << "\n========== COLLECTION CHANNEL CHECK event 72 primary 13 ==========\n";
+
+  std::cout << "IDE total Edep MeV = " << ideTotal_p13 << "\n";
+  std::cout << "N IDE entries      = " << ideN_p13 << "\n";
+  std::cout << "unique channels    = " << ideEByChannel_p13.size() << "\n";
+  std::cout << "unique TDCs        = " << ideEByTDC_p13.size() << "\n";
+  std::cout << "unique rounded xyz = " << ideEByRoundedXYZ_p13.size() << "\n\n";
+
+  std::cout << "--- Energy by channel ---\n";
+  for (auto const &entry : ideEByChannel_p13)
+  {
+    unsigned int ch = entry.first;
+    std::cout << "channel=" << ch
+              << " E_MeV=" << entry.second
+              << " N=" << ideNByChannel_p13[ch]
+              << "\n";
+  }
+
+  std::cout << "--- Energy by rounded XYZ position ---\n";
+  for (auto const &entry : ideEByRoundedXYZ_p13)
+  {
+    std::string key = entry.first;
+    std::cout << "xyzKey=" << key
+              << " E_MeV=" << entry.second
+              << " N=" << ideNByRoundedXYZ_p13[key]
+              << "\n";
+  }
+
+  std::cout << "========== END COLLECTION CHANNEL CHECK ==========\n\n";
+}
+
       fSim_n_hadronic_Edep_b = fSim_hadronic_hit_x_b.size();
 
       if (SimParticles.size() < 20)
