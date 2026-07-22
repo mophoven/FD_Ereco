@@ -196,7 +196,8 @@ namespace {
       case 3112: case -3112: return 1.197449;
       // Nuclear masses (GeV, ground-state, electrons removed), derived uniformly
       // from AME2020 mass excesses via  M = [ A*u + Delta - Z*m_e ],
-      //  u = 931.4941024 MeV,  m_e = 0.5109989 MeV.  Sorted by Z then A.
+      //   u = 931.4941024 MeV,  m_e = 0.5109989 MeV.  Sorted by Z then A.
+      // (Inverse for checking against the NNDC chart: Delta = 1000*M - A*u + Z*m_e.)
       case 1000010020: return 1.87561;   // d
       case 1000010030: return 2.80892;   // t
       case 1000020030: return 2.80839;   // He-3
@@ -303,9 +304,6 @@ namespace {
     }
   }
 
-  // Registry of PDG codes that missed the mass table, with hit counts. Printed at
-  // endJob so you can see exactly what (if anything) is falling back, and add the
-  // common ones to getMassFromPDG for exact masses if you want.
   std::map<int, long>& missingMassRegistry() { static std::map<int, long> m; return m; }
 
   // Robust particle mass (GeV). Source priority:
@@ -334,14 +332,6 @@ namespace {
   inline double pointKE(const simb::MCParticle& p, unsigned int i)
   { return p.Momentum(i).E() - p.Mass(); }
 
-  // ------------------------------------------------------------------
-  //  Incoming KE entering an interaction vertex.
-  //
-  //  CRITICAL: Geant4 zeroes the momentum at a particle's FINAL trajectory point
-  //  when it interacts . So thepre-interaction KE is the point *before* the vertex point, not at it.
-  //  We take the max KE over {iv-1, iv} for robustness against that zeroing and
-  //  against mid-track (elastic) vertices.
-  // ------------------------------------------------------------------
   double incomingKEAtVertex(const simb::MCParticle& p,
                             double vx, double vy, double vz)
   {
@@ -393,7 +383,7 @@ public:
       Comment("sim::SimEnergyDeposit label — VERIFY with eventdump"),
       art::InputTag("largeant:TPCActive") };
 
-    // Active-volume bounds (cm). Defaults are the DUNE values;
+    // Active-volume bounds (cm). Defaults are the user-stated DUNE values;
     // beginJob prints geometry dimensions so you can reconcile them.
     fhicl::Atom<double> ActiveXmin { Name("ActiveXmin"), Comment("cm"), -600.0 };
     fhicl::Atom<double> ActiveXmax { Name("ActiveXmax"), Comment("cm"),  600.0 };
@@ -425,7 +415,7 @@ private:
   }
   bool inside(const TLorentzVector& p) const { return inside(p.X(), p.Y(), p.Z()); }
 
-  // Walk to the GENIE-primary ancestor and return its PDG.
+  // Walk to the GENIE-primary ancestor and return its PDG (memoized).
   int rootPrimaryPDG(int trackID);
 
   // Category index for the deposited-energy breakdown (by primary ancestor).
@@ -483,6 +473,7 @@ private:
   int         fV_target_pdg, fV_residual_pdg;
   int         fV_nOut, fV_nNeutron, fV_nProton, fV_nGamma, fV_nNeutrino, fV_nNucleus;
   double      fV_Ebind_mass, fV_Ebind_cons, fV_Ebind_diff;
+  double      fV_Ebind_meson, fV_Ebind_nuclear;
   double      fV_Enu_vtx;
   bool        fV_isMichel;
   std::string fV_channel;
@@ -519,9 +510,6 @@ MyEnergyAnalysis::MyEnergyAnalysis(Parameters const& c)
 // ----------------------------------------------------------------------------
 void MyEnergyAnalysis::beginJob()
 {
-  // Print geometry dimensions for cross-checking the fhicl bounds. These are
-  // per-TPC quantities, not the whole-detector envelope, so use them only as a
-  // sanity reference — the active-volume bounds actually used are the fhicl ones.
   mf::LogInfo("MyEnergyAnalysis")
     << "Active-volume bounds in use (cm): "
     << "x[" << fXmin << "," << fXmax << "] "
@@ -590,6 +578,8 @@ void MyEnergyAnalysis::beginJob()
   fVertexTree->Branch("E_binding_mass", &fV_Ebind_mass);
   fVertexTree->Branch("E_binding_cons", &fV_Ebind_cons);
   fVertexTree->Branch("E_binding_diff", &fV_Ebind_diff);
+  fVertexTree->Branch("E_binding_meson", &fV_Ebind_meson);      // created-meson rest mass removed
+  fVertexTree->Branch("E_binding_nuclear", &fV_Ebind_nuclear);  // nuclear remainder (added to ledger)
   fVertexTree->Branch("E_neutrino_vtx", &fV_Enu_vtx);
   fVertexTree->Branch("IsMichel", &fV_isMichel);
   fVertexTree->Branch("Channel", &fV_channel);
@@ -615,11 +605,7 @@ void MyEnergyAnalysis::beginJob()
 // ----------------------------------------------------------------------------
 void MyEnergyAnalysis::endJob()
 {
-  // Deposits occur only in active argon, so their min/max over the job is a
-  // direct, geometry-API-free measurement of the active volume. Compare it to the
-  // escape bounds you configured — they should match. If the deposits extend
-  // beyond your bounds, escape fires too early; if your bounds extend beyond the
-  // deposits, escape fires too late.
+
   if (fDepCount > 0) {
     mf::LogInfo("MyEnergyAnalysis")
       << "SimEnergyDeposit spatial extent over the job (" << fDepCount << " deposits):\n"
@@ -643,8 +629,6 @@ void MyEnergyAnalysis::endJob()
     << "Fiducial cut (inset " << fFidInset << " cm): skipped " << fNskippedFid
     << " events with vertex outside the active volume.";
 
-  // Report any PDG codes that missed the mass table (used a fallback). Add the
-  // common ones to getMassFromPDG if you want exact masses for them.
   auto const& miss = missingMassRegistry();
   if (!miss.empty()) {
     std::ostringstream os;
@@ -717,6 +701,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
   // ---- (1) generator truth ----
   art::Handle<std::vector<simb::MCTruth>> mcth;
   if (event.getByLabel(fGenLabel, mcth) && !mcth->empty()) {
+    // Dereference the handle directly — no art::Ptr / fill_ptr_vector needed.
     const auto& nu = mcth->at(0).GetNeutrino();
     fGen_nu_E        = nu.Nu().E();
     fGen_nu_PDG      = nu.Nu().PdgCode();
@@ -787,6 +772,10 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
         default: fE_dep_other += e; break;
       }
     }
+  } else {
+    mf::LogWarning("MyEnergyAnalysis")
+      << "SimEnergyDeposit '" << fEdepLabel.encode()
+      << "' not found — E_dep will be 0. Fix the label (see header).";
   }
 
   // ---- (4) interaction vertices: binding + neutrino, per channel ----
@@ -820,6 +809,11 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
 
       // --- tally products ---
       double sumM_out = 0, sumKE_out_massive = 0, sumE_out_massless = 0, sumE_nu = 0;
+      double sumCreatedMesonM = 0;  // rest mass of created products (baryon-number-0 mesons and
+                                    //   massive leptons, plus baryon-antibaryon pair mass). Paid
+                                    //   for by the projectile and given back downstream
+                                    //   (E_dep/E_escape), so it is NOT nuclear binding — removed
+                                    //   in the decompose below.
       int sumA = 0, sumZ = 0;
       int nN = 0, nP = 0, nG = 0, nNu = 0, nNuc = 0;
       int residualPDG = 0;
@@ -839,6 +833,18 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
 
         sumM_out += dM;
         if (dM > 1e-9) sumKE_out_massive += dKE; else sumE_out_massless += dE;
+        // Created meson (baryon number 0, massive): its rest mass is new — paid for by the
+        // projectile — and it leaves the vertex to deposit or escape downstream. Accumulate
+        // so the decompose below can take it back out of the binding number.
+        // A created antibaryon signals a baryon-antibaryon PAIR (baryon-number conservation
+        // requires a partner baryon in the final state): both partners are new mass paid for
+        // by the projectile, so remove 2x the antibaryon mass. Knocked-out target nucleons
+        // (no accompanying antibaryon) are NOT removed — their mass is handled by the A/Z
+        // target balance, which the pair leaves untouched (net baryon number 0).
+        if (isCreatedParticle(dpdg) && baryonNumber(dpdg) == 0 && dM > 1e-9)
+          sumCreatedMesonM += dM;
+        else if (baryonNumber(dpdg) < 0)
+          sumCreatedMesonM += 2.0 * dM;
 
         if (isNeutrino(dpdg)) { sumE_nu += dE; ++nNu; }
         else if (dpdg == 22)  ++nG;
@@ -869,7 +875,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       }
 
       // --- binding energy, two routes ---
-      double Eb_mass = 0, Eb_cons = 0, Enu_vtx = 0;
+      double Eb_mass = 0, Eb_cons = 0, Enu_vtx = 0, Eb_nuclear = 0, Eb_meson = 0;
       bool isMichel = false;
 
       if (isDecayProcess(vtx.process) || isCaptureAtRest(vtx.process)) {
@@ -908,29 +914,49 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
         // conservation route (cross-check): energy not carried by product KE
         Eb_cons = KE_in - sumKE_out_massive - sumE_out_massless;
 
-        // Choose the value to add to the ledger.
-        // The two routes are independent: when they AGREE the binding is trustworthy
-        // (this is the main correctness signal — they matched to 0.1 MeV on the clean
-        // event). When they disagree, a mass lookup or KE_in extraction went wrong;
-        // prefer the conservation route (no target-table dependence, robust product
-        // masses), and apply a hard physical cap so nothing unphysical leaks.
-        const double kCapGeV = 0.5;   // per-vertex binding is at most ~hundreds of MeV
-        const double kAgreeGeV = 0.05;
-        double Eb_use = 0.0;
+        // Pick the trustworthy TOTAL rest-mass change.
+        // Eb_mass and Eb_cons both measure the total rest-mass change of the system; they
+        // share no inputs (mass route: table only; conservation route: kinematics only), so
+        // agreement is a genuine closure test — they matched to 0.1 MeV on the clean event.
+        // Prefer the exact route when they agree; else the conservation route (no target-
+        // table dependence); the fallback may be NaN and is caught by the guard below.
+        const double kAgreeGeV = 0.05;                 // routes agree to 50 MeV
         bool agree = std::isfinite(Eb_mass) && std::isfinite(Eb_cons) &&
                      std::abs(Eb_mass - Eb_cons) < kAgreeGeV;
-        if (agree && std::abs(Eb_mass) < kCapGeV) {
-          Eb_use = Eb_mass;
-        } else if (std::isfinite(Eb_cons) && std::abs(Eb_cons) < kCapGeV) {
-          Eb_use = Eb_cons;
-        } else if (std::isfinite(Eb_mass) && std::abs(Eb_mass) < kCapGeV) {
-          Eb_use = Eb_mass;
+        double Eb_total;                               // total rest-mass change at this vertex
+        if      (agree)                  Eb_total = Eb_mass;
+        else if (std::isfinite(Eb_cons)) Eb_total = Eb_cons;
+        else                             Eb_total = Eb_mass;
+        //
+        // sumCreatedMesonM is the OUTGOING created-meson mass. If the projectile is itself a
+        // meson (pi/K inelastic), its mass was already in the initial state (subtracted via
+        // M_in), so only the NET created meson mass should come out — subtract the incoming
+        // meson mass too. For a nucleon/nucleus projectile there is no incoming meson.
+        int    parentPDG = parent.PdgCode();
+        bool   parentIsMeson = !isNucleus(parentPDG) && baryonNumber(parentPDG) == 0 &&
+                               !isNeutrino(parentPDG) && parentPDG != 22 &&
+                               std::abs(parentPDG) != 11 && std::abs(parentPDG) != 13 &&
+                               std::abs(parentPDG) != 15 &&
+                               robustMass(parentPDG, parent.Mass()) > 1e-9;
+        double Mmeson_in = parentIsMeson ? robustMass(parentPDG, parent.Mass()) : 0.0;
+        Eb_meson   = sumCreatedMesonM - Mmeson_in;     // net created-meson rest mass
+        Eb_nuclear = std::isfinite(Eb_total) ? (Eb_total - Eb_meson) : std::nan("");
+
+        // Guard on the nuclear remainder (not the total). It cannot physically exceed the
+        // target's total binding (~344 MeV for Ar-40; 0.5 GeV is a generous ceiling). This
+        // used to cap the total, which rejected every meson vertex and discarded the nuclear
+        // piece with it. After the decompose a violation is rare and means the vertex is
+        // mis-reconstructed (wrong target, missing product) — skip only those.
+        const double kNucCapGeV = 0.5;
+        double Eb_use = 0.0;
+        if (std::isfinite(Eb_nuclear) && std::abs(Eb_nuclear) < kNucCapGeV) {
+          Eb_use = Eb_nuclear;
         } else {
-          mf::LogWarning("MyEnergyAnalysis")
-            << "Vertex binding out of range (mass=" << Eb_mass
-            << " cons=" << Eb_cons << " GeV) process " << vtx.process
-            << " in_pdg " << parent.PdgCode() << " — skipped from sum.";
-          Eb_use = 0.0;
+          // mf::LogWarning("MyEnergyAnalysis")
+          //   << "Nuclear binding out of range after meson removal (total=" << Eb_total
+          //   << " meson=" << Eb_meson << " nuclear=" << Eb_nuclear << " GeV) process "
+          //   << vtx.process << " in_pdg " << parentPDG << " — skipped from sum.";
+           Eb_use = 0.0;
         }
         fE_binding_total += (vtxInside ? Eb_use : 0.0);
         // Binding is only a detector loss if it happens inside the active volume.
@@ -942,14 +968,14 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
         // exothermic release (e.g. nCapture), which reappears as gammas.
       }
 
-      // --- build channel key: "n+Ar40[neutronInelastic]->Ar38+2n" --- make the channel tag track Eb per channel here and not in csv script
+      // --- build channel key: "n+Ar40[neutronInelastic]->Ar38+2n" ---
       auto nucName = [](int pdg) -> std::string {
         if (!isNucleus(pdg)) return std::to_string(pdg);
         return "Z" + std::to_string(nuclearZ(pdg)) + "A" + std::to_string(nuclearA(pdg));
       };
       std::map<int,int> outCount;
       for (int h : freeHadrons) ++outCount[h];
-      for (int g : fragments)  ++outCount[g];   // every nucleus in the key (Option A)
+      for (int g : fragments)  ++outCount[g];
       std::string chan = std::to_string(parent.PdgCode());
       if (targetPDG) chan += "+" + nucName(targetPDG);
       chan += "[" + vtx.process + "]->";
@@ -976,6 +1002,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       fV_nNeutron = nN; fV_nProton = nP; fV_nGamma = nG; fV_nNeutrino = nNu; fV_nNucleus = nNuc;
       fV_Ebind_mass = Eb_mass; fV_Ebind_cons = Eb_cons;
       fV_Ebind_diff = (std::isfinite(Eb_mass) ? Eb_mass - Eb_cons : std::nan(""));
+      fV_Ebind_meson = Eb_meson; fV_Ebind_nuclear = Eb_nuclear;
       fV_Enu_vtx = Enu_vtx; fV_isMichel = isMichel;
       fV_channel = chan;
       fV_channel_hash = std::hash<std::string>{}(chan);
@@ -1009,7 +1036,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
     }
     if (!everInside) continue;        // never in the detector at all
     if (exitKE < 0) continue;         // ended inside -> contained
-      
+    if (exitKE < 0) exitKE = 0;
 
     // Energy that becomes invisible when the track leaves the active volume.
     // Created particles (mu, e, pi, gamma, ...) take their rest mass with them and
@@ -1046,12 +1073,12 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
     if (inside(p.Vx(), p.Vy(), p.Vz())) fE_neutrino_inside += p.Momentum(0).E();
   }
 
-  // ---- (7) close the ledger ----
+  // ---- (7) close the ledger; residual is the QA number at truth level ----
   fE_residual = fGen_nu_E - (fE_dep_total + fE_binding_total
                 + fE_escape_neutral + fE_escape_charged + fE_neutrino_inside);
 
   // Containment flag: fraction of the neutrino energy that left the active volume.
-  // Not a cut — stored so the analysis can threshold(e.g. EscapeFrac < 0.3
+  // Not a cut — stored so the analysis can threshold offline (e.g. EscapeFrac < 0.3
   // for a well-contained subset). High-energy DIS events leak large fractions.
   fEscapeFrac = (fGen_nu_E > 0)
               ? (fE_escape_charged + fE_escape_neutral) / fGen_nu_E
