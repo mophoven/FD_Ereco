@@ -9,7 +9,7 @@ services:
   # Load the service that manages root files for histograms.
   # Any histograms or n-tuples that you create in the program will be
   # written to this file.
-  TFileService:           { fileName: "100EvtTest.root"}
+  TFileService:           { fileName: "NewReworkTest09.root"}
 
 
 
@@ -44,7 +44,8 @@ source:
   maxEvents:  10
 
   # Include the name of an art::Event input file
-  fileNames: ["/pnfs/dune/persistent/staging/fardet-hd/21/b6/nu_dune10kt_1x2x6_1061_0_20230822T200326Z_gen_g4_detsim_hitreco.root"]
+  fileNames: ["/pnfs/dune/persistent/staging/fardet-hd/21/b6/nu_dune10kt_1x2x6_1061_0_20230822T200326Z_gen_g4_detsim_hitreco.root",
+	      "/pnfs/dune/persistent/staging/fardet-hd/7d/11/nu_dune10kt_1x2x6_1098_912_20230826T014307Z_gen_g4_detsim_hitreco.root"]
 }
 
 
@@ -85,8 +86,11 @@ physics:
 
       GenieGenModuleLabel: "generator"
       SimulationLabel: "largeant"
-      SimChannelLabel: "tpcrawdecoder:simpleSC"
-
+      SimEnergyDepositLabel: "IonAndScint"
+	
+      ActiveXmin: -363.4   ActiveXmax: 363.4
+      ActiveYmin: -607.9   ActiveYmax: 607.9
+      ActiveZmin:    0.0   ActiveZmax: 1393.5
 
       # In this example, which primary particle(s) we'll focus on in an event.
       # PDG code 13 = mu-.
