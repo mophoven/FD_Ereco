@@ -1091,3 +1091,5 @@ DEFINE_ART_MODULE(MyEnergyAnalysis)
 
 } // namespace example
 } // namespace lar
+
+// share instructions for grids
