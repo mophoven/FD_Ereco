@@ -1093,3 +1093,6 @@ DEFINE_ART_MODULE(MyEnergyAnalysis)
 } // namespace lar
 
 // share instructions for grids
+// estimator for neutrons learn about neutron energy. Look at the ones that leave the detector and understand what they to and find the energy of the interactions.
+// when neutron comes in look at the highest energy and plot the difference
+// look at the variables for plots
