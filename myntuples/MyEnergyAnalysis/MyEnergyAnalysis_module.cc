@@ -998,46 +998,46 @@ namespace lar
       std::map<int, std::vector<int>> children;
       for (auto const &p : *ph)
         children[p.Mother()].push_back(p.TrackId());
-for (auto const &p : *ph)
-{
-  if (p.Mother() != 0)
-    continue;
+      for (auto const &p : *ph)
+      {
+        if (p.Mother() != 0)
+          continue;
 
-  int pdg = p.PdgCode();
+        int pdg = p.PdgCode();
 
-  // Do not count incoming/primary neutrinos as visible particle-category energy.
-  if (isNeutrino(pdg))
-    continue;
+        // Do not count incoming/primary neutrinos as visible particle-category energy.
+        if (isNeutrino(pdg))
+          continue;
 
-  double trueKE = p.Momentum(0).E() - p.Mass();
-  if (trueKE < 0)
-    trueKE = 0.0;
+        double trueKE = p.Momentum(0).E() - p.Mass();
+        if (trueKE < 0)
+          trueKE = 0.0;
 
-  switch (depositCategory(pdg))
-  {
-  case 0:
-    fE_true_mu += trueKE;
-    break;
-  case 1:
-    fE_true_p += trueKE;
-    break;
-  case 2:
-    fE_true_n += trueKE;
-    break;
-  case 3:
-    fE_true_pi += trueKE;
-    break;
-  case 4:
-    fE_true_em += trueKE;
-    break;
-  case 5:
-    fE_true_nuc += trueKE;
-    break;
-  default:
-    fE_true_other += trueKE;
-    break;
-  }
-}
+        switch (depositCategory(pdg))
+        {
+        case 0:
+          fE_true_mu += trueKE;
+          break;
+        case 1:
+          fE_true_p += trueKE;
+          break;
+        case 2:
+          fE_true_n += trueKE;
+          break;
+        case 3:
+          fE_true_pi += trueKE;
+          break;
+        case 4:
+          fE_true_em += trueKE;
+          break;
+        case 5:
+          fE_true_nuc += trueKE;
+          break;
+        default:
+          fE_true_other += trueKE;
+          break;
+        }
+      }
 
       // ---- (3) deposited (visible) energy from SimEnergyDeposit ----
       // SimEnergyDeposit::Energy() is in MeV; convert to GeV. Deposits exist only in
@@ -1517,3 +1517,5 @@ for (auto const &p : *ph)
 // estimator for neutrons learn about neutron energy. Look at the ones that leave the detector and understand what they to and find the energy of the interactions.
 // when neutron comes in look at the highest energy and plot the difference
 // look at the variables for plots
+// from 500 event file take look at only 20 event and look at the energy of the neutrons at each step
+// For Highest-Energy Escaping Neutron plot zoom in to look at the yellow line we have 
