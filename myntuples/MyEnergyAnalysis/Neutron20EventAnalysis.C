@@ -77,15 +77,24 @@ void Neutron20EventAnalysis(const char *fileName, int maxEvents=20) {
   hl->SetFillColor(kAzure-9);hl->SetLineColor(kBlue+2);hl->SetLineWidth(2);auto*c2=new TCanvas("cLoss","Energy loss",1250,750);c2->SetGridy();c2->SetBottomMargin(.12);hl->Draw("HIST");c2->SaveAs("meeting_escaping_neutron_energy_loss.png");
 
   std::vector<Neutron>examples=ns;std::sort(examples.begin(),examples.end(),[](const Neutron&a,const Neutron&b){return a.birth>b.birth;});if(examples.size()>3)examples.resize(3);
-  Color_t colors[]={kBlue+1,kRed+1,kGreen+2};auto*c3=new TCanvas("cSteps","Representative histories",1500,520);c3->Divide(examples.size(),1,.015,.015);
-  for(size_t i=0;i<examples.size();++i){c3->cd(i+1);gPad->SetGrid();auto h=history(examples[i],steps);auto*g=makeGraph(h,colors[i]);g->SetMinimum(0);g->SetMaximum(1.12*(*std::max_element(h.begin(),h.end())));g->SetTitle(Form("Event %d, track %d;Recorded point: birth #rightarrow interactions #rightarrow exit;Neutron KE [GeV]",examples[i].event,examples[i].track));g->Draw("ALP");}
-  c3->SaveAs("meeting_representative_neutron_steps.png");
+  Color_t colors[]={kBlue+1,kRed+1,kGreen+2};
+  for(size_t i=0;i<examples.size();++i){
+    auto*c3=new TCanvas(Form("cSteps%zu",i),"Representative history",900,700);c3->SetGrid();
+    auto h=history(examples[i],steps);auto*g=makeGraph(h,colors[i]);
+    g->SetMinimum(0);g->SetMaximum(1.12*(*std::max_element(h.begin(),h.end())));
+    g->SetTitle(Form("Event %d, track %d;Recorded point: birth #rightarrow interactions #rightarrow exit;Neutron KE [GeV]",examples[i].event,examples[i].track));g->Draw("ALP");
+    c3->SaveAs(Form("meeting_neutron_steps_event%d_track%d.png",examples[i].event,examples[i].track));
+  }
 
   const Neutron&best=examples.front();auto h=history(best,steps);auto range=std::minmax_element(h.begin(),h.end());double span=*range.second-*range.first;double padding=span>0?.1*span:std::max(.001,.05*std::abs(*range.first));
-  auto*c4=new TCanvas("cZoom","Full and zoom",1400,650);c4->Divide(2,1);c4->cd(1);gPad->SetGrid();auto*full=makeGraph(h,kOrange+1);full->SetMinimum(0);full->SetMaximum(1.1*(*range.second));full->SetTitle(Form("Full scale: event %d, track %d;Recorded point;Neutron KE [GeV]",best.event,best.track));full->Draw("ALP");
-  c4->cd(2);gPad->SetGrid();auto*zoom=makeGraph(h,kOrange+1);zoom->SetMinimum(std::max(0.,*range.first-padding));zoom->SetMaximum(*range.second+padding);zoom->SetTitle("Zoomed energy change;Recorded point;Neutron KE [GeV]");zoom->Draw("ALP");c4->SaveAs("meeting_highest_escaping_neutron_full_and_zoom.png");
+  auto*c4full=new TCanvas("cFull","Full scale",900,700);c4full->SetGrid();auto*full=makeGraph(h,kOrange+1);
+  full->SetMinimum(0);full->SetMaximum(1.1*(*range.second));full->SetTitle(Form("Full scale: event %d, track %d;Recorded point;Neutron KE [GeV]",best.event,best.track));full->Draw("ALP");
+  c4full->SaveAs("meeting_highest_escaping_neutron_full_scale.png");
+  auto*c4zoom=new TCanvas("cZoom","Zoomed energy change",900,700);c4zoom->SetGrid();auto*zoom=makeGraph(h,kOrange+1);
+  zoom->SetMinimum(std::max(0.,*range.first-padding));zoom->SetMaximum(*range.second+padding);zoom->SetTitle(Form("Zoomed energy change: event %d, track %d;Recorded point;Neutron KE [GeV]",best.event,best.track));zoom->Draw("ALP");
+  c4zoom->SaveAs("meeting_highest_escaping_neutron_zoom.png");
 
   std::cout<<"Selected "<<ids.size()<<" events; "<<ns.size()<<" had an escaping neutron.\n";
   std::cout<<"Highest: event "<<best.event<<", track "<<best.track<<", birth "<<best.birth<<" GeV, exit "<<best.exit<<" GeV, loss "<<1000*(best.birth-best.exit)<<" MeV.\n";
-  std::cout<<"Created four meeting_*.png plots.\n";
+  std::cout<<"Created "<<4+examples.size()<<" meeting_*.png files, one plot per image.\n";
 }
