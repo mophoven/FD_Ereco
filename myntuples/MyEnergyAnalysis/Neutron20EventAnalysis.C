@@ -63,23 +63,24 @@ void Neutron20EventAnalysis(const char *fileName, int maxEvents=20) {
   std::vector<Neutron>ns;for(int id:ids)if(bestByEvent.count(id))ns.push_back(bestByEvent[id]);
   if(ns.empty()){std::cout<<"No escaping neutrons in selected events.\n";return;}
   gStyle->SetOptStat(0);gStyle->SetTitleSize(.045,"XY");gStyle->SetLabelSize(.038,"XY");
+  gStyle->SetTitleOffset(1.35,"Y");gStyle->SetTitleOffset(1.15,"X");
 
   int n=ns.size();double ymax=0;
   auto*hb=new TH1D("hb","Highest-energy escaping neutron per event;Event;Kinetic energy [GeV]",n,.5,n+.5);
   auto*he=new TH1D("he","",n,.5,n+.5);
   for(int i=0;i<n;++i){hb->SetBinContent(i+1,ns[i].birth);he->SetBinContent(i+1,ns[i].exit);hb->GetXaxis()->SetBinLabel(i+1,Form("%d",ns[i].event));ymax=std::max(ymax,ns[i].birth);}
   hb->SetMinimum(0);hb->SetMaximum(1.18*ymax);hb->SetMarkerStyle(20);hb->SetMarkerSize(1.3);hb->SetMarkerColor(kBlue+1);he->SetMarkerStyle(21);he->SetMarkerSize(1.3);he->SetMarkerColor(kOrange+7);
-  auto*c1=new TCanvas("cSummary","Summary",1250,750);c1->SetGridy();c1->SetBottomMargin(.12);hb->Draw("P");he->Draw("P SAME");
+  auto*c1=new TCanvas("cSummary","Summary",1250,750);c1->SetGridy();c1->SetLeftMargin(.16);c1->SetRightMargin(.04);c1->SetBottomMargin(.15);hb->Draw("P");he->Draw("P SAME");
   auto*leg=new TLegend(.68,.76,.89,.89);leg->SetBorderSize(0);leg->AddEntry(hb,"Birth KE","p");leg->AddEntry(he,"Exit KE","p");leg->Draw();c1->SaveAs("meeting_highest_escaping_neutron_per_event.png");
 
   auto*hl=new TH1D("hl","Energy lost by highest-energy escaping neutron;Event;Birth KE - exit KE [MeV]",n,.5,n+.5);
   for(int i=0;i<n;++i){hl->SetBinContent(i+1,1000*(ns[i].birth-ns[i].exit));hl->GetXaxis()->SetBinLabel(i+1,Form("%d",ns[i].event));}
-  hl->SetFillColor(kAzure-9);hl->SetLineColor(kBlue+2);hl->SetLineWidth(2);auto*c2=new TCanvas("cLoss","Energy loss",1250,750);c2->SetGridy();c2->SetBottomMargin(.12);hl->Draw("HIST");c2->SaveAs("meeting_escaping_neutron_energy_loss.png");
+  hl->SetFillColor(kAzure-9);hl->SetLineColor(kBlue+2);hl->SetLineWidth(2);auto*c2=new TCanvas("cLoss","Energy loss",1250,750);c2->SetGridy();c2->SetLeftMargin(.16);c2->SetRightMargin(.04);c2->SetBottomMargin(.15);hl->Draw("HIST");c2->SaveAs("meeting_escaping_neutron_energy_loss.png");
 
   std::vector<Neutron>examples=ns;std::sort(examples.begin(),examples.end(),[](const Neutron&a,const Neutron&b){return a.birth>b.birth;});if(examples.size()>3)examples.resize(3);
   Color_t colors[]={kBlue+1,kRed+1,kGreen+2};
   for(size_t i=0;i<examples.size();++i){
-    auto*c3=new TCanvas(Form("cSteps%zu",i),"Representative history",900,700);c3->SetGrid();
+    auto*c3=new TCanvas(Form("cSteps%zu",i),"Representative history",900,700);c3->SetGrid();c3->SetLeftMargin(.18);c3->SetRightMargin(.04);c3->SetBottomMargin(.17);
     auto h=history(examples[i],steps);auto*g=makeGraph(h,colors[i]);
     g->SetMinimum(0);g->SetMaximum(1.12*(*std::max_element(h.begin(),h.end())));
     g->SetTitle(Form("Event %d, track %d;Recorded point: birth #rightarrow interactions #rightarrow exit;Neutron KE [GeV]",examples[i].event,examples[i].track));g->Draw("ALP");
@@ -87,10 +88,10 @@ void Neutron20EventAnalysis(const char *fileName, int maxEvents=20) {
   }
 
   const Neutron&best=examples.front();auto h=history(best,steps);auto range=std::minmax_element(h.begin(),h.end());double span=*range.second-*range.first;double padding=span>0?.1*span:std::max(.001,.05*std::abs(*range.first));
-  auto*c4full=new TCanvas("cFull","Full scale",900,700);c4full->SetGrid();auto*full=makeGraph(h,kOrange+1);
+  auto*c4full=new TCanvas("cFull","Full scale",900,700);c4full->SetGrid();c4full->SetLeftMargin(.18);c4full->SetRightMargin(.04);c4full->SetBottomMargin(.16);auto*full=makeGraph(h,kOrange+1);
   full->SetMinimum(0);full->SetMaximum(1.1*(*range.second));full->SetTitle(Form("Full scale: event %d, track %d;Recorded point;Neutron KE [GeV]",best.event,best.track));full->Draw("ALP");
   c4full->SaveAs("meeting_highest_escaping_neutron_full_scale.png");
-  auto*c4zoom=new TCanvas("cZoom","Zoomed energy change",900,700);c4zoom->SetGrid();auto*zoom=makeGraph(h,kOrange+1);
+  auto*c4zoom=new TCanvas("cZoom","Zoomed energy change",900,700);c4zoom->SetGrid();c4zoom->SetLeftMargin(.18);c4zoom->SetRightMargin(.04);c4zoom->SetBottomMargin(.16);auto*zoom=makeGraph(h,kOrange+1);
   zoom->SetMinimum(std::max(0.,*range.first-padding));zoom->SetMaximum(*range.second+padding);zoom->SetTitle(Form("Zoomed energy change: event %d, track %d;Recorded point;Neutron KE [GeV]",best.event,best.track));zoom->Draw("ALP");
   c4zoom->SaveAs("meeting_highest_escaping_neutron_zoom.png");
 
