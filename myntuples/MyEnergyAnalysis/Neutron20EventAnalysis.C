@@ -91,8 +91,9 @@ void Neutron20EventAnalysis(const char *fileName, int maxEvents=20) {
   auto*c4full=new TCanvas("cFull","Full scale",900,700);c4full->SetGrid();c4full->SetLeftMargin(.18);c4full->SetRightMargin(.04);c4full->SetBottomMargin(.16);auto*full=makeGraph(h,kOrange+1);
   full->SetMinimum(0);full->SetMaximum(1.1*(*range.second));full->SetTitle(Form("Full scale: event %d, track %d;Recorded point;Neutron KE [GeV]",best.event,best.track));full->Draw("ALP");
   c4full->SaveAs("meeting_highest_escaping_neutron_full_scale.png");
-  auto*c4zoom=new TCanvas("cZoom","Zoomed energy change",900,700);c4zoom->SetGrid();c4zoom->SetLeftMargin(.18);c4zoom->SetRightMargin(.04);c4zoom->SetBottomMargin(.16);auto*zoom=makeGraph(h,kOrange+1);
+  auto*c4zoom=new TCanvas("cZoom","Zoomed energy change",900,700);c4zoom->SetGrid();c4zoom->SetLeftMargin(.25);c4zoom->SetRightMargin(.04);c4zoom->SetBottomMargin(.16);auto*zoom=makeGraph(h,kOrange+1);
   zoom->SetMinimum(std::max(0.,*range.first-padding));zoom->SetMaximum(*range.second+padding);zoom->SetTitle(Form("Zoomed energy change: event %d, track %d;Recorded point;Neutron KE [GeV]",best.event,best.track));zoom->Draw("ALP");
+  zoom->GetYaxis()->SetLabelSize(.032);zoom->GetYaxis()->SetTitleOffset(2.25);c4zoom->Modified();c4zoom->Update();
   c4zoom->SaveAs("meeting_highest_escaping_neutron_zoom.png");
 
   std::cout<<"Selected "<<ids.size()<<" events; "<<ns.size()<<" had an escaping neutron.\n";
