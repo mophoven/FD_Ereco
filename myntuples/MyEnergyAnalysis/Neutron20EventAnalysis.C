@@ -1,179 +1,91 @@
-// ROOT macro for the last two analysis requests in MyEnergyAnalysis_module.cc.
-// Run with:
-//   root -l -q 'Neutron20EventAnalysis.C("your_500_event_file.root",20)'
-
+// Meeting-ready neutron plots. Run with:
+// root -l -b -q 'Neutron20EventAnalysis.C("MiloEnergy_merged_500.root",20)'
 #include <TCanvas.h>
 #include <TDirectory.h>
 #include <TFile.h>
 #include <TGraph.h>
+#include <TH1D.h>
 #include <TKey.h>
 #include <TLegend.h>
-#include <TMultiGraph.h>
+#include <TPad.h>
 #include <TStyle.h>
 #include <TTree.h>
-
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <limits>
 #include <map>
 #include <set>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace {
-TTree *findTree(TDirectory *dir, const char *wanted)
-{
-  if (!dir) return nullptr;
-  if (auto *tree = dynamic_cast<TTree *>(dir->Get(wanted))) return tree;
-  TIter next(dir->GetListOfKeys());
-  while (auto *key = dynamic_cast<TKey *>(next())) {
-    if (std::string(key->GetClassName()).find("TDirectory") == std::string::npos) continue;
-    if (auto *tree = findTree(dynamic_cast<TDirectory *>(key->ReadObj()), wanted)) return tree;
+TTree *findTree(TDirectory *d, const char *name) {
+  if (!d) return nullptr;
+  if (auto *t = dynamic_cast<TTree *>(d->Get(name))) return t;
+  TIter next(d->GetListOfKeys());
+  while (auto *k = dynamic_cast<TKey *>(next())) {
+    if (std::string(k->GetClassName()).find("TDirectory") == std::string::npos) continue;
+    if (auto *t = findTree(dynamic_cast<TDirectory *>(k->ReadObj()), name)) return t;
   }
   return nullptr;
 }
-
-struct Step {
-  double time;
-  double ke;
-};
+struct Step { double time, ke; };
+struct Neutron { int event, track; double birth, exit; };
+std::vector<double> history(const Neutron &n, const std::map<int,std::map<int,std::vector<Step>>> &steps) {
+  std::vector<double> h{n.birth};
+  auto e=steps.find(n.event);
+  if(e!=steps.end()) { auto t=e->second.find(n.track); if(t!=e->second.end()) for(const auto&s:t->second) h.push_back(s.ke); }
+  h.push_back(n.exit); return h;
+}
+TGraph *makeGraph(const std::vector<double>&h, Color_t c) {
+  auto*g=new TGraph(h.size()); for(size_t i=0;i<h.size();++i) g->SetPoint(i,i,h[i]);
+  g->SetLineColor(c); g->SetMarkerColor(c); g->SetLineWidth(3); g->SetMarkerStyle(20); g->SetMarkerSize(1.1); return g;
+}
 }
 
-void Neutron20EventAnalysis(const char *fileName, int maxEvents = 20)
-{
-  TFile input(fileName, "READ");
-  if (input.IsZombie()) {
-    std::cerr << "Cannot open " << fileName << '\n';
-    return;
-  }
+void Neutron20EventAnalysis(const char *fileName, int maxEvents=20) {
+  TFile f(fileName,"READ"); if(f.IsZombie()){std::cerr<<"Cannot open "<<fileName<<'\n';return;}
+  auto*et=findTree(&f,"EventTree"),*vt=findTree(&f,"VertexTree"),*xt=findTree(&f,"EscapeTree");
+  if(!et||!vt||!xt){std::cerr<<"Need EventTree, VertexTree and EscapeTree.\n";return;}
+  int ev=0; et->SetBranchAddress("Event",&ev); std::vector<int>ids; std::set<int>chosen;
+  for(Long64_t i=0;i<et->GetEntries()&&(int)ids.size()<maxEvents;++i){et->GetEntry(i);if(chosen.insert(ev).second)ids.push_back(ev);} et->ResetBranchAddresses();
 
-  TTree *eventTree = findTree(&input, "EventTree");
-  TTree *vertexTree = findTree(&input, "VertexTree");
-  TTree *escapeTree = findTree(&input, "EscapeTree");
-  if (!eventTree || !vertexTree || !escapeTree) {
-    std::cerr << "The file must contain EventTree, VertexTree, and EscapeTree.\n";
-    return;
-  }
+  int ve=0,pdg=0,trk=0; double ke=0,time=0;
+  vt->SetBranchAddress("Event",&ve);vt->SetBranchAddress("In_PDG",&pdg);vt->SetBranchAddress("In_TrackID",&trk);vt->SetBranchAddress("In_KE",&ke);vt->SetBranchAddress("Vtx_t",&time);
+  std::map<int,std::map<int,std::vector<Step>>>steps;
+  for(Long64_t i=0;i<vt->GetEntries();++i){vt->GetEntry(i);if(chosen.count(ve)&&pdg==2112)steps[ve][trk].push_back({time,ke});}
+  for(auto&e:steps)for(auto&t:e.second)std::sort(t.second.begin(),t.second.end(),[](const Step&a,const Step&b){return a.time<b.time;});
 
-  // Select event IDs from the file instead of assuming that they are 0,1,2,...
-  int event = 0;
-  eventTree->SetBranchAddress("Event", &event);
-  std::vector<int> eventIds;
-  std::set<int> selected;
-  for (Long64_t i = 0; i < eventTree->GetEntries() && (int)eventIds.size() < maxEvents; ++i) {
-    eventTree->GetEntry(i);
-    if (selected.insert(event).second) eventIds.push_back(event);
-  }
-  eventTree->ResetBranchAddresses();
-  if (eventIds.empty()) {
-    std::cerr << "No events were found.\n";
-    return;
-  }
+  int xe=0,xtrk=0,xpdg=0;double birth=0,exit=0;
+  xt->SetBranchAddress("Event",&xe);xt->SetBranchAddress("TrackID",&xtrk);xt->SetBranchAddress("PDG",&xpdg);xt->SetBranchAddress("BirthKE",&birth);xt->SetBranchAddress("ExitKE",&exit);
+  std::map<int,Neutron>bestByEvent;
+  for(Long64_t i=0;i<xt->GetEntries();++i){xt->GetEntry(i);if(!chosen.count(xe)||xpdg!=2112)continue;auto old=bestByEvent.find(xe);if(old==bestByEvent.end()||birth>old->second.birth)bestByEvent[xe]={xe,xtrk,birth,exit};}
+  std::vector<Neutron>ns;for(int id:ids)if(bestByEvent.count(id))ns.push_back(bestByEvent[id]);
+  if(ns.empty()){std::cout<<"No escaping neutrons in selected events.\n";return;}
+  gStyle->SetOptStat(0);gStyle->SetTitleSize(.045,"XY");gStyle->SetLabelSize(.038,"XY");
 
-  // Collect incoming neutron KE at each recorded physics-interaction vertex.
-  int vEvent = 0, inPdg = 0, trackId = 0;
-  double inKE = 0.0, vertexTime = 0.0;
-  vertexTree->SetBranchAddress("Event", &vEvent);
-  vertexTree->SetBranchAddress("In_PDG", &inPdg);
-  vertexTree->SetBranchAddress("In_TrackID", &trackId);
-  vertexTree->SetBranchAddress("In_KE", &inKE);
-  vertexTree->SetBranchAddress("Vtx_t", &vertexTime);
+  int n=ns.size();double ymax=0;
+  auto*hb=new TH1D("hb","Highest-energy escaping neutron per event;Event;Kinetic energy [GeV]",n,.5,n+.5);
+  auto*he=new TH1D("he","",n,.5,n+.5);
+  for(int i=0;i<n;++i){hb->SetBinContent(i+1,ns[i].birth);he->SetBinContent(i+1,ns[i].exit);hb->GetXaxis()->SetBinLabel(i+1,Form("%d",ns[i].event));ymax=std::max(ymax,ns[i].birth);}
+  hb->SetMinimum(0);hb->SetMaximum(1.18*ymax);hb->SetMarkerStyle(20);hb->SetMarkerSize(1.3);hb->SetMarkerColor(kBlue+1);he->SetMarkerStyle(21);he->SetMarkerSize(1.3);he->SetMarkerColor(kOrange+7);
+  auto*c1=new TCanvas("cSummary","Summary",1250,750);c1->SetGridy();c1->SetBottomMargin(.12);hb->Draw("P");he->Draw("P SAME");
+  auto*leg=new TLegend(.68,.76,.89,.89);leg->SetBorderSize(0);leg->AddEntry(hb,"Birth KE","p");leg->AddEntry(he,"Exit KE","p");leg->Draw();c1->SaveAs("meeting_highest_escaping_neutron_per_event.png");
 
-  std::map<int, std::map<int, std::vector<Step>>> steps;
-  for (Long64_t i = 0; i < vertexTree->GetEntries(); ++i) {
-    vertexTree->GetEntry(i);
-    if (!selected.count(vEvent) || inPdg != 2112) continue;
-    steps[vEvent][trackId].push_back({vertexTime, inKE});
-  }
-  for (auto &[ev, tracks] : steps)
-    for (auto &[trk, values] : tracks)
-      std::sort(values.begin(), values.end(), [](const Step &a, const Step &b) { return a.time < b.time; });
+  auto*hl=new TH1D("hl","Energy lost by highest-energy escaping neutron;Event;Birth KE - exit KE [MeV]",n,.5,n+.5);
+  for(int i=0;i<n;++i){hl->SetBinContent(i+1,1000*(ns[i].birth-ns[i].exit));hl->GetXaxis()->SetBinLabel(i+1,Form("%d",ns[i].event));}
+  hl->SetFillColor(kAzure-9);hl->SetLineColor(kBlue+2);hl->SetLineWidth(2);auto*c2=new TCanvas("cLoss","Energy loss",1250,750);c2->SetGridy();c2->SetBottomMargin(.12);hl->Draw("HIST");c2->SaveAs("meeting_escaping_neutron_energy_loss.png");
 
-  gStyle->SetOptStat(0);
-  auto *allCanvas = new TCanvas("cNeutron20Events", "Neutron energy at each interaction", 1800, 1200);
-  allCanvas->Divide(4, 5, 0.002, 0.002);
-  const int colors[] = {kBlue+1, kRed+1, kGreen+2, kMagenta+1, kOrange+7, kCyan+2, kViolet, kGray+2};
-  for (size_t pad = 0; pad < eventIds.size(); ++pad) {
-    allCanvas->cd(pad + 1);
-    auto *multi = new TMultiGraph();
-    int color = 0;
-    for (const auto &[trk, values] : steps[eventIds[pad]]) {
-      if (values.empty()) continue;
-      auto *graph = new TGraph(values.size());
-      for (size_t s = 0; s < values.size(); ++s) graph->SetPoint(s, s + 1, values[s].ke);
-      graph->SetLineColor(colors[color % 8]);
-      graph->SetMarkerColor(colors[color % 8]);
-      graph->SetMarkerStyle(20 + color % 5);
-      graph->SetTitle(Form("track %d", trk));
-      multi->Add(graph, "LP");
-      ++color;
-    }
-    multi->SetTitle(Form("Event %d;recorded interaction step;incoming neutron KE [GeV]", eventIds[pad]));
-    multi->Draw("A");
-    if (color) gPad->BuildLegend(0.58, 0.68, 0.88, 0.88, "neutron tracks");
-  }
-  allCanvas->SaveAs("neutron_energy_steps_first20.png");
-  allCanvas->SaveAs("neutron_energy_steps_first20.pdf");
+  std::vector<Neutron>examples=ns;std::sort(examples.begin(),examples.end(),[](const Neutron&a,const Neutron&b){return a.birth>b.birth;});if(examples.size()>3)examples.resize(3);
+  Color_t colors[]={kBlue+1,kRed+1,kGreen+2};auto*c3=new TCanvas("cSteps","Representative histories",1500,520);c3->Divide(examples.size(),1,.015,.015);
+  for(size_t i=0;i<examples.size();++i){c3->cd(i+1);gPad->SetGrid();auto h=history(examples[i],steps);auto*g=makeGraph(h,colors[i]);g->SetMinimum(0);g->SetMaximum(1.12*(*std::max_element(h.begin(),h.end())));g->SetTitle(Form("Event %d, track %d;Recorded point: birth #rightarrow interactions #rightarrow exit;Neutron KE [GeV]",examples[i].event,examples[i].track));g->Draw("ALP");}
+  c3->SaveAs("meeting_representative_neutron_steps.png");
 
-  // Find the highest-birth-energy escaping neutron among those same events.
-  int xEvent = 0, xTrack = 0, xPdg = 0;
-  double birthKE = 0.0, exitKE = 0.0;
-  escapeTree->SetBranchAddress("Event", &xEvent);
-  escapeTree->SetBranchAddress("TrackID", &xTrack);
-  escapeTree->SetBranchAddress("PDG", &xPdg);
-  escapeTree->SetBranchAddress("BirthKE", &birthKE);
-  escapeTree->SetBranchAddress("ExitKE", &exitKE);
-  double bestBirth = -1.0, bestExit = 0.0;
-  int bestEvent = -1, bestTrack = -1;
-  for (Long64_t i = 0; i < escapeTree->GetEntries(); ++i) {
-    escapeTree->GetEntry(i);
-    if (!selected.count(xEvent) || xPdg != 2112 || birthKE <= bestBirth) continue;
-    bestBirth = birthKE;
-    bestExit = exitKE;
-    bestEvent = xEvent;
-    bestTrack = xTrack;
-  }
-  if (bestTrack < 0) {
-    std::cout << "No escaping neutron was found in the selected events.\n";
-    return;
-  }
+  const Neutron&best=examples.front();auto h=history(best,steps);auto range=std::minmax_element(h.begin(),h.end());double span=*range.second-*range.first;double padding=span>0?.1*span:std::max(.001,.05*std::abs(*range.first));
+  auto*c4=new TCanvas("cZoom","Full and zoom",1400,650);c4->Divide(2,1);c4->cd(1);gPad->SetGrid();auto*full=makeGraph(h,kOrange+1);full->SetMinimum(0);full->SetMaximum(1.1*(*range.second));full->SetTitle(Form("Full scale: event %d, track %d;Recorded point;Neutron KE [GeV]",best.event,best.track));full->Draw("ALP");
+  c4->cd(2);gPad->SetGrid();auto*zoom=makeGraph(h,kOrange+1);zoom->SetMinimum(std::max(0.,*range.first-padding));zoom->SetMaximum(*range.second+padding);zoom->SetTitle("Zoomed energy change;Recorded point;Neutron KE [GeV]");zoom->Draw("ALP");c4->SaveAs("meeting_highest_escaping_neutron_full_and_zoom.png");
 
-  std::vector<double> history{bestBirth};
-  for (const Step &s : steps[bestEvent][bestTrack]) history.push_back(s.ke);
-  history.push_back(bestExit);
-  auto makeGraph = [&history]() {
-    auto *g = new TGraph(history.size());
-    for (size_t i = 0; i < history.size(); ++i) g->SetPoint(i, i, history[i]);
-    g->SetLineColor(kYellow+1);
-    g->SetMarkerColor(kYellow+1);
-    g->SetLineWidth(3);
-    g->SetMarkerStyle(20);
-    return g;
-  };
-
-  auto *zoomCanvas = new TCanvas("cHighestEscapingNeutron", "Highest-energy escaping neutron", 1400, 650);
-  zoomCanvas->Divide(2, 1);
-  zoomCanvas->cd(1);
-  auto *full = makeGraph();
-  full->SetTitle(Form("Highest-energy escaping neutron: event %d, track %d;birth / interaction / exit point;KE [GeV]", bestEvent, bestTrack));
-  full->Draw("ALP");
-
-  zoomCanvas->cd(2);
-  auto *zoom = makeGraph();
-  const auto range = std::minmax_element(history.begin(), history.end());
-  double span = *range.second - *range.first;
-  double padding = (span > 0.0) ? 0.10 * span : std::max(0.01, 0.05 * std::abs(*range.first));
-  zoom->SetMinimum(std::max(0.0, *range.first - padding));
-  zoom->SetMaximum(*range.second + padding);
-  zoom->SetTitle("Zoom on yellow curve;birth / interaction / exit point;KE [GeV]");
-  zoom->Draw("ALP");
-  zoomCanvas->SaveAs("highest_energy_escaping_neutron_zoom.png");
-  zoomCanvas->SaveAs("highest_energy_escaping_neutron_zoom.pdf");
-
-  std::cout << "Selected " << eventIds.size() << " events. Highest escaping neutron: event "
-            << bestEvent << ", track " << bestTrack << ", birth KE " << bestBirth
-            << " GeV, exit/loss energy " << bestExit << " GeV.\n";
-  std::cout << "Created neutron_energy_steps_first20.* and highest_energy_escaping_neutron_zoom.*\n";
+  std::cout<<"Selected "<<ids.size()<<" events; "<<ns.size()<<" had an escaping neutron.\n";
+  std::cout<<"Highest: event "<<best.event<<", track "<<best.track<<", birth "<<best.birth<<" GeV, exit "<<best.exit<<" GeV, loss "<<1000*(best.birth-best.exit)<<" MeV.\n";
+  std::cout<<"Created four meeting_*.png plots.\n";
 }
