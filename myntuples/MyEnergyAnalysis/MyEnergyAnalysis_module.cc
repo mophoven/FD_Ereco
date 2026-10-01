@@ -34,7 +34,7 @@
  *     (a muon that escapes and decays outside already had its energy counted as
  *     charged escape; its decay neutrinos must not be double counted).
  *
- * @author (rework) — building on W. Shi's original; original adapted from
+ * @author Milo Ophoven(rework) — building on W. Shi's original; original adapted from
  *         the LArSoft AnalysisExample.
  */
 
@@ -304,6 +304,9 @@ namespace {
     }
   }
 
+  // Registry of PDG codes that missed the mass table, with hit counts. Printed at
+  // endJob so you can see exactly what (if anything) is falling back, and add the
+  // common ones to getMassFromPDG for exact masses if you want.
   std::map<int, long>& missingMassRegistry() { static std::map<int, long> m; return m; }
 
   // Robust particle mass (GeV). Source priority:
@@ -332,6 +335,16 @@ namespace {
   inline double pointKE(const simb::MCParticle& p, unsigned int i)
   { return p.Momentum(i).E() - p.Mass(); }
 
+  // ------------------------------------------------------------------
+  //  Incoming KE entering an interaction vertex.
+  //
+  //  CRITICAL: Geant4 zeroes the momentum at a particle's FINAL trajectory point
+  //  when it interacts (verified on event 1061/1/1: the primary neutron's last
+  //  point has KE ~ 0 even though it carried 38 MeV one step earlier). So the
+  //  pre-interaction KE is the point *before* the vertex point, not at it.
+  //  We take the max KE over {iv-1, iv} for robustness against that zeroing and
+  //  against mid-track (elastic) vertices.
+  // ------------------------------------------------------------------
   double incomingKEAtVertex(const simb::MCParticle& p,
                             double vx, double vy, double vz)
   {
@@ -401,6 +414,25 @@ public:
       Name("FiducialInset"),
       Comment("cm to shrink the active volume by for the vertex fiducial cut (0 = use active bounds)"),
       0.0 };
+
+    fhicl::Atom<double> EdgeMargin {
+      Name("EdgeMargin"),
+      Comment("cm — edge shell thickness for the containment veto"),
+      30.0 };
+    fhicl::Atom<double> EdgeEThreshold {
+      Name("EdgeEThreshold"),
+      Comment("GeV — veto the event if more than this is deposited in the edge shell"),
+      0.030 };
+    fhicl::Atom<bool> DropUncontained {
+      Name("DropUncontained"),
+      Comment("if true, uncontained events are dropped entirely (no tree fills); "
+              "if false, they are kept and flagged via the Contained branch"),
+      false };
+    fhicl::Atom<bool> SaveTrajectories {
+      Name("SaveTrajectories"),
+      Comment("if true, write TrajectoryTree with every trajectory point of every "
+              "MCParticle (LARGE output — off by default, enable per-request)"),
+      false };
   };
   using Parameters = art::EDAnalyzer::Table<Config>;
 
@@ -414,6 +446,34 @@ private:
     return x > fXmin && x < fXmax && y > fYmin && y < fYmax && z > fZmin && z < fZmax;
   }
   bool inside(const TLorentzVector& p) const { return inside(p.X(), p.Y(), p.Z()); }
+
+  // --- observable-topology helpers (Phase 1: truth-level proxies for reco quantities) ---
+  // How a real detector would classify a primary from dE/dx, length and topology. Keyed on
+  // PDG here; swap for Pandora/reco PID later and the topology key construction is unchanged.
+  enum PidClass { kInvisible = 0, kMuon, kElectron, kProton, kPion, kShower };
+  PidClass pidClassOf(int pdg) const {
+    int a = std::abs(pdg);
+    if (a == 13)              return kMuon;      // long MIP track, Michel electron at the end
+    if (a == 11)              return kElectron;  // EM shower (the CC nu_e lepton, or a stray e)
+    if (a == 2212)            return kProton;    // short, high dE/dx, Bragg peak
+    if (a == 211 || a == 321) return kPion;      // charged-meson MIP track
+    if (a == 22 || a == 111)  return kShower;    // photon / pi0 -> EM shower(s)
+    return kInvisible;                           // neutron, neutrino, nucleus, sub-threshold
+  }
+  const char* pidName(PidClass c) const {
+    switch (c) { case kMuon: return "mu"; case kElectron: return "e"; case kProton: return "p";
+                 case kPion: return "pi"; case kShower: return "sh"; default: return "inv"; }
+  }
+  // Trajectory arc length in cm — proxy for reconstructed track length / range.
+  double trackLength(const simb::MCParticle& p) const {
+    double L = 0.0;
+    unsigned int n = p.NumberTrajectoryPoints();
+    for (unsigned int i = 1; i < n; ++i) {
+      double dx = p.Vx(i) - p.Vx(i - 1), dy = p.Vy(i) - p.Vy(i - 1), dz = p.Vz(i) - p.Vz(i - 1);
+      L += std::sqrt(dx * dx + dy * dy + dz * dz);
+    }
+    return L;
+  }
 
   // Walk to the GENIE-primary ancestor and return its PDG (memoized).
   int rootPrimaryPDG(int trackID);
@@ -460,8 +520,48 @@ private:
   double fE_neutrino_inside;
   double fE_residual;
   double fEscapeFrac;   // (E_escape_charged + E_escape_neutral) / E_nu — containment flag
+  // Edge-veto containment cut: energy deposited within fEdgeMargin of any active-volume
+  // face. Standard fiducial-style veto — if more than fEdgeEThresh lands in that shell the
+  // event is not contained. Stored as a flag (EdgeE + Contained) so the analysis applies
+  // the cut offline and can vary the threshold, consistent with EscapeFrac.
+  double fEdgeE;        // GeV deposited within fEdgeMargin of the boundary
+  bool   fContained;    // fEdgeE < fEdgeEThresh
+  double fEdgeMargin;   // cm  — shell thickness at the detector edge (fhicl)
+  double fEdgeEThresh;  // GeV — veto threshold (fhicl)
+  bool   fDropUncontained;  // if true, uncontained events are dropped entirely (fhicl)
   int    fN_michel_inside;
   double fMichel_nu_E;
+
+  // EventTree: observable interaction topology (Phase 1 of the reconstructible channel key).
+  // Flavor-inclusive (mu or e lepton), CC only; NC events get "NC" and empty counts.
+  std::string fTopology;                 // e.g. "cont.mu.0pi.1p.0sh"
+  int         fTopo_lepton;              // 13 (mu), 11 (e), or 0 (none)
+  bool        fTopo_contained;           // no visible primary track exits the active volume
+  int         fTopo_nPi, fTopo_nP, fTopo_nShower, fTopo_nTrack;
+
+  // PrimaryTree: one row per visible primary (the observable-object list feeding the key)
+  TTree*      fPrimaryTree = nullptr;
+  int         fPr_event, fPr_pdg;
+  double      fPr_KE, fPr_length;
+  bool        fPr_contained, fPr_isLepton;
+  std::string fPr_pidclass;
+
+  // VertexMissTree: one row per interesting vertex — observable key + missing energy
+  // (ledger binding + attributed escape). Summed per event it reproduces binding + escape.
+  TTree*      fVertexMissTree = nullptr;
+  int         fVM_event, fVM_vid, fVM_in_pdg, fVM_nP, fVM_nPi, fVM_nSh, fVM_ccnc;
+  bool        fVM_inside, fVM_contained;
+  double      fVM_x, fVM_y, fVM_z, fVM_binding, fVM_escape, fVM_missing, fVM_nu_E;
+  std::string fVM_key, fVM_in_class;
+
+  // TrajectoryTree: one row per MCParticle, full trajectory stored as vectors.
+  // fhicl SaveTrajectories (off by default — this is LARGE). Positions cm, time ns,
+  // momenta/energy GeV. Requested by group for track-level studies.
+  bool        fSaveTrajectories;
+  TTree*      fTrajTree = nullptr;
+  int         fTr_event, fTr_run, fTr_subrun, fTr_trackid, fTr_pdg, fTr_mother, fTr_npts;
+  std::string fTr_process, fTr_endprocess;
+  std::vector<double> fTr_x, fTr_y, fTr_z, fTr_t, fTr_px, fTr_py, fTr_pz, fTr_E;
 
   // VertexTree branches
   int         fV_event;
@@ -500,6 +600,10 @@ MyEnergyAnalysis::MyEnergyAnalysis(Parameters const& c)
   , fZmin(c().ActiveZmin()), fZmax(c().ActiveZmax())
   , fSelectCC(c().SelectCC())
   , fFidInset(c().FiducialInset())
+  , fEdgeMargin(c().EdgeMargin())
+  , fEdgeEThresh(c().EdgeEThreshold())
+  , fDropUncontained(c().DropUncontained())
+  , fSaveTrajectories(c().SaveTrajectories())
 {
   fGeom = &*art::ServiceHandle<geo::Geometry>();
   consumes<std::vector<simb::MCTruth>>(fGenLabel);
@@ -510,6 +614,9 @@ MyEnergyAnalysis::MyEnergyAnalysis(Parameters const& c)
 // ----------------------------------------------------------------------------
 void MyEnergyAnalysis::beginJob()
 {
+  // Print geometry dimensions for cross-checking the fhicl bounds. These are
+  // per-TPC quantities, not the whole-detector envelope, so use them only as a
+  // sanity reference — the active-volume bounds actually used are the fhicl ones.
   mf::LogInfo("MyEnergyAnalysis")
     << "Active-volume bounds in use (cm): "
     << "x[" << fXmin << "," << fXmax << "] "
@@ -552,8 +659,17 @@ void MyEnergyAnalysis::beginJob()
   fEventTree->Branch("E_neutrino_inside", &fE_neutrino_inside);
   fEventTree->Branch("E_residual", &fE_residual);
   fEventTree->Branch("EscapeFrac", &fEscapeFrac);
+  fEventTree->Branch("EdgeE", &fEdgeE);          // GeV deposited in the edge shell
+  fEventTree->Branch("Contained", &fContained);  // passed the edge-veto containment cut
   fEventTree->Branch("N_michel_inside", &fN_michel_inside);
   fEventTree->Branch("Michel_nu_E", &fMichel_nu_E);
+  fEventTree->Branch("Topology", &fTopology);
+  fEventTree->Branch("Topo_lepton", &fTopo_lepton);
+  fEventTree->Branch("Topo_contained", &fTopo_contained);
+  fEventTree->Branch("Topo_nPi", &fTopo_nPi);
+  fEventTree->Branch("Topo_nP", &fTopo_nP);
+  fEventTree->Branch("Topo_nShower", &fTopo_nShower);
+  fEventTree->Branch("Topo_nTrack", &fTopo_nTrack);
 
   // ---- VertexTree ----
   fVertexTree = tfs->make<TTree>("VertexTree", "per-interaction-vertex channels");
@@ -600,12 +716,70 @@ void MyEnergyAnalysis::beginJob()
   fEscapeTree->Branch("EndProcess", &fX_endProcess);
   fEscapeTree->Branch("BirthChannel", &fX_birthChannel);
   fEscapeTree->Branch("Charged", &fX_charged);
+
+  // ---- PrimaryTree ----  one row per visible primary (the reconstructible-object list)
+  fPrimaryTree = tfs->make<TTree>("PrimaryTree", "per-primary observable objects");
+  fPrimaryTree->Branch("Event", &fPr_event);
+  fPrimaryTree->Branch("PDG", &fPr_pdg);
+  fPrimaryTree->Branch("KE", &fPr_KE);            // GeV
+  fPrimaryTree->Branch("Length", &fPr_length);    // cm, trajectory arc length
+  fPrimaryTree->Branch("Contained", &fPr_contained);
+  fPrimaryTree->Branch("IsLepton", &fPr_isLepton);
+  fPrimaryTree->Branch("PidClass", &fPr_pidclass);
+
+  // ---- VertexMissTree ----  observable-keyed per-vertex missing energy
+  fVertexMissTree = tfs->make<TTree>("VertexMissTree", "per-vertex missing energy, observable key");
+  fVertexMissTree->Branch("Event", &fVM_event);
+  fVertexMissTree->Branch("VertexId", &fVM_vid);
+  fVertexMissTree->Branch("Key", &fVM_key);              // e.g. "n->2p.0pi.0sh"
+  fVertexMissTree->Branch("In_PDG", &fVM_in_pdg);
+  fVertexMissTree->Branch("In_class", &fVM_in_class);    // observable incoming class (n if invisible)
+  fVertexMissTree->Branch("nP", &fVM_nP);
+  fVertexMissTree->Branch("nPi", &fVM_nPi);
+  fVertexMissTree->Branch("nShower", &fVM_nSh);
+  fVertexMissTree->Branch("Inside", &fVM_inside);
+  fVertexMissTree->Branch("X", &fVM_x);
+  fVertexMissTree->Branch("Y", &fVM_y);
+  fVertexMissTree->Branch("Z", &fVM_z);
+  fVertexMissTree->Branch("E_binding", &fVM_binding);    // ledger binding at this vertex (GeV)
+  fVertexMissTree->Branch("E_escape", &fVM_escape);      // escaped energy of this vertex's products
+  fVertexMissTree->Branch("E_missing", &fVM_missing);    // binding + escape (GeV)
+  fVertexMissTree->Branch("CCNC", &fVM_ccnc);            // event CC/NC, for filtering
+  fVertexMissTree->Branch("Contained", &fVM_contained);  // event passed the containment cut
+  fVertexMissTree->Branch("Gen_nu_E", &fVM_nu_E);        // event neutrino energy, for normalization
+
+  // ---- TrajectoryTree ----  one row per MCParticle, full trajectory as vectors.
+  // Only created when fhicl SaveTrajectories is true (large output).
+  if (fSaveTrajectories) {
+    fTrajTree = tfs->make<TTree>("TrajectoryTree", "all trajectory points of all particles");
+    fTrajTree->Branch("Event", &fTr_event);
+    fTrajTree->Branch("Run", &fTr_run);
+    fTrajTree->Branch("SubRun", &fTr_subrun);
+    fTrajTree->Branch("TrackID", &fTr_trackid);
+    fTrajTree->Branch("PDG", &fTr_pdg);
+    fTrajTree->Branch("Mother", &fTr_mother);
+    fTrajTree->Branch("Process", &fTr_process);
+    fTrajTree->Branch("EndProcess", &fTr_endprocess);
+    fTrajTree->Branch("nPts", &fTr_npts);
+    fTrajTree->Branch("X", &fTr_x);     // cm
+    fTrajTree->Branch("Y", &fTr_y);
+    fTrajTree->Branch("Z", &fTr_z);
+    fTrajTree->Branch("T", &fTr_t);     // ns
+    fTrajTree->Branch("Px", &fTr_px);   // GeV
+    fTrajTree->Branch("Py", &fTr_py);
+    fTrajTree->Branch("Pz", &fTr_pz);
+    fTrajTree->Branch("E", &fTr_E);     // GeV (total energy at each point)
+  }
 }
 
 // ----------------------------------------------------------------------------
 void MyEnergyAnalysis::endJob()
 {
-
+  // Deposits occur only in active argon, so their min/max over the job is a
+  // direct, geometry-API-free measurement of the active volume. Compare it to the
+  // escape bounds you configured — they should match. If the deposits extend
+  // beyond your bounds, escape fires too early; if your bounds extend beyond the
+  // deposits, escape fires too late.
   if (fDepCount > 0) {
     mf::LogInfo("MyEnergyAnalysis")
       << "SimEnergyDeposit spatial extent over the job (" << fDepCount << " deposits):\n"
@@ -629,6 +803,8 @@ void MyEnergyAnalysis::endJob()
     << "Fiducial cut (inset " << fFidInset << " cm): skipped " << fNskippedFid
     << " events with vertex outside the active volume.";
 
+  // Report any PDG codes that missed the mass table (used a fallback). Add the
+  // common ones to getMassFromPDG if you want exact masses for them.
   auto const& miss = missingMassRegistry();
   if (!miss.empty()) {
     std::ostringstream os;
@@ -688,6 +864,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
   fNuVtxX = fNuVtxY = fNuVtxZ = -9999; fLep_PDG = 0; fLep_E = 0;
   fE_dep_total = 0; fE_dep_mu = fE_dep_p = fE_dep_n = fE_dep_pi = 0;
   fE_dep_em = fE_dep_nuc = fE_dep_other = 0;
+  fEdgeE = 0; fContained = true;
   fE_binding_total = 0; fE_escape_neutral = 0; fE_escape_charged = 0;
   fE_neutrino_inside = 0; fE_residual = 0;
   fN_michel_inside = 0; fMichel_nu_E = 0;
@@ -697,6 +874,21 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
   // read in stage 5 so each escaping track can be attributed to its production
   // interaction. Empty for tracks not born at an interesting vertex.
   std::map<int, std::string> birthChannel;
+
+  // Per-vertex observable records, for the reconstructible per-vertex missing-energy table.
+  // Each interesting vertex gets a unique id; escaping products are stamped with it in
+  // stage 5 so their lost energy is attributed back to the vertex that made them. The
+  // per-vertex missing energy = ledger binding + attributed escape; summed over an event's
+  // vertices it reproduces the event's missing energy (minus the sub-threshold residual).
+  struct VtxObs {
+    int vid; double x, y, z; bool inside;
+    std::string key, in_class; int in_pdg, nP, nPi, nSh;
+    double binding;
+  };
+  std::vector<VtxObs>   vtxObs;
+  std::map<int, int>    birthVertexId;    // trackID -> vertex id
+  std::map<int, double> escapeByVertex;   // vertex id -> summed escaped energy of its products
+  int vtxCounter = 0;
 
   // ---- (1) generator truth ----
   art::Handle<std::vector<simb::MCTruth>> mcth;
@@ -747,6 +939,32 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
   std::map<int, std::vector<int>> children;
   for (auto const& p : *ph) children[p.Mother()].push_back(p.TrackId());
 
+  // ---- (2.5) full trajectories of every particle (fhicl SaveTrajectories; LARGE) ----
+  // One row per MCParticle; each spatial/kinematic quantity is a vector over the
+  // particle's trajectory points. Written only when SaveTrajectories is set.
+  if (fSaveTrajectories && fTrajTree) {
+    for (auto const& p : *ph) {
+      const unsigned int npts = p.NumberTrajectoryPoints();
+      fTr_event = fEvent; fTr_run = fRun; fTr_subrun = fSubRun;
+      fTr_trackid = p.TrackId(); fTr_pdg = p.PdgCode(); fTr_mother = p.Mother();
+      fTr_process = p.Process(); fTr_endprocess = p.EndProcess();
+      fTr_npts = (int)npts;
+      fTr_x.clear();  fTr_y.clear();  fTr_z.clear();  fTr_t.clear();
+      fTr_px.clear(); fTr_py.clear(); fTr_pz.clear(); fTr_E.clear();
+      fTr_x.reserve(npts);  fTr_y.reserve(npts);  fTr_z.reserve(npts);  fTr_t.reserve(npts);
+      fTr_px.reserve(npts); fTr_py.reserve(npts); fTr_pz.reserve(npts); fTr_E.reserve(npts);
+      for (unsigned int i = 0; i < npts; ++i) {
+        const TLorentzVector& pos = p.Position(i);
+        const TLorentzVector& mom = p.Momentum(i);
+        fTr_x.push_back(pos.X());  fTr_y.push_back(pos.Y());
+        fTr_z.push_back(pos.Z());  fTr_t.push_back(pos.T());
+        fTr_px.push_back(mom.Px()); fTr_py.push_back(mom.Py());
+        fTr_pz.push_back(mom.Pz()); fTr_E.push_back(mom.E());
+      }
+      fTrajTree->Fill();
+    }
+  }
+
   // ---- (3) deposited (visible) energy from SimEnergyDeposit ----
   // SimEnergyDeposit::Energy() is in MeV; convert to GeV. Deposits exist only in
   // sensitive volumes, so this is already restricted to the active volume.
@@ -761,6 +979,11 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       fDepYmin = std::min(fDepYmin, dy); fDepYmax = std::max(fDepYmax, dy);
       fDepZmin = std::min(fDepZmin, dz); fDepZmax = std::max(fDepZmax, dz);
       ++fDepCount;
+      // edge-veto: energy landing within fEdgeMargin of any active-volume face
+      if (dx < fXmin + fEdgeMargin || dx > fXmax - fEdgeMargin ||
+          dy < fYmin + fEdgeMargin || dy > fYmax - fEdgeMargin ||
+          dz < fZmin + fEdgeMargin || dz > fZmax - fEdgeMargin)
+        fEdgeE += e;
       int prim = rootPrimaryPDG(std::abs(d.TrackID()));
       switch (depositCategory(prim)) {
         case 0: fE_dep_mu  += e; break;
@@ -776,6 +999,90 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
     mf::LogWarning("MyEnergyAnalysis")
       << "SimEnergyDeposit '" << fEdepLabel.encode()
       << "' not found — E_dep will be 0. Fix the label (see header).";
+  }
+  fContained = (fEdgeE < fEdgeEThresh);   // edge-veto containment cut
+  if (fDropUncontained && !fContained) return;   // drop entirely (no tree fills this event)
+
+  // ---- (3.5) primary observables + interaction topology (reconstructible channel key) ----
+  // Build the observable-object list (one row per visible primary in PrimaryTree) and
+  // assemble an event-level topology key from quantities a detector can actually measure:
+  // PID class (dE/dx), track length/range, and endpoint containment (position). This is the
+  // reconstructible successor to the truth per-vertex Channel key. Flavor-inclusive
+  // (mu or e lepton); CC only, NC events are labelled "NC" and excluded for now.
+  {
+    const double kThrMIP = 0.030;   // GeV KE — muon/pion tracking threshold
+    const double kThrP   = 0.050;   // GeV KE — proton threshold (short, high dE/dx)
+    const double kThrEM  = 0.030;   // GeV    — EM shower threshold
+    int  nPi = 0, nP = 0, nSh = 0, nTrk = 0, leptonPDG = 0;
+    bool allTracksContained = true, haveLepton = false;
+    // The generator (neutrino) vertex is vertex 0: it makes the primary lepton and primary
+    // hadrons. Its missing energy is the primary escape (dominant term — the muon leaving)
+    // plus generator binding. Reserve its id and stamp every primary with it, so their
+    // escaped energy is attributed back here in stage 5.
+    int genVid = vtxCounter++;
+
+    for (auto const& kv : fPmap) {
+      const simb::MCParticle& p = *kv.second;
+      if (p.Mother() != 0 || p.Process() != "primary") continue;   // GENIE final-state only
+      birthVertexId[p.TrackId()] = genVid;                         // primaries -> generator vertex
+      int pdg = p.PdgCode();
+      if (isNeutrino(pdg) || isNucleus(pdg)) continue;             // invisible / target remnant
+      PidClass cls = pidClassOf(pdg);
+      if (cls == kInvisible) continue;                            // neutron etc. -> no prong
+      double KE  = p.E(0) - p.Mass();                             // GeV
+      double thr = (cls == kProton) ? kThrP : (cls == kShower ? kThrEM : kThrMIP);
+      if (KE < thr) continue;                                     // sub-threshold, not reconstructed
+
+      bool contained = inside(p.EndPosition());
+      bool isTrack   = (cls == kMuon || cls == kPion || cls == kProton);
+      bool isLep     = !haveLepton && (cls == kMuon || cls == kElectron) &&
+                       (std::abs(pdg) == std::abs(fLep_PDG));
+      if (isLep) { haveLepton = true; leptonPDG = std::abs(pdg); }
+
+      fPr_event = fEvent; fPr_pdg = pdg; fPr_KE = KE; fPr_length = trackLength(p);
+      fPr_contained = contained; fPr_isLepton = isLep; fPr_pidclass = pidName(cls);
+      fPrimaryTree->Fill();
+
+      if (isTrack && !contained) allTracksContained = false;
+      if (isTrack) ++nTrk;
+      if (isLep) continue;                       // the CC lepton has its own axis
+      switch (cls) {
+        case kElectron: nSh += 1; break;         // a stray (non-lepton) electron -> shower
+        case kProton:   ++nP;     break;
+        case kPion:     ++nPi;    break;
+        case kShower:   nSh += (std::abs(pdg) == 111 ? 2 : 1); break;  // pi0 -> 2 showers
+        default: break;
+      }
+    }
+
+    fTopo_nP = nP; fTopo_nPi = nPi; fTopo_nShower = nSh; fTopo_nTrack = nTrk;
+    fTopo_contained = allTracksContained;
+    fTopo_lepton = haveLepton ? leptonPDG : 0;
+
+    if (fCCNC != 0) {
+      fTopology = "NC";
+    } else {
+      auto cap = [](int k){ return k > 2 ? 2 : k; };   // 0, 1, 2  (2 means "2 or more")
+      std::string lep = (leptonPDG == 13) ? "mu" : (leptonPDG == 11) ? "e" : "nolep";
+      // containment is now handled by the edge-veto cut (Contained branch), not the key;
+      // Topo_contained is kept as a truth diagnostic but is no longer a key axis.
+      fTopology = lep + "." + std::to_string(cap(nPi)) + "pi." +
+                  std::to_string(cap(nP)) + "p." + std::to_string(cap(nSh)) + "sh";
+    }
+
+    // Generator-vertex record: incoming = neutrino, outgoing = the primary prongs. Its
+    // missing energy (filled in stage 5.5) is the primary escape + generator binding. The
+    // generator (removal) binding is not recomputed at truth level here, so it is left 0
+    // and shows up in E_residual; the dominant primary-escape term is what this vertex adds.
+    {
+      auto cap2 = [](int k){ return k > 2 ? 2 : k; };
+      std::string glep = (leptonPDG == 13) ? "mu" : (leptonPDG == 11) ? "e" : "nolep";
+      std::string genKey = std::string("nu.") + glep + "->" +
+                           std::to_string(cap2(nP)) + "p." +
+                           std::to_string(cap2(nPi)) + "pi." + std::to_string(cap2(nSh)) + "sh";
+      vtxObs.push_back({genVid, fNuVtxX, fNuVtxY, fNuVtxZ, true, genKey, "nu",
+                        fGen_nu_PDG, nP, nPi, nSh, 0.0});
+    }
   }
 
   // ---- (4) interaction vertices: binding + neutrino, per channel ----
@@ -875,8 +1182,18 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       }
 
       // --- binding energy, two routes ---
-      double Eb_mass = 0, Eb_cons = 0, Enu_vtx = 0, Eb_nuclear = 0, Eb_meson = 0;
+      double Eb_mass = 0, Eb_cons = 0, Enu_vtx = 0, Eb_nuclear = 0, Eb_meson = 0, Eb_ledger = 0;
       bool isMichel = false;
+
+      // The rest-mass-change binding formula assumes a HADRONIC projectile: its rest mass,
+      // baryon number and charge are part of the initial-state accounting. A photon or
+      // lepton projectile (e.g. a photonuclear breakup mislabelled "neutronInelastic" by
+      // Geant4) has M_in = 0 and no baryon number, so the formula returns nonsense — the
+      // guard used to catch it, but it should not enter the calculation at all. The
+      // products' energy is still tracked by E_dep and escape; only the (small) photonuclear
+      // separation energy is not booked as binding, a negligible, documented approximation.
+      int  ppdgAbs = std::abs(parent.PdgCode());
+      bool projectileIsHadron = !(ppdgAbs == 22 || (ppdgAbs >= 11 && ppdgAbs <= 16));
 
       if (isDecayProcess(vtx.process) || isCaptureAtRest(vtx.process)) {
         // Conversion of the projectile (mu- decay -> e nu nu; mu- capture -> nu n).
@@ -896,7 +1213,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
         // and mis-identify the target by one nucleon). Record the channel, no binding.
         Eb_mass = 0.0; Eb_cons = 0.0;
         targetPDG = residualPDG; // recoil nucleus is (essentially) the target
-      } else if (isNuclearTargetProcess(vtx.process)) {
+      } else if (isNuclearTargetProcess(vtx.process) && projectileIsHadron) {
         // mass route (primary): ground-state mass change = -Q.
         // Target stays TABLE-ONLY: if the (almost always argon) target isn't in the
         // table, abandon the mass route (NaN) and use the conservation route, which
@@ -927,6 +1244,15 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
         if      (agree)                  Eb_total = Eb_mass;
         else if (std::isfinite(Eb_cons)) Eb_total = Eb_cons;
         else                             Eb_total = Eb_mass;
+
+        // DECOMPOSE created-meson rest mass out of the total.
+        // At a meson-production vertex the total is dominated by the rest mass of created
+        // mesons, which is NOT nuclear binding: the meson carries that mass off and gives it
+        // back downstream as deposits (E_dep) or as escaping decay products (E_escape), where
+        // the ledger already books it. Booking it here too would double count. What remains
+        // after removing it is the genuine nuclear separation energy — locked into the
+        // ground-state masses of the recoil fragments, never re-materialising — which is real
+        // missing energy and belongs in the binding sum.
         //
         // sumCreatedMesonM is the OUTGOING created-meson mass. If the projectile is itself a
         // meson (pi/K inelastic), its mass was already in the initial state (subtracted via
@@ -942,7 +1268,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
         Eb_meson   = sumCreatedMesonM - Mmeson_in;     // net created-meson rest mass
         Eb_nuclear = std::isfinite(Eb_total) ? (Eb_total - Eb_meson) : std::nan("");
 
-        // Guard on the nuclear remainder (not the total). It cannot physically exceed the
+        // Guard on the NUCLEAR remainder (not the total). It cannot physically exceed the
         // target's total binding (~344 MeV for Ar-40; 0.5 GeV is a generous ceiling). This
         // used to cap the total, which rejected every meson vertex and discarded the nuclear
         // piece with it. After the decompose a violation is rare and means the vertex is
@@ -952,13 +1278,14 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
         if (std::isfinite(Eb_nuclear) && std::abs(Eb_nuclear) < kNucCapGeV) {
           Eb_use = Eb_nuclear;
         } else {
-          // mf::LogWarning("MyEnergyAnalysis")
-          //   << "Nuclear binding out of range after meson removal (total=" << Eb_total
-          //   << " meson=" << Eb_meson << " nuclear=" << Eb_nuclear << " GeV) process "
-          //   << vtx.process << " in_pdg " << parentPDG << " — skipped from sum.";
-           Eb_use = 0.0;
+          mf::LogWarning("MyEnergyAnalysis")
+            << "Nuclear binding out of range after meson removal (total=" << Eb_total
+            << " meson=" << Eb_meson << " nuclear=" << Eb_nuclear << " GeV) process "
+            << vtx.process << " in_pdg " << parentPDG << " — skipped from sum.";
+          Eb_use = 0.0;
         }
         fE_binding_total += (vtxInside ? Eb_use : 0.0);
+        Eb_ledger = (vtxInside ? Eb_use : 0.0);   // this vertex's contribution to the ledger
         // Binding is only a detector loss if it happens inside the active volume.
         // A daughter that left the volume already had its KE counted as escape; its
         // subsequent interactions out in the cryostat are not the detector's loss.
@@ -975,7 +1302,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       };
       std::map<int,int> outCount;
       for (int h : freeHadrons) ++outCount[h];
-      for (int g : fragments)  ++outCount[g];
+      for (int g : fragments)  ++outCount[g];   // every nucleus in the key (Option A)
       std::string chan = std::to_string(parent.PdgCode());
       if (targetPDG) chan += "+" + nucName(targetPDG);
       chan += "[" + vtx.process + "]->";
@@ -991,6 +1318,35 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       // escaping tracks (stage 5) can be attributed to their production interaction.
       for (const simb::MCParticle* d : vtx.daughters)
         birthChannel[d->TrackId()] = chan;
+
+      // --- observable per-vertex key: what a detector would see at this vertex ---
+      // Incoming: the projectile's observable class. An INVISIBLE projectile (a neutron)
+      // that produces a visible hadronic star is inferred to be a neutron ("n") — valid at
+      // the FD where neutrino pileup is negligible, so an unseen-in / visible-out star is
+      // overwhelmingly a neutron interaction. (A near-detector study would revisit this.)
+      // Outgoing: counts of VISIBLE prongs above threshold (proton / charged-pion / EM
+      // shower). Outgoing neutrons are invisible and deliberately excluded — the energy
+      // they carry off is exactly what the bucket's missing-energy spread measures.
+      const double kThrMIP = 0.030, kThrP = 0.050, kThrEM = 0.030;   // GeV, same as stage 3.5
+      int nP_o = 0, nPi_o = 0, nSh_o = 0;
+      for (const simb::MCParticle* d : vtx.daughters) {
+        PidClass c = pidClassOf(d->PdgCode());
+        double dKE = d->E(0) - d->Mass();
+        if      (c == kProton   && dKE      >= kThrP)   ++nP_o;
+        else if (c == kPion     && dKE      >= kThrMIP) ++nPi_o;
+        else if (c == kElectron && dKE      >= kThrEM)  ++nSh_o;
+        else if (c == kShower   && d->E(0)  >= kThrEM)  nSh_o += (std::abs(d->PdgCode()) == 111 ? 2 : 1);
+      }
+      PidClass inCls = pidClassOf(parent.PdgCode());
+      std::string inClass = (inCls == kInvisible) ? std::string("n") : std::string(pidName(inCls));
+      auto cap2 = [](int k){ return k > 2 ? 2 : k; };
+      std::string obsKey = inClass + "->" + std::to_string(cap2(nP_o)) + "p." +
+                           std::to_string(cap2(nPi_o)) + "pi." + std::to_string(cap2(nSh_o)) + "sh";
+
+      int vid = vtxCounter++;
+      for (const simb::MCParticle* d : vtx.daughters) birthVertexId[d->TrackId()] = vid;
+      vtxObs.push_back({vid, vtx.x, vtx.y, vtx.z, vtxInside, obsKey, inClass,
+                        parent.PdgCode(), nP_o, nPi_o, nSh_o, Eb_ledger});
 
       // --- fill VertexTree ---
       fV_event = fEvent;
@@ -1058,8 +1414,28 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
     {
       auto bc = birthChannel.find(p.TrackId());
       fX_birthChannel = (bc != birthChannel.end()) ? bc->second : std::string();
+      auto bv = birthVertexId.find(p.TrackId());
+      if (bv != birthVertexId.end()) escapeByVertex[bv->second] += loss;   // attribute to vertex
     }
     fEscapeTree->Fill();
+  }
+
+  // ---- (5.5) per-vertex missing energy (binding + attributed escape), observable-keyed ----
+  // Now that escape is attributed, write one row per interesting vertex: its observable key
+  // and its missing energy = ledger binding + escaped energy of the products it produced.
+  // Summing E_missing over an event's vertices reproduces the event's binding + escape.
+  for (auto const& v : vtxObs) {
+    double esc = 0.0;
+    auto it = escapeByVertex.find(v.vid);
+    if (it != escapeByVertex.end()) esc = it->second;
+    double bind = std::isfinite(v.binding) ? v.binding : 0.0;
+    fVM_event = fEvent; fVM_vid = v.vid; fVM_key = v.key;
+    fVM_in_pdg = v.in_pdg; fVM_in_class = v.in_class;
+    fVM_nP = v.nP; fVM_nPi = v.nPi; fVM_nSh = v.nSh; fVM_inside = v.inside;
+    fVM_x = v.x; fVM_y = v.y; fVM_z = v.z;
+    fVM_binding = bind; fVM_escape = esc; fVM_missing = bind + esc;
+    fVM_ccnc = fCCNC; fVM_nu_E = fGen_nu_E; fVM_contained = fContained;
+    fVertexMissTree->Fill();
   }
 
   // ---- (6) secondary (decay) neutrinos created inside the active volume ----
