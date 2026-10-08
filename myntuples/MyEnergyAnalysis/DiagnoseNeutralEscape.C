@@ -1,220 +1,114 @@
-// Diagnose the event-level neutral escape bookkeeping.
-//
-// Run with:
-//   root -l -b -q 'DiagnoseNeutralEscape.C("MiloEnergy_merged_500.root",20)'
-//
-// Important: in the current module, EscapeTree::ExitKE is filled with the
-// variable named "loss".  For neutrons that value is their exit kinetic
-// energy, but for some other particle species it can have different semantics.
+// Diagnose neutral escape accounting using existing, unmerged grid outputs.
+// Recommended:
+// root -l -b -q 'DiagnoseNeutralEscape.C("clean_input_files.txt",-1)'
+// Matching is reset for each file because EscapeTree lacks Run/SubRun.
 
 #include <TDirectory.h>
 #include <TFile.h>
 #include <TKey.h>
 #include <TTree.h>
-
-#include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
 
 namespace {
-TTree *findDiagnosticTree(TDirectory *dir, const char *wanted)
-{
-  if (!dir) return nullptr;
-  if (auto *tree = dynamic_cast<TTree *>(dir->Get(wanted))) return tree;
-
-  TIter next(dir->GetListOfKeys());
-  while (auto *key = dynamic_cast<TKey *>(next())) {
-    if (std::string(key->GetClassName()).find("TDirectory") == std::string::npos)
-      continue;
-    if (auto *tree = findDiagnosticTree(
-            dynamic_cast<TDirectory *>(key->ReadObj()), wanted))
-      return tree;
+TTree* findTree(TDirectory* d, const char* name) {
+  if (!d) return nullptr;
+  if (auto* t=dynamic_cast<TTree*>(d->Get(name))) return t;
+  TIter next(d->GetListOfKeys());
+  while (auto* k=dynamic_cast<TKey*>(next())) {
+    if (std::string(k->GetClassName()).find("TDirectory")==std::string::npos) continue;
+    if (auto* t=findTree(dynamic_cast<TDirectory*>(k->ReadObj()),name)) return t;
   }
   return nullptr;
 }
+std::string quote(const std::string& s) {
+  std::string q="\""; for(char c:s){if(c=='"')q+='"';q+=c;} return q+'"';
+}
+bool endsWith(const std::string& s,const std::string& x) {
+  return s.size()>=x.size() && s.compare(s.size()-x.size(),x.size(),x)==0;
+}
+struct Evt { Long64_t entry; int run,subrun,event; double ledger; };
+struct Esc { Long64_t entry; int track,pdg; double birth,exit; bool charged; };
+struct Counts { long long files=0,failed=0,events=0,withN=0,negative=0,ambiguous=0,mismatch=0; };
 
-struct EventRow {
-  Long64_t entry = -1;
-  int run = 0;
-  int subrun = 0;
-  int event = 0;
-  double neutralLedger = 0.0;
-};
+void processFile(const std::string& fn,long long limit,Counts& n,
+                 std::ofstream& out,std::ofstream& details) {
+  TFile f(fn.c_str(),"READ");
+  if(f.IsZombie()){std::cerr<<"ERROR opening "<<fn<<'\n';++n.failed;return;}
+  TTree* et=findTree(&f,"EventTree"); TTree* xt=findTree(&f,"EscapeTree");
+  if(!et||!xt){std::cerr<<"ERROR missing tree in "<<fn<<'\n';++n.failed;return;}
 
-struct EscapeRow {
-  Long64_t entry = -1;
-  int event = 0;
-  int track = 0;
-  int pdg = 0;
-  double birthKE = 0.0;
-  double exitField = 0.0;
-  bool charged = false;
-};
+  int ev=0,run=0,sub=0; double ledger=0;
+  et->SetBranchAddress("Event",&ev); et->SetBranchAddress("Run",&run);
+  et->SetBranchAddress("SubRun",&sub); et->SetBranchAddress("E_escape_neutral",&ledger);
+  std::vector<Evt> events; std::map<int,int> multiplicity;
+  for(Long64_t i=0;i<et->GetEntries();++i){
+    if(limit>=0 && n.events+(long long)events.size()>=limit) break;
+    et->GetEntry(i); events.push_back({i,run,sub,ev,ledger}); ++multiplicity[ev];
+  }
+
+  int xev=0,tr=0,pdg=0; double birth=0,exit=0; bool charged=false;
+  xt->SetBranchAddress("Event",&xev); xt->SetBranchAddress("TrackID",&tr);
+  xt->SetBranchAddress("PDG",&pdg); xt->SetBranchAddress("BirthKE",&birth);
+  xt->SetBranchAddress("ExitKE",&exit); xt->SetBranchAddress("Charged",&charged);
+  std::map<int,std::vector<Esc>> byEvent;
+  for(Long64_t i=0;i<xt->GetEntries();++i){xt->GetEntry(i);byEvent[xev].push_back({i,tr,pdg,birth,exit,charged});}
+
+  for(const auto& e:events){
+    bool amb=multiplicity[e.event]>1; if(amb)++n.ambiguous;
+    double maxN=-std::numeric_limits<double>::infinity(),sum=0; int maxTrack=-1,nNeutral=0,nNeutron=0;
+    auto it=byEvent.find(e.event);
+    if(it!=byEvent.end()) for(const auto& x:it->second){
+      if(x.charged)continue; ++nNeutral; sum+=x.exit;
+      if(x.pdg==2112){++nNeutron;if(x.exit>maxN){maxN=x.exit;maxTrack=x.track;}}
+    }
+    bool hasN=maxTrack>=0; double diff=hasN?e.ledger-maxN:std::numeric_limits<double>::quiet_NaN();
+    double ledgerDiff=e.ledger-sum; bool neg=hasN&&diff < -1e-9; bool bad=std::fabs(ledgerDiff)>1e-8;
+    ++n.events; if(hasN)++n.withN; if(neg)++n.negative; if(bad)++n.mismatch;
+    out<<quote(fn)<<','<<e.entry<<','<<e.run<<','<<e.subrun<<','<<e.event<<','<<multiplicity[e.event]
+       <<','<<(amb?1:0)<<','<<std::setprecision(17)<<e.ledger<<',';
+    if(hasN)out<<maxN<<','<<maxTrack<<','<<diff;else out<<"nan,-1,nan";
+    out<<','<<sum<<','<<ledgerDiff<<','<<nNeutral<<','<<nNeutron<<','<<(neg?1:0)<<','<<(bad?1:0)<<'\n';
+    if(neg&&it!=byEvent.end())for(const auto& x:it->second)if(!x.charged)
+      details<<quote(fn)<<','<<e.entry<<','<<e.run<<','<<e.subrun<<','<<e.event<<','<<x.entry
+             <<','<<x.track<<','<<x.pdg<<','<<std::setprecision(17)<<x.birth<<','<<x.exit<<'\n';
+  }
+  ++n.files;
+}
 }
 
-void DiagnoseNeutralEscape(const char *fileName, int maxEventEntries = 20)
-{
-  TFile input(fileName, "READ");
-  if (input.IsZombie()) {
-    std::cerr << "ERROR: cannot open " << fileName << '\n';
-    return;
-  }
-
-  TTree *eventTree = findDiagnosticTree(&input, "EventTree");
-  TTree *escapeTree = findDiagnosticTree(&input, "EscapeTree");
-  if (!eventTree || !escapeTree) {
-    std::cerr << "ERROR: file must contain EventTree and EscapeTree.\n";
-    return;
-  }
-
-  // Read all EventTree IDs so duplicate IDs in a merged file can be detected.
-  int event = 0, run = 0, subrun = 0;
-  double neutralLedger = 0.0;
-  eventTree->SetBranchAddress("Event", &event);
-  eventTree->SetBranchAddress("Run", &run);
-  eventTree->SetBranchAddress("SubRun", &subrun);
-  eventTree->SetBranchAddress("E_escape_neutral", &neutralLedger);
-
-  std::map<int, int> eventIdMultiplicity;
-  std::vector<EventRow> selectedEvents;
-  const Long64_t nEventEntries = eventTree->GetEntries();
-  for (Long64_t i = 0; i < nEventEntries; ++i) {
-    eventTree->GetEntry(i);
-    ++eventIdMultiplicity[event];
-    if ((int)selectedEvents.size() < maxEventEntries)
-      selectedEvents.push_back({i, run, subrun, event, neutralLedger});
-  }
-
-  // Read every EscapeTree contributor.  This tree currently has Event only,
-  // not Run/SubRun, so duplicate Event IDs make the association ambiguous.
-  int xEvent = 0, track = 0, pdg = 0;
-  double birthKE = 0.0, exitField = 0.0;
-  bool charged = false;
-  escapeTree->SetBranchAddress("Event", &xEvent);
-  escapeTree->SetBranchAddress("TrackID", &track);
-  escapeTree->SetBranchAddress("PDG", &pdg);
-  escapeTree->SetBranchAddress("BirthKE", &birthKE);
-  escapeTree->SetBranchAddress("ExitKE", &exitField);
-  escapeTree->SetBranchAddress("Charged", &charged);
-
-  std::map<int, std::vector<EscapeRow>> escapeByEventId;
-  for (Long64_t i = 0; i < escapeTree->GetEntries(); ++i) {
-    escapeTree->GetEntry(i);
-    escapeByEventId[xEvent].push_back(
-        {i, xEvent, track, pdg, birthKE, exitField, charged});
-  }
-
-  std::ofstream summary("neutral_escape_diagnostic_first20.csv");
-  summary << "event_tree_entry,run,subrun,event,event_id_multiplicity,ambiguous_event_id,"
-             "E_escape_neutral,max_neutron_ExitKE_field,max_neutron_track,"
-             "E_escape_neutral_minus_max_neutron,sum_neutral_ExitKE_fields,"
-             "E_escape_neutral_minus_sum_fields,n_neutral_escape_rows,n_neutron_escape_rows\n";
-
-  std::ofstream contributors("neutral_escape_contributors_first20.csv");
-  contributors << "event_tree_entry,run,subrun,event,ambiguous_event_id,"
-                  "escape_tree_entry,track,pdg,birthKE,ExitKE_field,charged\n";
-
-  int negativeCount = 0;
-  int negativeUnambiguousCount = 0;
-  int ambiguousCount = 0;
-  constexpr double tolerance = 1.0e-9;
-
-  std::cout << std::fixed << std::setprecision(9);
-  std::cout << "\nChecking the first " << selectedEvents.size()
-            << " EventTree entries\n";
-  std::cout << "NOTE: EscapeTree::ExitKE is the module's stored 'loss' field.\n\n";
-
-  for (const EventRow &ev : selectedEvents) {
-    const bool ambiguous = eventIdMultiplicity[ev.event] > 1;
-    if (ambiguous) ++ambiguousCount;
-
-    double maxNeutronExit = -std::numeric_limits<double>::infinity();
-    int maxNeutronTrack = -1;
-    double sumNeutralFields = 0.0;
-    int nNeutral = 0;
-    int nNeutron = 0;
-
-    const auto found = escapeByEventId.find(ev.event);
-    if (found != escapeByEventId.end()) {
-      for (const EscapeRow &x : found->second) {
-        if (x.charged) continue;
-        ++nNeutral;
-        sumNeutralFields += x.exitField;
-        if (x.pdg == 2112) {
-          ++nNeutron;
-          if (x.exitField > maxNeutronExit) {
-            maxNeutronExit = x.exitField;
-            maxNeutronTrack = x.track;
-          }
-        }
-        contributors << ev.entry << ',' << ev.run << ',' << ev.subrun << ','
-                     << ev.event << ',' << (ambiguous ? 1 : 0) << ','
-                     << x.entry << ',' << x.track << ',' << x.pdg << ','
-                     << std::setprecision(17) << x.birthKE << ','
-                     << x.exitField << ',' << (x.charged ? 1 : 0) << '\n';
-      }
+void DiagnoseNeutralEscape(const char* inputName,int maxTotalEvents=-1) {
+  std::string input=inputName?inputName:""; std::vector<std::string> files;
+  if(endsWith(input,".txt")){
+    std::ifstream list(input); if(!list){std::cerr<<"ERROR opening list "<<input<<'\n';return;}
+    std::string s; while(std::getline(list,s)){
+      auto a=s.find_first_not_of(" \t\r\n"); if(a==std::string::npos||s[a]=='#')continue;
+      auto b=s.find_last_not_of(" \t\r\n"); files.push_back(s.substr(a,b-a+1));
     }
+  } else files.push_back(input);
 
-    const bool hasNeutron = maxNeutronTrack >= 0;
-    const double difference = hasNeutron
-                                  ? ev.neutralLedger - maxNeutronExit
-                                  : std::numeric_limits<double>::quiet_NaN();
-    const double sumDifference = ev.neutralLedger - sumNeutralFields;
-    const bool negative = hasNeutron && difference < -tolerance;
-    if (negative) {
-      ++negativeCount;
-      if (!ambiguous) ++negativeUnambiguousCount;
-    }
-
-    std::cout << "entry=" << ev.entry
-              << "  run/subrun/event=" << ev.run << '/' << ev.subrun << '/'
-              << ev.event
-              << "  Eneutral=" << ev.neutralLedger;
-    if (hasNeutron)
-      std::cout << "  maxNExit=" << maxNeutronExit
-                << " (track " << maxNeutronTrack << ')'
-                << "  diff=" << difference;
-    else
-      std::cout << "  no escaping neutron";
-    std::cout << "  neutralSum=" << sumNeutralFields
-              << "  ledger-sum=" << sumDifference;
-    if (negative) std::cout << "  <-- NEGATIVE";
-    if (ambiguous)
-      std::cout << "  <-- AMBIGUOUS: Event ID appears "
-                << eventIdMultiplicity[ev.event] << " times";
-    std::cout << '\n';
-
-    summary << ev.entry << ',' << ev.run << ',' << ev.subrun << ','
-            << ev.event << ',' << eventIdMultiplicity[ev.event] << ','
-            << (ambiguous ? 1 : 0) << ',' << std::setprecision(17)
-            << ev.neutralLedger << ',';
-    if (hasNeutron)
-      summary << maxNeutronExit << ',' << maxNeutronTrack << ',' << difference;
-    else
-      summary << "nan,-1,nan";
-    summary << ',' << sumNeutralFields << ',' << sumDifference << ','
-            << nNeutral << ',' << nNeutron << '\n';
+  std::ofstream out("neutral_escape_diagnostic_all_files.csv");
+  out<<"source_file,event_tree_entry,run,subrun,event,event_id_multiplicity_within_file,ambiguous_within_file,"
+       "E_escape_neutral,max_neutron_ExitKE_field,max_neutron_track,E_escape_neutral_minus_max_neutron,"
+       "sum_neutral_ExitKE_fields,E_escape_neutral_minus_sum_fields,n_neutral_escape_rows,n_neutron_escape_rows,is_negative,ledger_mismatch\n";
+  std::ofstream details("neutral_escape_negative_contributors.csv");
+  details<<"source_file,event_tree_entry,run,subrun,event,escape_tree_entry,track,pdg,birthKE,ExitKE_field\n";
+  Counts n; std::cout<<"Processing "<<files.size()<<" unmerged ROOT files.\n";
+  for(size_t i=0;i<files.size();++i){
+    if(maxTotalEvents>=0&&n.events>=maxTotalEvents)break;
+    processFile(files[i],maxTotalEvents,n,out,details);
+    if((i+1)%25==0||i+1==files.size())std::cout<<"  attempted "<<i+1<<'/'<<files.size()<<", events "<<n.events<<'\n';
   }
-
-  std::cout << "\nSummary\n"
-            << "  selected EventTree entries: " << selectedEvents.size() << '\n'
-            << "  entries with ambiguous Event-only matching: " << ambiguousCount << '\n'
-            << "  negative E_escape_neutral - max neutron ExitKE: "
-            << negativeCount << '\n'
-            << "  negative and unambiguous: " << negativeUnambiguousCount << '\n'
-            << "\nCreated:\n"
-            << "  neutral_escape_diagnostic_first20.csv\n"
-            << "  neutral_escape_contributors_first20.csv\n";
-
-  if (ambiguousCount > 0) {
-    std::cout << "\nIMPORTANT: EscapeTree lacks Run/SubRun, so duplicated Event IDs "
-                 "cannot be matched safely after hadd. Add Run and SubRun branches "
-                 "to EscapeTree before interpreting those rows.\n";
-  }
+  std::cout<<"\nSummary\n  files read: "<<n.files<<"\n  files failed: "<<n.failed
+           <<"\n  events: "<<n.events<<"\n  events with escaping neutron: "<<n.withN
+           <<"\n  ambiguous IDs within a file: "<<n.ambiguous
+           <<"\n  negative E_escape_neutral - max neutron ExitKE: "<<n.negative
+           <<"\n  ledger mismatches: "<<n.mismatch
+           <<"\nCreated neutral_escape_diagnostic_all_files.csv and neutral_escape_negative_contributors.csv\n";
 }
