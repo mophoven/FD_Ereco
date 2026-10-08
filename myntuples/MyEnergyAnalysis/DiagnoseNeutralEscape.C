@@ -33,7 +33,7 @@ std::string quote(const std::string& s) {
 bool endsWith(const std::string& s,const std::string& x) {
   return s.size()>=x.size() && s.compare(s.size()-x.size(),x.size(),x)==0;
 }
-struct Evt { Long64_t entry; int run,subrun,event; double ledger; };
+struct Evt { Long64_t entry; int run,subrun,event; double trueNuE,ledger; };
 struct Esc { Long64_t entry; int track,pdg; double birth,exit; bool charged; };
 struct Counts { long long files=0,failed=0,events=0,withN=0,negative=0,ambiguous=0,mismatch=0; };
 
@@ -44,13 +44,14 @@ void processFile(const std::string& fn,long long limit,Counts& n,
   TTree* et=findTree(&f,"EventTree"); TTree* xt=findTree(&f,"EscapeTree");
   if(!et||!xt){std::cerr<<"ERROR missing tree in "<<fn<<'\n';++n.failed;return;}
 
-  int ev=0,run=0,sub=0; double ledger=0;
+  int ev=0,run=0,sub=0; double trueNuE=0,ledger=0;
   et->SetBranchAddress("Event",&ev); et->SetBranchAddress("Run",&run);
-  et->SetBranchAddress("SubRun",&sub); et->SetBranchAddress("E_escape_neutral",&ledger);
+  et->SetBranchAddress("SubRun",&sub); et->SetBranchAddress("Gen_nu_E",&trueNuE);
+  et->SetBranchAddress("E_escape_neutral",&ledger);
   std::vector<Evt> events; std::map<int,int> multiplicity;
   for(Long64_t i=0;i<et->GetEntries();++i){
     if(limit>=0 && n.events+(long long)events.size()>=limit) break;
-    et->GetEntry(i); events.push_back({i,run,sub,ev,ledger}); ++multiplicity[ev];
+    et->GetEntry(i); events.push_back({i,run,sub,ev,trueNuE,ledger}); ++multiplicity[ev];
   }
 
   int xev=0,tr=0,pdg=0; double birth=0,exit=0; bool charged=false;
@@ -72,7 +73,7 @@ void processFile(const std::string& fn,long long limit,Counts& n,
     double ledgerDiff=e.ledger-sum; bool neg=hasN&&diff < -1e-9; bool bad=std::fabs(ledgerDiff)>1e-8;
     ++n.events; if(hasN)++n.withN; if(neg)++n.negative; if(bad)++n.mismatch;
     out<<quote(fn)<<','<<e.entry<<','<<e.run<<','<<e.subrun<<','<<e.event<<','<<multiplicity[e.event]
-       <<','<<(amb?1:0)<<','<<std::setprecision(17)<<e.ledger<<',';
+       <<','<<(amb?1:0)<<','<<std::setprecision(17)<<e.trueNuE<<','<<e.ledger<<',';
     if(hasN)out<<maxN<<','<<maxTrack<<','<<diff;else out<<"nan,-1,nan";
     out<<','<<sum<<','<<ledgerDiff<<','<<nNeutral<<','<<nNeutron<<','<<(neg?1:0)<<','<<(bad?1:0)<<'\n';
     if(neg&&it!=byEvent.end())for(const auto& x:it->second)if(!x.charged)
@@ -95,7 +96,7 @@ void DiagnoseNeutralEscape(const char* inputName,int maxTotalEvents=-1) {
 
   std::ofstream out("neutral_escape_diagnostic_all_files.csv");
   out<<"source_file,event_tree_entry,run,subrun,event,event_id_multiplicity_within_file,ambiguous_within_file,"
-       "E_escape_neutral,max_neutron_ExitKE_field,max_neutron_track,E_escape_neutral_minus_max_neutron,"
+       "Gen_nu_E,E_escape_neutral,max_neutron_ExitKE_field,max_neutron_track,E_escape_neutral_minus_max_neutron,"
        "sum_neutral_ExitKE_fields,E_escape_neutral_minus_sum_fields,n_neutral_escape_rows,n_neutron_escape_rows,is_negative,ledger_mismatch\n";
   std::ofstream details("neutral_escape_negative_contributors.csv");
   details<<"source_file,event_tree_entry,run,subrun,event,escape_tree_entry,track,pdg,birthKE,ExitKE_field\n";
