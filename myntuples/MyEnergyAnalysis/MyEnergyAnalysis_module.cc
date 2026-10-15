@@ -1519,3 +1519,4 @@ namespace lar
 // look at the variables for plots
 // from 500 event file take look at only 20 event and look at the energy of the neutrons at each step
 // For Highest-Energy Escaping Neutron plot zoom in to look at the yellow line we have 
+// Look at the neutron bins and the neutrons and try to get info how many just leave how many are invisible how many have interaction and how many have a hydronic interaction
