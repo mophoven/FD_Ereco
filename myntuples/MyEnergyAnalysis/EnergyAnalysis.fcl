@@ -87,6 +87,10 @@ physics:
       GenieGenModuleLabel: "generator"
       SimulationLabel: "largeant"
       SimEnergyDepositLabel: "IonAndScint"
+
+      # A neutron is flagged invisible when the neutron plus all descendants
+      # deposit less than this energy in the active volume.
+      NeutronInvisibleThresholdMeV: 0.1
 	
       ActiveXmin: -363.4   ActiveXmax: 363.4
       ActiveYmin: -607.9   ActiveYmax: 607.9

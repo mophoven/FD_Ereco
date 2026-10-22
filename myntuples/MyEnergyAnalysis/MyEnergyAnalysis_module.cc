@@ -20,6 +20,10 @@
  *                     neutral, with the KE it carried out (KE at the LAST
  *                     inside->outside crossing).
  *
+ *   (4) NeutronTree - one row per neutron that enters the active volume, with
+ *                     escape outcome, interaction counts, and descendant energy
+ *                     deposition for visibility studies.
+ *
  * Design decisions worth knowing (see inline comments for detail):
  *   - Binding energy is the ground-state nuclear mass change, computed two ways
  *     (mass route, primary; conservation route, cross-check). Disagreement is a flag.
@@ -95,6 +99,15 @@ namespace
         "photonNuclear", "muonNuclear"};
     return s;
   }
+
+  struct NeutronInteractionCounts
+  {
+    int total = 0;
+    int elastic = 0;
+    int inelastic = 0;
+    int capture = 0;
+    int other = 0;
+  };
 
   bool isDecayProcess(const std::string &p)
   {
@@ -595,6 +608,11 @@ namespace lar
             Name("FiducialInset"),
             Comment("cm to shrink the active volume by for the vertex fiducial cut (0 = use active bounds)"),
             0.0};
+
+        fhicl::Atom<double> NeutronInvisibleThresholdMeV{
+            Name("NeutronInvisibleThresholdMeV"),
+            Comment("A neutron family is invisible when its active-volume SimEnergyDeposit sum is below this threshold (MeV)"),
+            0.1};
       };
       using Parameters = art::EDAnalyzer::Table<Config>;
 
@@ -622,6 +640,7 @@ namespace lar
       bool fSelectCC = true;
       long fNskippedNC = 0;
       double fFidInset = 0.0;
+      double fNeutronInvisibleThresholdGeV = 0.0001;
       long fNskippedFid = 0;
       geo::GeometryCore const *fGeom = nullptr;
 
@@ -639,6 +658,7 @@ namespace lar
       TTree *fEventTree = nullptr;
       TTree *fVertexTree = nullptr;
       TTree *fEscapeTree = nullptr;
+      TTree *fNeutronTree = nullptr;
 
       // EventTree branches
       int fEvent, fRun, fSubRun;
@@ -662,7 +682,7 @@ namespace lar
       double fMichel_nu_E;
 
       // VertexTree branches
-      int fV_event;
+      int fV_run, fV_subrun, fV_event;
       double fV_x, fV_y, fV_z, fV_t;
       int fV_in_pdg, fV_in_trk;
       double fV_in_KE;
@@ -680,16 +700,24 @@ namespace lar
       std::vector<double> fV_out_KE;
 
       // EscapeTree branches
-      int fX_event, fX_trk, fX_pdg;
+      int fX_run, fX_subrun, fX_event, fX_trk, fX_pdg;
       double fX_birthKE, fX_exitKE, fX_exitX, fX_exitY, fX_exitZ;
       std::string fX_endProcess;
       std::string fX_birthChannel; // channel of the vertex that created this track
       bool fX_charged;
+
+      // NeutronTree branches: one row per neutron that enters the active volume.
+      int fN_run, fN_subrun, fN_event, fN_trk, fN_mother;
+      double fN_birthKE, fN_endKE, fN_exitKE, fN_familyEdep;
+      bool fN_escaped, fN_invisible, fN_hadronic;
+      int fN_nInteractions, fN_nElastic, fN_nInelastic, fN_nCapture, fN_nOther;
+      int fN_outcome; // 0 direct exit, 1 interaction+exit, 2 interaction+contained, 3 no interaction+contained
+      std::string fN_endProcess;
     };
 
     // ----------------------------------------------------------------------------
     MyEnergyAnalysis::MyEnergyAnalysis(Parameters const &c)
-        : EDAnalyzer(c), fGenLabel(c().GenieGenModuleLabel()), fSimLabel(c().SimulationLabel()), fEdepLabel(c().SimEnergyDepositLabel()), fXmin(c().ActiveXmin()), fXmax(c().ActiveXmax()), fYmin(c().ActiveYmin()), fYmax(c().ActiveYmax()), fZmin(c().ActiveZmin()), fZmax(c().ActiveZmax()), fSelectCC(c().SelectCC()), fFidInset(c().FiducialInset())
+        : EDAnalyzer(c), fGenLabel(c().GenieGenModuleLabel()), fSimLabel(c().SimulationLabel()), fEdepLabel(c().SimEnergyDepositLabel()), fXmin(c().ActiveXmin()), fXmax(c().ActiveXmax()), fYmin(c().ActiveYmin()), fYmax(c().ActiveYmax()), fZmin(c().ActiveZmin()), fZmax(c().ActiveZmax()), fSelectCC(c().SelectCC()), fFidInset(c().FiducialInset()), fNeutronInvisibleThresholdGeV(c().NeutronInvisibleThresholdMeV() * 1e-3)
     {
       fGeom = &*art::ServiceHandle<geo::Geometry>();
       consumes<std::vector<simb::MCTruth>>(fGenLabel);
@@ -756,6 +784,8 @@ namespace lar
 
       // ---- VertexTree ----
       fVertexTree = tfs->make<TTree>("VertexTree", "per-interaction-vertex channels");
+      fVertexTree->Branch("Run", &fV_run);
+      fVertexTree->Branch("SubRun", &fV_subrun);
       fVertexTree->Branch("Event", &fV_event);
       fVertexTree->Branch("Vtx_x", &fV_x);
       fVertexTree->Branch("Vtx_y", &fV_y);
@@ -788,6 +818,8 @@ namespace lar
 
       // ---- EscapeTree ----
       fEscapeTree = tfs->make<TTree>("EscapeTree", "tracks leaving the active volume");
+      fEscapeTree->Branch("Run", &fX_run);
+      fEscapeTree->Branch("SubRun", &fX_subrun);
       fEscapeTree->Branch("Event", &fX_event);
       fEscapeTree->Branch("TrackID", &fX_trk);
       fEscapeTree->Branch("PDG", &fX_pdg);
@@ -799,6 +831,28 @@ namespace lar
       fEscapeTree->Branch("EndProcess", &fX_endProcess);
       fEscapeTree->Branch("BirthChannel", &fX_birthChannel);
       fEscapeTree->Branch("Charged", &fX_charged);
+
+      // ---- NeutronTree ----
+      fNeutronTree = tfs->make<TTree>("NeutronTree", "one row per neutron entering the active volume");
+      fNeutronTree->Branch("Run", &fN_run);
+      fNeutronTree->Branch("SubRun", &fN_subrun);
+      fNeutronTree->Branch("Event", &fN_event);
+      fNeutronTree->Branch("TrackID", &fN_trk);
+      fNeutronTree->Branch("MotherTrackID", &fN_mother);
+      fNeutronTree->Branch("BirthKE", &fN_birthKE);
+      fNeutronTree->Branch("EndKE", &fN_endKE);
+      fNeutronTree->Branch("Escaped", &fN_escaped);
+      fNeutronTree->Branch("ExitKE", &fN_exitKE);
+      fNeutronTree->Branch("NInteractions", &fN_nInteractions);
+      fNeutronTree->Branch("NElastic", &fN_nElastic);
+      fNeutronTree->Branch("NInelastic", &fN_nInelastic);
+      fNeutronTree->Branch("NCapture", &fN_nCapture);
+      fNeutronTree->Branch("NOther", &fN_nOther);
+      fNeutronTree->Branch("HadronicInteraction", &fN_hadronic);
+      fNeutronTree->Branch("FamilyEdep", &fN_familyEdep);
+      fNeutronTree->Branch("Invisible", &fN_invisible);
+      fNeutronTree->Branch("Outcome", &fN_outcome);
+      fNeutronTree->Branch("EndProcess", &fN_endProcess);
     }
 
     // ----------------------------------------------------------------------------
@@ -1042,6 +1096,9 @@ namespace lar
       // ---- (3) deposited (visible) energy from SimEnergyDeposit ----
       // SimEnergyDeposit::Energy() is in MeV; convert to GeV. Deposits exist only in
       // sensitive volumes, so this is already restricted to the active volume.
+      // Keep the direct per-track sums as well.  A subtree sum is built in stage 5b
+      // so a neutron's visibility includes recoil and capture descendants.
+      std::map<int, double> directTrackEdep;
       art::Handle<std::vector<sim::SimEnergyDeposit>> edh;
       if (event.getByLabel(fEdepLabel, edh))
       {
@@ -1049,6 +1106,7 @@ namespace lar
         {
           double e = d.Energy() * 1e-3; // MeV -> GeV
           fE_dep_total += e;
+          directTrackEdep[std::abs(d.TrackID())] += e;
           // empirical active-volume probe: track the spatial extent of deposits
           double dx = d.MidPointX(), dy = d.MidPointY(), dz = d.MidPointZ();
           fDepXmin = std::min(fDepXmin, dx);
@@ -1091,6 +1149,10 @@ namespace lar
             << "SimEnergyDeposit '" << fEdepLabel.encode()
             << "' not found — E_dep will be 0. Fix the label (see header).";
       }
+
+      // Per-neutron counts are filled from the same reconstructed vertices written
+      // to VertexTree, restricted to vertices inside the active volume.
+      std::map<int, NeutronInteractionCounts> neutronInteractions;
 
       // ---- (4) interaction vertices: binding + neutrino, per channel ----
       for (auto const &parentPair : children)
@@ -1223,6 +1285,20 @@ namespace lar
 
           const double KE_in = incomingKEAtVertex(parent, vtx.x, vtx.y, vtx.z);
           const bool vtxInside = inside(vtx.x, vtx.y, vtx.z);
+
+          if (parent.PdgCode() == 2112 && vtxInside)
+          {
+            auto &counts = neutronInteractions[parent.TrackId()];
+            ++counts.total;
+            if (vtx.process == "hadElastic")
+              ++counts.elastic;
+            else if (vtx.process == "neutronInelastic")
+              ++counts.inelastic;
+            else if (vtx.process == "nCapture")
+              ++counts.capture;
+            else
+              ++counts.other;
+          }
 
           // --- reconstruct the implicit target nucleus (A,Z balance) ---
           int targetPDG = 0;
@@ -1382,6 +1458,8 @@ namespace lar
             birthChannel[d->TrackId()] = chan;
 
           // --- fill VertexTree ---
+          fV_run = fRun;
+          fV_subrun = fSubRun;
           fV_event = fEvent;
           fV_x = vtx.x;
           fV_y = vtx.y;
@@ -1463,6 +1541,8 @@ namespace lar
         else
           fE_escape_neutral += loss;
 
+        fX_run = fRun;
+        fX_subrun = fSubRun;
         fX_event = fEvent;
         fX_trk = p.TrackId();
         fX_pdg = pdg;
@@ -1478,6 +1558,92 @@ namespace lar
           fX_birthChannel = (bc != birthChannel.end()) ? bc->second : std::string();
         }
         fEscapeTree->Fill();
+      }
+
+      // ---- (5b) one row per neutron entering the active volume ----
+      // FamilyEdep includes the neutron and every descendant track.  This is the
+      // detector response caused by that neutron, unlike a neutron-only TrackID sum
+      // (which would miss recoil protons, fragments, and capture gammas).  Families
+      // of parent and secondary neutrons overlap by construction, so FamilyEdep is a
+      // visibility diagnostic and must not be summed over NeutronTree rows.
+      std::map<int, double> subtreeEdepCache;
+      std::set<int> subtreeInProgress;
+      std::function<double(int)> subtreeEdep = [&](int trackID) -> double
+      {
+        auto cached = subtreeEdepCache.find(trackID);
+        if (cached != subtreeEdepCache.end())
+          return cached->second;
+        if (!subtreeInProgress.insert(trackID).second)
+          return 0.0; // malformed genealogy loop guard
+
+        double sum = directTrackEdep[std::abs(trackID)];
+        auto kids = children.find(trackID);
+        if (kids != children.end())
+          for (int childID : kids->second)
+            sum += subtreeEdep(childID);
+
+        subtreeInProgress.erase(trackID);
+        subtreeEdepCache[trackID] = sum;
+        return sum;
+      };
+
+      for (auto const &p : *ph)
+      {
+        if (p.PdgCode() != 2112)
+          continue;
+
+        const unsigned int N = p.NumberTrajectoryPoints();
+        if (N == 0)
+          continue;
+
+        bool everInside = false;
+        bool wasInside = inside(p.Position(0));
+        everInside = wasInside;
+        double exitKE = -1.0;
+        for (unsigned int i = 1; i < N; ++i)
+        {
+          bool nowInside = inside(p.Position(i));
+          if (wasInside && !nowInside)
+            exitKE = pointKE(p, i); // retain the last inside-to-outside crossing
+          if (nowInside)
+            everInside = true;
+          wasInside = nowInside;
+        }
+        if (!everInside)
+          continue;
+
+        NeutronInteractionCounts counts;
+        auto countIt = neutronInteractions.find(p.TrackId());
+        if (countIt != neutronInteractions.end())
+          counts = countIt->second;
+
+        fN_run = fRun;
+        fN_subrun = fSubRun;
+        fN_event = fEvent;
+        fN_trk = p.TrackId();
+        fN_mother = p.Mother();
+        fN_birthKE = pointKE(p, 0);
+        fN_endKE = pointKE(p, N - 1);
+        fN_escaped = (exitKE >= 0.0);
+        fN_exitKE = fN_escaped ? std::max(0.0, exitKE) : 0.0;
+        fN_nInteractions = counts.total;
+        fN_nElastic = counts.elastic;
+        fN_nInelastic = counts.inelastic;
+        fN_nCapture = counts.capture;
+        fN_nOther = counts.other;
+        fN_hadronic = (counts.elastic + counts.inelastic + counts.capture) > 0;
+        fN_familyEdep = subtreeEdep(p.TrackId());
+        fN_invisible = fN_familyEdep < fNeutronInvisibleThresholdGeV;
+        if (fN_escaped && counts.total == 0)
+          fN_outcome = 0;
+        else if (fN_escaped)
+          fN_outcome = 1;
+        else if (counts.total > 0)
+          fN_outcome = 2;
+        else
+          fN_outcome = 3;
+        fN_endProcess = p.EndProcess();
+        fNeutronTree->Fill();
       }
 
       // ---- (6) secondary (decay) neutrinos created inside the active volume ----
