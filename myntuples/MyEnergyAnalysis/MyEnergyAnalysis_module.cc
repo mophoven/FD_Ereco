@@ -708,8 +708,8 @@ namespace lar
 
       // NeutronTree branches: one row per neutron that enters the active volume.
       int fN_run, fN_subrun, fN_event, fN_trk, fN_mother;
-      double fN_birthKE, fN_endKE, fN_exitKE, fN_familyEdep;
-      bool fN_escaped, fN_invisible, fN_hadronic;
+      double fN_birthKE, fN_endKE, fN_exitKE, fN_directEdep, fN_familyEdep;
+      bool fN_primary, fN_escaped, fN_invisible, fN_hadronic;
       int fN_nInteractions, fN_nElastic, fN_nInelastic, fN_nCapture, fN_nOther;
       int fN_outcome; // 0 direct exit, 1 interaction+exit, 2 interaction+contained, 3 no interaction+contained
       std::string fN_endProcess;
@@ -839,7 +839,9 @@ namespace lar
       fNeutronTree->Branch("Event", &fN_event);
       fNeutronTree->Branch("TrackID", &fN_trk);
       fNeutronTree->Branch("MotherTrackID", &fN_mother);
+      fNeutronTree->Branch("Primary", &fN_primary);
       fNeutronTree->Branch("BirthKE", &fN_birthKE);
+      fNeutronTree->Branch("DirectEdep", &fN_directEdep);
       fNeutronTree->Branch("EndKE", &fN_endKE);
       fNeutronTree->Branch("Escaped", &fN_escaped);
       fNeutronTree->Branch("ExitKE", &fN_exitKE);
@@ -1622,7 +1624,11 @@ namespace lar
         fN_event = fEvent;
         fN_trk = p.TrackId();
         fN_mother = p.Mother();
+        fN_primary = (p.Mother() == 0);
         fN_birthKE = pointKE(p, 0);
+        // Direct energy deposited by this neutron's own TrackID only.  Do not
+        // include secondary neutrons or any other descendant tracks.
+        fN_directEdep = directTrackEdep[std::abs(p.TrackId())];
         fN_endKE = pointKE(p, N - 1);
         fN_escaped = (exitKE >= 0.0);
         fN_exitKE = fN_escaped ? std::max(0.0, exitKE) : 0.0;
