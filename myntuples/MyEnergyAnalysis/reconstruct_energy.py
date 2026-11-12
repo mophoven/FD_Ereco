@@ -6,17 +6,41 @@ deposited energy?
 
     E_reco = E_dep + (missing-energy correction from the channel averages)
 
-Two granularities:
-  --level event   one correction per event, keyed by the event topology (lepton x nP x nPi
-                  x nShower). Uses EventTree only -> RUNS ON THE CURRENT FILE, no rerun.
-  --level vertex  sum a per-vertex correction over the event's vertices, each keyed by its
-                  observable VertexMissTree key. Needs the Run/SubRun branches just added
-                  to VertexMissTree (rerun), so EventTree E_dep can be joined per event.
-
-Honesty: a lookup trained and tested on the same events flatters itself. We report the
-in-sample number (what was literally asked) AND a 5-fold cross-validated number (each
-event corrected by averages built from the OTHER events) — the CV number is the real one.
-
+Options
+-------
+  rootfile                 Analysis ROOT file. Needs EventTree; also VertexMissTree for --level vertex.
+  --level {event,vertex}   Granularity. 'event': one correction per event, keyed by event topology
+                           (EventTree only, runs on the current file). 'vertex': sum a per-vertex
+                           correction over the event's vertices, each keyed by its VertexMissTree key
+                           (needs Run/SubRun on VertexMissTree so E_dep can be joined per event).
+  --mode {additive,multiplicative}
+                           'additive': E_reco = E_dep + <miss>_chan. 'multiplicative': E_reco = E_dep * k_chan
+                           (k = 1/<E_dep/E_nu>_chan), which scales the correction with energy. Event level only.
+  --keep-uncontained       Include uncontained events (default: contained only, via the Contained flag).
+  --min-count N            Channels with fewer than N MC entries fall back to the global mean (default 1).
+  --csv FILE               Write the per-channel correction table (channel, N, mean/std of missing energy).
+  --event-csv FILE         Write per-event Run/SubRun/Event, N_vtx, E_true/E_dep/E_reco and fractional
+                           errors.
+  --plot FILE              Output path for the resolution figure (default reconstruct_energy.png).
+ 
+  Decay-neutrino recovery (fold recovered decay-neutrino energy into E_dep'; pick at most one):
+  --decay-correct          E_dep' = E_dep + E_decay_EndE - E_decay_dDep - E_decay_dEsc. Observable estimate;
+                           needs the decay branches.
+  --decay-rest-mass        With --decay-correct, use the rest-mass variant E_decay_mass instead of EndE.
+  --decay-nu-inside        Add the truth E_neutrino_inside (exact decay-neutrino energy). Disjoint from the
+                           escape term, so no double-count; needs only that branch (no rerun).
+ 
+  Sample / neutron handling (vertex level):
+  --max-escapefrac F       Drop events with truth EscapeFrac > F (e.g. 0.3) — removes unreconstructible
+                           high-leakage events the edge-veto containment cut misses.
+  --keep-neutron-incoming  Keep n->... vertices (default: dropped; a neutron leaves no track, so those
+                           vertices are unobservable in data).
+  --neutron-conservation   At observable p->/pi-> vertices, replace the channel-mean correction with the
+                           per-vertex conservation estimate In_KE - E_binding - OutChargedKE (minus
+                           OutShowerKE if present), clamped >= 0. nu-> and other vertices keep the channel
+                           mean. Vertex + additive only.
+ 
+Example Usage:
   python3 reconstruct_energy.py bigsampleV2.root --level event
   python3 reconstruct_energy.py bigsampleV2.root --level vertex --csv reco_channels.csv --plot reco.png
   python3 reconstruct_energy.py bigsampleV2.root --level event --keep-uncontained
