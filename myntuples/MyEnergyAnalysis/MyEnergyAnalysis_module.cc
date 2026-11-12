@@ -2,8 +2,8 @@
  * @file   MyEnergyAnalysis_module.cc
  * @brief  Neutrino energy reconstruction / missing-energy accounting for DUNE FD MC.
  *
- * Reworked, "collapsed" version. One pass over the Geant4 MCParticle list builds
- * a genealogy, then three things are produced per event:
+ * One pass over the Geant4 MCParticle list builds a genealogy, then three things
+ * are produced per event:
  *
  *   (1) EventTree   - one row per event: the closing energy ledger
  *                       E_nu(gen) = E_dep + E_binding + E_escape_neutral
@@ -23,18 +23,25 @@
  * Design decisions worth knowing (see inline comments for detail):
  *   - Binding energy is the ground-state nuclear mass change, computed two ways
  *     (mass route, primary; conservation route, cross-check). Disagreement is a flag.
- *   - "Binding" from fillInteractionTree in the old code was identically zero by
- *     construction (it equalled E_in - sumOut - Q_std == 0). That is removed.
  *   - Deposited energy comes from sim::SimEnergyDeposit (true ionization in the
- *     active volume), NOT from a SimChannel/collection-plane loop.
+ *     active volume), not from a SimChannel/collection-plane loop.
  *   - Escape is a per-track geometric quantity (last exit KE), so neutron energy is
- *     never summed across the cascade (that double-counted in the old code).
+ *     never summed across the cascade.
  *   - Photons are EM/visible; only their geometric exit counts as escape. Neutrinos
  *     are handled by the neutrino term, and only if created INSIDE the active volume
  *     (a muon that escapes and decays outside already had its energy counted as
  *     charged escape; its decay neutrinos must not be double counted).
  *
- * @author Milo Ophoven(rework) — building on W. Shi's original; original adapted from
+ * Two configuration items to verify per dunesw build before trusting numbers:
+ *   A. SimEnergyDepositLabel - the producer/instance that holds the active-volume
+ *      deposits. Confirm with `lar -c eventdump.fcl <file>` or product_sizes_dumper.
+ *      Common candidates: "largeant:TPCActive", "largeant:LArG4DetectorServicevolTPCActive",
+ *      "IonAndScint:priorSCE" (refactored sim); set via the SimEnergyDepositLabel fhicl parameter.
+ *   B. Active-volume bounds (Active{X,Y,Z}{min,max}), set as fhicl parameters.
+ *      beginJob prints the geometry's per-TPC dimensions for comparison;
+ *      escape energy depends entirely on these.
+ *
+ * @author Milo Ophoven — building on W. Shi's original; original adapted from
  *         the LArSoft AnalysisExample.
  */
 
@@ -300,13 +307,65 @@ namespace {
       case 1000260580: return 53.95122;   // Fe-58
       case 1000280580: return 53.95212;   // Ni-58
       case 1000280590: return 54.88269;   // Ni-59
+      case 1000010040: return 3.75008;    // H-4
+      case 1000020060: return 5.60553;    // He-6
+      case 1000030060: return 5.60152;    // Li-6
+      case 1000030080: return 7.47137;    // Li-8
+      case 1000050090: return 8.39331;    // B-9
+      case 1000050120: return 11.18874;   // B-12
+      case 1000080190: return 17.69763;   // O-19
+      case 1000080200: return 18.62959;   // O-20
+      case 1000090170: return 15.83275;   // F-17
+      case 1000090180: return 16.76317;   // F-18
+      case 1000090200: return 18.62527;   // F-20
+      case 1000090210: return 19.55673;   // F-21
+      case 1000100190: return 17.69503;   // Ne-19
+      case 1000100240: return 22.34480;   // Ne-24
+      case 1000110210: return 19.55357;   // Na-21
+      case 1000110260: return 24.20637;   // Na-26
+      case 1000120230: return 21.41276;   // Mg-23
+      case 1000130320: return 29.79007;   // Al-32
+      case 1000140330: return 30.71164;   // Si-33
+      case 1000140360: return 33.51420;   // Si-36
+      case 1000150360: return 33.50587;   // P-36
+      case 1000150380: return 35.37449;   // P-38
+      case 1000160310: return 28.84910;   // S-31
+      case 1000160390: return 36.29693;   // S-39
+      case 1000180340: return 31.64322;   // Ar-34
+      case 1000190380: return 35.35827;   // K-38
+      case 1000200410: return 38.14590;   // Ca-41
+      case 1000200430: return 40.00562;   // Ca-43
+      case 1000200470: return 43.72766;   // Ca-47
+      case 1000200480: return 44.65727;   // Ca-48
+      case 1000210470: return 43.72515;   // Sc-47
+      case 1000220490: return 45.58341;   // Ti-49
+      case 1000220500: return 46.51203;   // Ti-50
+      case 1000230470: return 43.72646;   // V-47
+      case 1000230490: return 45.58350;   // V-49
+      case 1000230520: return 48.37450;   // V-52
+      case 1000230540: return 50.23903;   // V-54
+      case 1000240480: return 44.65663;   // Cr-48
+      case 1000240550: return 51.16480;   // Cr-55
+      case 1000250520: return 48.37421;   // Mn-52
+      case 1000250570: return 53.02490;   // Mn-57
+      case 1000260520: return 48.37608;   // Fe-52
+      case 1000270570: return 53.02202;   // Co-57
+      case 1000270580: return 53.95301;   // Co-58
+      case 1000270590: return 54.88213;   // Co-59
+      case 1000280560: return 52.09545;   // Ni-56
+      case 1000280570: return 53.02477;   // Ni-57
+      case 1000280620: return 57.67158;   // Ni-62
+      case 1000280640: return 59.53422;   // Ni-64
+      case 1000280650: return 60.46768;   // Ni-65
+      case 1000290640: return 59.53538;   // Cu-64
+      case 1000290660: return 61.39753;   // Cu-66
       default: return -1.0;              // not in table -> mass route abandoned
     }
   }
 
   // Registry of PDG codes that missed the mass table, with hit counts. Printed at
-  // endJob so you can see exactly what (if anything) is falling back, and add the
-  // common ones to getMassFromPDG for exact masses if you want.
+  // endJob to show what (if anything) is falling back; common ones can be added to
+  // getMassFromPDG for exact masses.
   std::map<int, long>& missingMassRegistry() { static std::map<int, long> m; return m; }
 
   // Robust particle mass (GeV). Source priority:
@@ -396,8 +455,8 @@ public:
       Comment("sim::SimEnergyDeposit label — VERIFY with eventdump"),
       art::InputTag("largeant:TPCActive") };
 
-    // Active-volume bounds (cm). Defaults are the user-stated DUNE values;
-    // beginJob prints geometry dimensions so you can reconcile them.
+    // Active-volume bounds (cm). Defaults are nominal DUNE FD values;
+    // beginJob prints geometry dimensions for reconciliation.
     fhicl::Atom<double> ActiveXmin { Name("ActiveXmin"), Comment("cm"), -600.0 };
     fhicl::Atom<double> ActiveXmax { Name("ActiveXmax"), Comment("cm"),  600.0 };
     fhicl::Atom<double> ActiveYmin { Name("ActiveYmin"), Comment("cm"), -375.0 };
@@ -462,7 +521,7 @@ private:
   }
   const char* pidName(PidClass c) const {
     switch (c) { case kMuon: return "mu"; case kElectron: return "e"; case kProton: return "p";
-                 case kPion: return "pi"; case kShower: return "sh"; default: return "inv"; }
+                 case kPion: return "pi"; case kShower: return "g"; default: return "inv"; }
   }
   // Trajectory arc length in cm — proxy for reconstructed track length / range.
   double trackLength(const simb::MCParticle& p) const {
@@ -510,6 +569,7 @@ private:
   double fGen_nu_E;
   int    fGen_nu_PDG, fCCNC, fMode, fInteractionType;
   double fNuVtxX, fNuVtxY, fNuVtxZ;
+  double fNuDirX, fNuDirY, fNuDirZ;   // true neutrino unit direction (beam axis for angle-to-beam)
   int    fLep_PDG;
   double fLep_E;
 
@@ -520,6 +580,16 @@ private:
   double fE_neutrino_inside;
   double fE_residual;
   double fEscapeFrac;   // (E_escape_charged + E_escape_neutral) / E_nu — containment flag
+  // Decay-mass recovery (observable): for each top-level particle that decays inside the
+  // volume, its decay-product deposits under-count its energy (neutrinos escape). The
+  // corrected deposit is  E_dep' = E_dep + E_decay_EndE - E_decay_dDep, which recovers the
+  // invisible decay-neutrino energy from (parent energy at decay) - (measured daughter dep).
+  double fE_decay_mass;   // sum of rest masses of accounted (top-level, inside) decays, GeV
+  double fE_decay_EndE;   // sum of their total energy AT decay (generalizes mass to in-flight), GeV
+  double fE_decay_dDep;   // sum of deposits of their decay-product subtrees (to be removed), GeV
+  double fE_decay_dEsc;   // sum of ESCAPE of their decay-product subtrees (also removed), GeV
+  int    fN_decay;        // number of accounted decays
+  double fE_decay_mass_mu, fE_decay_mass_pi;   // split by parent type, diagnostic
   // Edge-veto containment cut: energy deposited within fEdgeMargin of any active-volume
   // face. Standard fiducial-style veto — if more than fEdgeEThresh lands in that shell the
   // event is not contained. Stored as a flag (EdgeE + Contained) so the analysis applies
@@ -550,8 +620,15 @@ private:
   // (ledger binding + attributed escape). Summed per event it reproduces binding + escape.
   TTree*      fVertexMissTree = nullptr;
   int         fVM_event, fVM_vid, fVM_in_pdg, fVM_nP, fVM_nPi, fVM_nSh, fVM_ccnc;
+  int         fVM_nNeut;      // true count of outgoing neutrons (invisible) — reveals quantization
   bool        fVM_inside, fVM_contained;
   double      fVM_x, fVM_y, fVM_z, fVM_binding, fVM_escape, fVM_missing, fVM_nu_E;
+  double      fVM_chKE;       // summed KE of visible charged outgoing prongs (p + charged pi), GeV
+  double      fVM_angInc;     // leading charged prong angle w.r.t. INCOMING parent dir (deg) — true scatter angle
+  double      fVM_angBeam;    // leading charged prong angle w.r.t. neutrino dir (deg) — the observable one
+  double      fVM_inKE;       // incoming particle KE at the vertex (GeV); -1 at the primary nu vertex
+  double      fVM_neutKE;     // TRUTH summed KE of outgoing neutrons (GeV) — validates conservation estimate
+  double      fVM_shKE;       // summed EM-shower energy out (photon/pi0, GeV) — observable, subtract in conservation
   std::string fVM_key, fVM_in_class;
 
   // TrajectoryTree: one row per MCParticle, full trajectory stored as vectors.
@@ -562,6 +639,12 @@ private:
   int         fTr_event, fTr_run, fTr_subrun, fTr_trackid, fTr_pdg, fTr_mother, fTr_npts;
   std::string fTr_process, fTr_endprocess;
   std::vector<double> fTr_x, fTr_y, fTr_z, fTr_t, fTr_px, fTr_py, fTr_pz, fTr_E;
+
+  // DecayTree — one row per RECOVERED decay (the ones stage 3.5/5.6 actually count), so the
+  // E_dep' adjustment is itemized: recov = EndE - dDep - dEsc, summed over rows = E_dep'-E_dep.
+  TTree* fDecayTree = nullptr;
+  int    fD_event, fD_run, fD_subrun, fD_trk, fD_pdg;
+  double fD_EndE, fD_dDep, fD_dEsc, fD_recov;
 
   // VertexTree branches
   int         fV_event;
@@ -626,7 +709,7 @@ void MyEnergyAnalysis::beginJob()
     << " 2*DetHalfWidth=" << 2 * fGeom->DetHalfWidth()
     << " 2*DetHalfHeight=" << 2 * fGeom->DetHalfHeight() << " cm\n"
     << "SimEnergyDeposit label: " << fEdepLabel.encode()
-    << "  (verify this exists in your file)";
+    << "  (verify this product exists in the input file)";
 
   art::ServiceHandle<art::TFileService const> tfs;
 
@@ -659,6 +742,13 @@ void MyEnergyAnalysis::beginJob()
   fEventTree->Branch("E_neutrino_inside", &fE_neutrino_inside);
   fEventTree->Branch("E_residual", &fE_residual);
   fEventTree->Branch("EscapeFrac", &fEscapeFrac);
+  fEventTree->Branch("E_decay_mass", &fE_decay_mass);   // decay-mass recovery pieces (see E_dep')
+  fEventTree->Branch("E_decay_EndE", &fE_decay_EndE);
+  fEventTree->Branch("E_decay_dDep", &fE_decay_dDep);
+  fEventTree->Branch("E_decay_dEsc", &fE_decay_dEsc);   // subtree escape; recovery = EndE - dDep - dEsc = neutrino
+  fEventTree->Branch("N_decay", &fN_decay);
+  fEventTree->Branch("E_decay_mass_mu", &fE_decay_mass_mu);
+  fEventTree->Branch("E_decay_mass_pi", &fE_decay_mass_pi);
   fEventTree->Branch("EdgeE", &fEdgeE);          // GeV deposited in the edge shell
   fEventTree->Branch("Contained", &fContained);  // passed the edge-veto containment cut
   fEventTree->Branch("N_michel_inside", &fN_michel_inside);
@@ -670,6 +760,18 @@ void MyEnergyAnalysis::beginJob()
   fEventTree->Branch("Topo_nP", &fTopo_nP);
   fEventTree->Branch("Topo_nShower", &fTopo_nShower);
   fEventTree->Branch("Topo_nTrack", &fTopo_nTrack);
+
+  // ---- DecayTree ----  one row per recovered decay (itemizes the E_dep' adjustment)
+  fDecayTree = tfs->make<TTree>("DecayTree", "one row per recovered decay");
+  fDecayTree->Branch("Event", &fD_event);
+  fDecayTree->Branch("Run", &fD_run);
+  fDecayTree->Branch("SubRun", &fD_subrun);
+  fDecayTree->Branch("TrackID", &fD_trk);
+  fDecayTree->Branch("PDG", &fD_pdg);
+  fDecayTree->Branch("EndE", &fD_EndE);      // parent total energy at decay (GeV)
+  fDecayTree->Branch("dDep", &fD_dDep);      // deposits of its decay-product subtree (GeV)
+  fDecayTree->Branch("dEsc", &fD_dEsc);      // escape of its decay-product subtree (GeV)
+  fDecayTree->Branch("recov", &fD_recov);    // EndE - dDep - dEsc = recovered neutrino energy (GeV)
 
   // ---- VertexTree ----
   fVertexTree = tfs->make<TTree>("VertexTree", "per-interaction-vertex channels");
@@ -730,6 +832,8 @@ void MyEnergyAnalysis::beginJob()
   // ---- VertexMissTree ----  observable-keyed per-vertex missing energy
   fVertexMissTree = tfs->make<TTree>("VertexMissTree", "per-vertex missing energy, observable key");
   fVertexMissTree->Branch("Event", &fVM_event);
+  fVertexMissTree->Branch("Run", &fRun);        // for a unique (Run,SubRun,Event) join to EventTree
+  fVertexMissTree->Branch("SubRun", &fSubRun);
   fVertexMissTree->Branch("VertexId", &fVM_vid);
   fVertexMissTree->Branch("Key", &fVM_key);              // e.g. "n->2p.0pi.0sh"
   fVertexMissTree->Branch("In_PDG", &fVM_in_pdg);
@@ -737,6 +841,13 @@ void MyEnergyAnalysis::beginJob()
   fVertexMissTree->Branch("nP", &fVM_nP);
   fVertexMissTree->Branch("nPi", &fVM_nPi);
   fVertexMissTree->Branch("nShower", &fVM_nSh);
+  fVertexMissTree->Branch("nNeutron_out", &fVM_nNeut);   // true outgoing neutron count (invisible)
+  fVertexMissTree->Branch("OutChargedKE", &fVM_chKE);    // sum KE of visible charged prongs (GeV)
+  fVertexMissTree->Branch("In_KE", &fVM_inKE);           // incoming KE at vertex (GeV); -1 at primary nu vertex
+  fVertexMissTree->Branch("OutNeutronKE", &fVM_neutKE);  // TRUTH sum KE of outgoing neutrons (GeV)
+  fVertexMissTree->Branch("OutShowerKE", &fVM_shKE);     // sum EM-shower energy out (photon/pi0, GeV)
+  fVertexMissTree->Branch("OutChargedAngle", &fVM_angInc);     // leading prong angle vs incoming dir (deg)
+  fVertexMissTree->Branch("OutChargedAngleBeam", &fVM_angBeam);// leading prong angle vs neutrino dir (deg)
   fVertexMissTree->Branch("Inside", &fVM_inside);
   fVertexMissTree->Branch("X", &fVM_x);
   fVertexMissTree->Branch("Y", &fVM_y);
@@ -776,10 +887,9 @@ void MyEnergyAnalysis::beginJob()
 void MyEnergyAnalysis::endJob()
 {
   // Deposits occur only in active argon, so their min/max over the job is a
-  // direct, geometry-API-free measurement of the active volume. Compare it to the
-  // escape bounds you configured — they should match. If the deposits extend
-  // beyond your bounds, escape fires too early; if your bounds extend beyond the
-  // deposits, escape fires too late.
+  // direct, geometry-API-free measurement of the active volume. It should match the
+  // configured escape bounds. If the deposits extend beyond the bounds, escape fires
+  // too early; if the bounds extend beyond the deposits, escape fires too late.
   if (fDepCount > 0) {
     mf::LogInfo("MyEnergyAnalysis")
       << "SimEnergyDeposit spatial extent over the job (" << fDepCount << " deposits):\n"
@@ -803,8 +913,8 @@ void MyEnergyAnalysis::endJob()
     << "Fiducial cut (inset " << fFidInset << " cm): skipped " << fNskippedFid
     << " events with vertex outside the active volume.";
 
-  // Report any PDG codes that missed the mass table (used a fallback). Add the
-  // common ones to getMassFromPDG if you want exact masses for them.
+  // Report any PDG codes that missed the mass table (used a fallback). Common ones
+  // can be added to getMassFromPDG for exact masses.
   auto const& miss = missingMassRegistry();
   if (!miss.empty()) {
     std::ostringstream os;
@@ -862,11 +972,14 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
   // reset ledger
   fGen_nu_E = 0; fGen_nu_PDG = 0; fCCNC = -1; fMode = -1; fInteractionType = -1;
   fNuVtxX = fNuVtxY = fNuVtxZ = -9999; fLep_PDG = 0; fLep_E = 0;
+  fNuDirX = fNuDirY = fNuDirZ = 0;
   fE_dep_total = 0; fE_dep_mu = fE_dep_p = fE_dep_n = fE_dep_pi = 0;
   fE_dep_em = fE_dep_nuc = fE_dep_other = 0;
   fEdgeE = 0; fContained = true;
   fE_binding_total = 0; fE_escape_neutral = 0; fE_escape_charged = 0;
   fE_neutrino_inside = 0; fE_residual = 0;
+  fE_decay_mass = fE_decay_EndE = fE_decay_dDep = fE_decay_dEsc = 0; fN_decay = 0;
+  fE_decay_mass_mu = fE_decay_mass_pi = 0;
   fN_michel_inside = 0; fMichel_nu_E = 0;
   fPmap.clear(); fRootCache.clear();
 
@@ -884,10 +997,18 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
     int vid; double x, y, z; bool inside;
     std::string key, in_class; int in_pdg, nP, nPi, nSh;
     double binding;
+    int nNeut;        // true outgoing neutron count (invisible)
+    double chKE;      // summed KE of visible charged outgoing prongs (p + charged pi), GeV
+    double angInc;    // leading charged prong angle w.r.t. incoming parent dir (deg), -1 if undefined
+    double angBeam;   // leading charged prong angle w.r.t. neutrino dir (deg), -1 if undefined
+    double inKE;      // incoming particle KE at the vertex (GeV); -1 at the primary nu vertex (E_in unknown)
+    double neutKE;    // TRUTH: summed KE of outgoing neutrons (GeV), for validating the conservation estimate
+    double shKE;      // summed energy of outgoing EM showers (photon/pi0, GeV) — observable, subtract in conservation
   };
   std::vector<VtxObs>   vtxObs;
   std::map<int, int>    birthVertexId;    // trackID -> vertex id
   std::map<int, double> escapeByVertex;   // vertex id -> summed escaped energy of its products
+  std::map<int, double> escapeByTrack;    // trackID -> escaped energy, for decay-subtree escape removal
   int vtxCounter = 0;
 
   // ---- (1) generator truth ----
@@ -901,6 +1022,9 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
     fMode            = nu.Mode();
     fInteractionType = nu.InteractionType();
     fNuVtxX = nu.Nu().Vx(); fNuVtxY = nu.Nu().Vy(); fNuVtxZ = nu.Nu().Vz();
+    { TVector3 nd = nu.Nu().Momentum(0).Vect();
+      if (nd.Mag() > 1e-9) nd = nd.Unit();
+      fNuDirX = nd.X(); fNuDirY = nd.Y(); fNuDirZ = nd.Z(); }
     fLep_PDG = nu.Lepton().PdgCode();
     fLep_E   = nu.Lepton().E();
     // In an NC interaction the "outgoing lepton" is a neutrino that Geant4 does NOT
@@ -918,8 +1042,8 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
   // (optionally inset by FiducialInset cm). This removes "rock"/external events
   // where the neutrino interacted in the surrounding cryostat/concrete/rock — those
   // deposit almost nothing in the active argon, so their residual is ~E_nu and they
-  // are not detector events. (You'll see non-argon targets like O-16/Si-28 in their
-  // vertex lists.) Skipped events fill no trees.
+  // are not detector events. (Such events show non-argon targets like O-16/Si-28 in
+  // their vertex lists.) Skipped events fill no trees.
   {
     const double d = fFidInset;
     bool nuInFid = (fNuVtxX > fXmin + d && fNuVtxX < fXmax - d &&
@@ -968,11 +1092,13 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
   // ---- (3) deposited (visible) energy from SimEnergyDeposit ----
   // SimEnergyDeposit::Energy() is in MeV; convert to GeV. Deposits exist only in
   // sensitive volumes, so this is already restricted to the active volume.
+  std::map<int, double> depByTrack;   // trackID -> deposited GeV, for decay-subtree removal
   art::Handle<std::vector<sim::SimEnergyDeposit>> edh;
   if (event.getByLabel(fEdepLabel, edh)) {
     for (auto const& d : *edh) {
       double e = d.Energy() * 1e-3; // MeV -> GeV
       fE_dep_total += e;
+      depByTrack[std::abs(d.TrackID())] += e;
       // empirical active-volume probe: track the spatial extent of deposits
       double dx = d.MidPointX(), dy = d.MidPointY(), dz = d.MidPointZ();
       fDepXmin = std::min(fDepXmin, dx); fDepXmax = std::max(fDepXmax, dx);
@@ -1000,6 +1126,73 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       << "SimEnergyDeposit '" << fEdepLabel.encode()
       << "' not found — E_dep will be 0. Fix the label (see header).";
   }
+
+  // ---- (3.5) decay-mass recovery (observable) ----
+  // For each particle that DECAYS inside the active volume and is itself top-level (not a
+  // decay product), add its energy at the decay point and flag its daughter-subtree deposits
+  // for removal. Top-level-only + full-subtree removal handles chains (pi->mu->e) exactly:
+  // it recovers every neutrino in the chain once, with no double counting. The corrected
+  // calorimetric estimate is  E_dep' = E_dep + E_decay_EndE - E_decay_dDep - E_decay_dEsc
+  // (the subtree ESCAPE E_decay_dEsc is summed in stage 5.6, once per-track escape exists).
+  // EndE - dDep - dEsc = the escaped neutrino energy alone, i.e. it tracks E_neutrino_inside.
+  auto isDecay = [](const std::string& s){
+    return s == "Decay" || s == "DecayWithSpin" || s == "muMinusDecay" || s == "muPlusDecay";
+  };
+  // Decays whose energy we should recover: ONLY mesons and leptons (mu, tau, pi±, K±, K0L/S/0).
+  // recovery = EndE - dDep - dEsc = neutrino energy only holds when every non-neutrino daughter
+  // shows up as deposit or escape. That is true for meson/lepton daughters, but a BARYON or
+  // NUCLEUS daughter carries rest mass (a 939 MeV neutron, a GeV-scale fragment) that never
+  // deposits, escapes, or becomes a neutrino, so it pollutes the recovery. By baryon-number
+  // conservation a meson/lepton parent cannot produce a baryon, so this whitelist guarantees
+  // no stranded baryon/nuclear mass. Nothing is lost: non-leptonic hyperon decays (Sigma->n pi)
+  // emit no prompt neutrino, and their pi±/mu daughters are still recovered as decays in their
+  // own right (they are top-of-chain once the hyperon parent is not counted).
+  auto decaysToNu = [](int pdg){
+    int a = std::abs(pdg);
+    return a==13 || a==15 || a==211 || a==321 || a==130 || a==310 || a==311;
+  };
+  auto isCountedDecay = [&](const simb::MCParticle& q){
+    if (!decaysToNu(q.PdgCode())) return false;                    // meson/lepton decays only
+    if (!isDecay(q.EndProcess())) return false;                    // genuine decay only
+    return inside(q.EndX(), q.EndY(), q.EndZ());                   // in the active volume
+  };
+  // True if any ANCESTOR of p is itself a counted decay: p's energy is then already inside
+  // that ancestor's EndE (its whole subtree), so counting p would double count. Walking the
+  // full ancestor chain (not just the direct parent's creation process) correctly excludes
+  // descendants made by non-decay processes inside a decay subtree (e.g. a K0S produced via
+  // kaon0LInelastic that sits inside a K0 decay's subtree).
+  auto nestedInDecay = [&](const simb::MCParticle& p){
+    int m = p.Mother();
+    while (m != 0) {
+      auto it = fPmap.find(m);
+      if (it == fPmap.end()) break;
+      if (isCountedDecay(*it->second)) return true;
+      m = it->second->Mother();
+    }
+    return false;
+  };
+  for (auto const& kv : fPmap) {
+    const simb::MCParticle& p = *kv.second;
+    if (!isCountedDecay(p)) continue;                    // genuine in-detector decay, no nuclei
+    if (nestedInDecay(p))   continue;                    // top of the chain only (ancestor walk)
+    // sum deposits of the whole decay-product subtree (descendants of p; p's own deposits stay)
+    double subDep = 0.0;
+    std::vector<int> stack;
+    if (children.count(p.TrackId())) stack = children[p.TrackId()];
+    while (!stack.empty()) {
+      int t = stack.back(); stack.pop_back();
+      auto dit = depByTrack.find(t);
+      if (dit != depByTrack.end()) subDep += dit->second;
+      if (children.count(t)) for (int ct : children[t]) stack.push_back(ct);
+    }
+    fE_decay_mass += p.Mass();
+    fE_decay_EndE += p.EndE();
+    fE_decay_dDep += subDep;
+    ++fN_decay;
+    int ap = std::abs(p.PdgCode());
+    if      (ap == 13)  fE_decay_mass_mu += p.Mass();
+    else if (ap == 211) fE_decay_mass_pi += p.Mass();
+  }
   fContained = (fEdgeE < fEdgeEThresh);   // edge-veto containment cut
   if (fDropUncontained && !fContained) return;   // drop entirely (no tree fills this event)
 
@@ -1008,12 +1201,12 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
   // assemble an event-level topology key from quantities a detector can actually measure:
   // PID class (dE/dx), track length/range, and endpoint containment (position). This is the
   // reconstructible successor to the truth per-vertex Channel key. Flavor-inclusive
-  // (mu or e lepton); CC only, NC events are labelled "NC" and excluded for now.
+  // (mu or e lepton); CC only, NC events are labelled "NC" and excluded.
   {
     const double kThrMIP = 0.030;   // GeV KE — muon/pion tracking threshold
     const double kThrP   = 0.050;   // GeV KE — proton threshold (short, high dE/dx)
     const double kThrEM  = 0.030;   // GeV    — EM shower threshold
-    int  nPi = 0, nP = 0, nSh = 0, nTrk = 0, leptonPDG = 0;
+    int  nPi = 0, nP = 0, nSh = 0, nMu = 0, nE = 0, nTrk = 0, leptonPDG = 0;
     bool allTracksContained = true, haveLepton = false;
     // The generator (neutrino) vertex is vertex 0: it makes the primary lepton and primary
     // hadrons. Its missing energy is the primary escape (dominant term — the muon leaving)
@@ -1045,12 +1238,14 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
 
       if (isTrack && !contained) allTracksContained = false;
       if (isTrack) ++nTrk;
-      if (isLep) continue;                       // the CC lepton has its own axis
+      // leptons are now explicit observable products (the CC mu/e is visible in data), not
+      // folded only into the nu.<flavor> prefix. isLep still set above for the prefix + PrimaryTree.
       switch (cls) {
-        case kElectron: nSh += 1; break;         // a stray (non-lepton) electron -> shower
+        case kMuon:     ++nMu;    break;         // CC muon (or stray) — a visible track
+        case kElectron: ++nE;     break;         // CC electron (or stray) — a visible EM prong
         case kProton:   ++nP;     break;
         case kPion:     ++nPi;    break;
-        case kShower:   nSh += (std::abs(pdg) == 111 ? 2 : 1); break;  // pi0 -> 2 showers
+        case kShower:   nSh += (std::abs(pdg) == 111 ? 2 : 1); break;  // pi0/gamma -> shower(s)
         default: break;
       }
     }
@@ -1066,8 +1261,9 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       std::string lep = (leptonPDG == 13) ? "mu" : (leptonPDG == 11) ? "e" : "nolep";
       // containment is now handled by the edge-veto cut (Contained branch), not the key;
       // Topo_contained is kept as a truth diagnostic but is no longer a key axis.
-      fTopology = lep + "." + std::to_string(cap(nPi)) + "pi." +
-                  std::to_string(cap(nP)) + "p." + std::to_string(cap(nSh)) + "sh";
+      fTopology = lep + "." + std::to_string(cap(nMu)) + "mu." +
+                  std::to_string(cap(nE)) + "e." + std::to_string(cap(nPi)) + "pi." +
+                  std::to_string(cap(nP)) + "p." + std::to_string(cap(nSh)) + "g";
     }
 
     // Generator-vertex record: incoming = neutrino, outgoing = the primary prongs. Its
@@ -1078,10 +1274,15 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       auto cap2 = [](int k){ return k > 2 ? 2 : k; };
       std::string glep = (leptonPDG == 13) ? "mu" : (leptonPDG == 11) ? "e" : "nolep";
       std::string genKey = std::string("nu.") + glep + "->" +
-                           std::to_string(cap2(nP)) + "p." +
-                           std::to_string(cap2(nPi)) + "pi." + std::to_string(cap2(nSh)) + "sh";
+                           std::to_string(cap2(nMu)) + "mu." +
+                           std::to_string(cap2(nE))  + "e." +
+                           std::to_string(cap2(nP))  + "p." +
+                           std::to_string(cap2(nPi)) + "pi." + std::to_string(cap2(nSh)) + "g";
+      // nNeut/chKE are left 0 at the generator vertex: the 2D outgoing-energy study filters
+      // to hadronic (n->/p->/pi->) vertices, so these fields are unused for nu.* rows.
       vtxObs.push_back({genVid, fNuVtxX, fNuVtxY, fNuVtxZ, true, genKey, "nu",
-                        fGen_nu_PDG, nP, nPi, nSh, 0.0});
+                        fGen_nu_PDG, nP, nPi, nSh, 0.0, 0, 0.0, -1.0, -1.0,
+                        -1.0, -1.0, 0.0});   // inKE=-1: incoming is the neutrino (E_in unknown, no conservation here)
     }
   }
 
@@ -1234,7 +1435,7 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
         // Pick the trustworthy TOTAL rest-mass change.
         // Eb_mass and Eb_cons both measure the total rest-mass change of the system; they
         // share no inputs (mass route: table only; conservation route: kinematics only), so
-        // agreement is a genuine closure test — they matched to 0.1 MeV on the clean event.
+        // agreement is a genuine closure test.
         // Prefer the exact route when they agree; else the conservation route (no target-
         // table dependence); the fallback may be NaN and is caught by the guard below.
         const double kAgreeGeV = 0.05;                 // routes agree to 50 MeV
@@ -1328,25 +1529,55 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       // shower). Outgoing neutrons are invisible and deliberately excluded — the energy
       // they carry off is exactly what the bucket's missing-energy spread measures.
       const double kThrMIP = 0.030, kThrP = 0.050, kThrEM = 0.030;   // GeV, same as stage 3.5
-      int nP_o = 0, nPi_o = 0, nSh_o = 0;
+      int nP_o = 0, nPi_o = 0, nSh_o = 0, nMu_o = 0, nE_o = 0;
+      int nNeut_o = 0;        // true outgoing neutrons (invisible) — the quantization driver
+      double nNeutKE_o = 0.0; // TRUTH summed KE of outgoing neutrons (validate conservation estimate)
+      double shKE_o = 0.0;    // summed energy of outgoing EM showers (photon/pi0) — observable, subtract
+      double chKE_o = 0.0;    // summed KE of the visible charged prongs we counted above
+      const simb::MCParticle* leadCh = nullptr;   // highest-KE visible charged prong
+      double leadKE = -1.0;
       for (const simb::MCParticle* d : vtx.daughters) {
         PidClass c = pidClassOf(d->PdgCode());
         double dKE = d->E(0) - d->Mass();
-        if      (c == kProton   && dKE      >= kThrP)   ++nP_o;
-        else if (c == kPion     && dKE      >= kThrMIP) ++nPi_o;
-        else if (c == kElectron && dKE      >= kThrEM)  ++nSh_o;
-        else if (c == kShower   && d->E(0)  >= kThrEM)  nSh_o += (std::abs(d->PdgCode()) == 111 ? 2 : 1);
+        if      (c == kProton   && dKE      >= kThrP)   { ++nP_o;  chKE_o += dKE;
+                                                          if (dKE > leadKE) { leadKE = dKE; leadCh = d; } }
+        else if (c == kPion     && dKE      >= kThrMIP) { ++nPi_o; chKE_o += dKE;
+                                                          if (dKE > leadKE) { leadKE = dKE; leadCh = d; } }
+        else if (c == kMuon     && dKE      >= kThrMIP) { ++nMu_o; chKE_o += dKE; }   // visible track
+        else if (c == kElectron && dKE      >= kThrEM)  { ++nE_o;  chKE_o += dKE; }   // visible EM prong
+        else if (c == kShower   && d->E(0)  >= kThrEM)  { nSh_o += (std::abs(d->PdgCode()) == 111 ? 2 : 1);
+                                                          shKE_o += d->E(0); }   // EM shower energy (observable)
+        if (d->PdgCode() == 2112) { ++nNeut_o; nNeutKE_o += dKE; }   // count + sum KE of outgoing neutrons
+      }
+
+      // Scattering angle of the leading charged prong. angInc is the true lab scatter
+      // angle (vs the incoming parent momentum) — the clean momentum-conservation handle,
+      // but the parent is a neutron here so it is NOT directly measurable. angBeam is vs
+      // the neutrino direction (beam axis), which IS reconstructible at the FD. Both in deg.
+      double angInc = -1.0, angBeam = -1.0;
+      if (leadCh) {
+        TVector3 pd = leadCh->Momentum(0).Vect();
+        if (pd.Mag() > 1e-9) {
+          TVector3 pin = parent.Momentum(0).Vect();
+          if (pin.Mag() > 1e-9) angInc  = pd.Angle(pin) * 180.0 / M_PI;
+          TVector3 nb(fNuDirX, fNuDirY, fNuDirZ);
+          if (nb.Mag() > 1e-9)  angBeam = pd.Angle(nb)  * 180.0 / M_PI;
+        }
       }
       PidClass inCls = pidClassOf(parent.PdgCode());
       std::string inClass = (inCls == kInvisible) ? std::string("n") : std::string(pidName(inCls));
       auto cap2 = [](int k){ return k > 2 ? 2 : k; };
-      std::string obsKey = inClass + "->" + std::to_string(cap2(nP_o)) + "p." +
-                           std::to_string(cap2(nPi_o)) + "pi." + std::to_string(cap2(nSh_o)) + "sh";
+      std::string obsKey = inClass + "->" +
+                           std::to_string(cap2(nMu_o)) + "mu." +
+                           std::to_string(cap2(nE_o))  + "e." +
+                           std::to_string(cap2(nP_o))  + "p." +
+                           std::to_string(cap2(nPi_o)) + "pi." + std::to_string(cap2(nSh_o)) + "g";
 
       int vid = vtxCounter++;
       for (const simb::MCParticle* d : vtx.daughters) birthVertexId[d->TrackId()] = vid;
       vtxObs.push_back({vid, vtx.x, vtx.y, vtx.z, vtxInside, obsKey, inClass,
-                        parent.PdgCode(), nP_o, nPi_o, nSh_o, Eb_ledger});
+                        parent.PdgCode(), nP_o, nPi_o, nSh_o, Eb_ledger, nNeut_o, chKE_o,
+                        angInc, angBeam, KE_in, nNeutKE_o, shKE_o});
 
       // --- fill VertexTree ---
       fV_event = fEvent;
@@ -1417,7 +1648,38 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
       auto bv = birthVertexId.find(p.TrackId());
       if (bv != birthVertexId.end()) escapeByVertex[bv->second] += loss;   // attribute to vertex
     }
+    escapeByTrack[p.TrackId()] += loss;   // per-track, for decay-subtree escape removal
     fEscapeTree->Fill();
+  }
+
+  // ---- (5.6) decay-subtree ESCAPE: subtract so the decay recovery is neutrino-only ----
+  // Now that per-track escape exists, re-walk each accounted decay's daughter subtree and sum
+  // its escaped energy. The corrected deposit is then
+  //    E_dep' = E_dep + E_decay_EndE - E_decay_dDep - E_decay_dEsc
+  // and EndE - dDep - dEsc = the escaped NEUTRINO energy alone (the daughters' deposits are in
+  // E_dep and their escape is already in the per-vertex escape term, so neither is double counted).
+  for (auto const& kv : fPmap) {
+    const simb::MCParticle& p = *kv.second;
+    if (!isCountedDecay(p)) continue;                    // same selection as stage 3.5 (no nuclei)
+    if (nestedInDecay(p))   continue;                    // top of the chain only (ancestor walk)
+    double subEsc = 0.0, subDep = 0.0;
+    std::vector<int> stack;
+    if (children.count(p.TrackId())) stack = children[p.TrackId()];
+    while (!stack.empty()) {
+      int t = stack.back(); stack.pop_back();
+      auto eit = escapeByTrack.find(t);
+      if (eit != escapeByTrack.end()) subEsc += eit->second;
+      auto dit = depByTrack.find(t);              // same subtree deposits as stage 3.5
+      if (dit != depByTrack.end())    subDep += dit->second;
+      if (children.count(t)) for (int ct : children[t]) stack.push_back(ct);
+    }
+    fE_decay_dEsc += subEsc;
+    // itemize this decay's contribution to the E_dep' adjustment
+    fD_event = fEvent; fD_run = fRun; fD_subrun = fSubRun;
+    fD_trk = p.TrackId(); fD_pdg = p.PdgCode();
+    fD_EndE = p.EndE(); fD_dDep = subDep; fD_dEsc = subEsc;
+    fD_recov = p.EndE() - subDep - subEsc;
+    fDecayTree->Fill();
   }
 
   // ---- (5.5) per-vertex missing energy (binding + attributed escape), observable-keyed ----
@@ -1432,6 +1694,9 @@ void MyEnergyAnalysis::analyze(const art::Event& event)
     fVM_event = fEvent; fVM_vid = v.vid; fVM_key = v.key;
     fVM_in_pdg = v.in_pdg; fVM_in_class = v.in_class;
     fVM_nP = v.nP; fVM_nPi = v.nPi; fVM_nSh = v.nSh; fVM_inside = v.inside;
+    fVM_nNeut = v.nNeut; fVM_chKE = v.chKE;
+    fVM_inKE = v.inKE; fVM_neutKE = v.neutKE; fVM_shKE = v.shKE;
+    fVM_angInc = v.angInc; fVM_angBeam = v.angBeam;
     fVM_x = v.x; fVM_y = v.y; fVM_z = v.z;
     fVM_binding = bind; fVM_escape = esc; fVM_missing = bind + esc;
     fVM_ccnc = fCCNC; fVM_nu_E = fGen_nu_E; fVM_contained = fContained;
