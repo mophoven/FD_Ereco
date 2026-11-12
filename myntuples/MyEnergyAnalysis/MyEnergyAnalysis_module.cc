@@ -1688,3 +1688,8 @@ namespace lar
 
 // Look at the neutron bins and the neutrons and try to get info how many just leave how many are invisible how many have interaction and how many have a hadronic interaction
 
+
+
+// Study only primary neutrons.
+// Study the energy that the primary neutrons deposit and make the plots energy deposited vs the initial kinetic energy.
+// Look at  the primary neutrons that interact...
